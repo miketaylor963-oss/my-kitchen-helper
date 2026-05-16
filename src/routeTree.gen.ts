@@ -9,12 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ShoppingListsRouteImport } from './routes/shopping-lists'
 import { Route as MealsRouteImport } from './routes/meals'
+import { Route as MealPlansRouteImport } from './routes/meal-plans'
+import { Route as ComponentsRouteImport } from './routes/components'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ShoppingListsRoute = ShoppingListsRouteImport.update({
+  id: '/shopping-lists',
+  path: '/shopping-lists',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MealsRoute = MealsRouteImport.update({
   id: '/meals',
   path: '/meals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MealPlansRoute = MealPlansRouteImport.update({
+  id: '/meal-plans',
+  path: '/meal-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComponentsRoute = ComponentsRouteImport.update({
+  id: '/components',
+  path: '/components',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,37 +43,76 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/components': typeof ComponentsRoute
+  '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRoute
+  '/shopping-lists': typeof ShoppingListsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/components': typeof ComponentsRoute
+  '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRoute
+  '/shopping-lists': typeof ShoppingListsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/components': typeof ComponentsRoute
+  '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRoute
+  '/shopping-lists': typeof ShoppingListsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/meals'
+  fullPaths: '/' | '/components' | '/meal-plans' | '/meals' | '/shopping-lists'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/meals'
-  id: '__root__' | '/' | '/meals'
+  to: '/' | '/components' | '/meal-plans' | '/meals' | '/shopping-lists'
+  id:
+    | '__root__'
+    | '/'
+    | '/components'
+    | '/meal-plans'
+    | '/meals'
+    | '/shopping-lists'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComponentsRoute: typeof ComponentsRoute
+  MealPlansRoute: typeof MealPlansRoute
   MealsRoute: typeof MealsRoute
+  ShoppingListsRoute: typeof ShoppingListsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/shopping-lists': {
+      id: '/shopping-lists'
+      path: '/shopping-lists'
+      fullPath: '/shopping-lists'
+      preLoaderRoute: typeof ShoppingListsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meals': {
       id: '/meals'
       path: '/meals'
       fullPath: '/meals'
       preLoaderRoute: typeof MealsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meal-plans': {
+      id: '/meal-plans'
+      path: '/meal-plans'
+      fullPath: '/meal-plans'
+      preLoaderRoute: typeof MealPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/components': {
+      id: '/components'
+      path: '/components'
+      fullPath: '/components'
+      preLoaderRoute: typeof ComponentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,7 +127,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComponentsRoute: ComponentsRoute,
+  MealPlansRoute: MealPlansRoute,
   MealsRoute: MealsRoute,
+  ShoppingListsRoute: ShoppingListsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
