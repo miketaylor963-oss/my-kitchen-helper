@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShoppingListsRouteImport } from './routes/shopping-lists'
 import { Route as MealsRouteImport } from './routes/meals'
 import { Route as MealPlansRouteImport } from './routes/meal-plans'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ComponentsRouteImport } from './routes/components'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MealsMealIdRouteImport } from './routes/meals.$mealId'
@@ -29,6 +30,11 @@ const MealsRoute = MealsRouteImport.update({
 const MealPlansRoute = MealPlansRouteImport.update({
   id: '/meal-plans',
   path: '/meal-plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComponentsRoute = ComponentsRouteImport.update({
@@ -50,6 +56,7 @@ const MealsMealIdRoute = MealsMealIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComponentsRoute: typeof ComponentsRoute
+  LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   MealsRoute: typeof MealsRouteWithChildren
   ShoppingListsRoute: typeof ShoppingListsRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/meal-plans'
       fullPath: '/meal-plans'
       preLoaderRoute: typeof MealPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/components': {
@@ -167,6 +187,7 @@ const MealsRouteWithChildren = MealsRoute._addFileChildren(MealsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComponentsRoute: ComponentsRoute,
+  LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   MealsRoute: MealsRouteWithChildren,
   ShoppingListsRoute: ShoppingListsRoute,
@@ -174,3 +195,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
