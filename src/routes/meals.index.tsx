@@ -17,7 +17,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const Route = createFileRoute("/meals")({
+export const Route = createFileRoute("/meals/")({
   component: Page,
 });
 
