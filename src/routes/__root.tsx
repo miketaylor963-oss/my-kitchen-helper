@@ -9,6 +9,10 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/lib/auth";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +117,45 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthStrip />
       <Outlet />
     </QueryClientProvider>
+  );
+}
+
+function AuthStrip() {
+  const { user, loading } = useSession();
+  const router = useRouter();
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      router.invalidate();
+      qc.invalidateQueries();
+    });
+    return () => subscription.unsubscribe();
+  }, [router, qc]);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+  }
+
+  return (
+    <div className="border-b bg-background">
+      <div className="mx-auto flex max-w-5xl items-center justify-end gap-3 px-6 py-2 text-sm">
+        {loading ? null : user ? (
+          <>
+            <span className="text-muted-foreground">{user.email}</span>
+            <button onClick={signOut} className="text-muted-foreground hover:text-foreground">
+              Sign out
+            </button>
+          </>
+        ) : (
+          <Link to="/login" className="text-muted-foreground hover:text-foreground">
+            Sign in
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }
