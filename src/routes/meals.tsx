@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List as ListIcon, Search } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Plus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsWriter } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ function Page() {
   const [status, setStatus] = useState<string>(ALL);
   const [dietaryId, setDietaryId] = useState<string>(ALL);
   const [cuisineId, setCuisineId] = useState<string>(ALL);
+  const { isWriter } = useIsWriter();
 
   useEffect(() => {
     const saved = localStorage.getItem(VIEW_KEY);
@@ -106,7 +108,13 @@ function Page() {
               {meals.isLoading ? "Loading…" : `${items.length} meal${items.length === 1 ? "" : "s"}`}
             </p>
           </div>
-          <div className="inline-flex rounded-md border">
+          <div className="flex items-center gap-2">
+            {isWriter && (
+              <Button asChild size="sm">
+                <Link to="/meals/new"><Plus /> New meal</Link>
+              </Button>
+            )}
+            <div className="inline-flex rounded-md border">
             <Button
               variant={view === "list" ? "secondary" : "ghost"}
               size="sm"
@@ -123,6 +131,7 @@ function Page() {
             >
               <LayoutGrid /> Grid
             </Button>
+            </div>
           </div>
         </div>
 

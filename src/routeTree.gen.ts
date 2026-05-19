@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShoppingListsRouteImport } from './routes/shopping-lists'
 import { Route as MealsRouteImport } from './routes/meals'
 import { Route as MealPlansRouteImport } from './routes/meal-plans'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ComponentsRouteImport } from './routes/components'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MealsNewRouteImport } from './routes/meals.new'
 import { Route as MealsMealIdRouteImport } from './routes/meals.$mealId'
+import { Route as MealsMealIdEditRouteImport } from './routes/meals.$mealId.edit'
 
 const ShoppingListsRoute = ShoppingListsRouteImport.update({
   id: '/shopping-lists',
@@ -31,6 +34,11 @@ const MealPlansRoute = MealPlansRouteImport.update({
   path: '/meal-plans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComponentsRoute = ComponentsRouteImport.update({
   id: '/components',
   path: '/components',
@@ -41,67 +49,96 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MealsNewRoute = MealsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => MealsRoute,
+} as any)
 const MealsMealIdRoute = MealsMealIdRouteImport.update({
   id: '/$mealId',
   path: '/$mealId',
   getParentRoute: () => MealsRoute,
 } as any)
+const MealsMealIdEditRoute = MealsMealIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => MealsMealIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRoute
+  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
+  '/meals/new': typeof MealsNewRoute
+  '/meals/$mealId/edit': typeof MealsMealIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRoute
+  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
+  '/meals/new': typeof MealsNewRoute
+  '/meals/$mealId/edit': typeof MealsMealIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/meals': typeof MealsRouteWithChildren
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRoute
+  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
+  '/meals/new': typeof MealsNewRoute
+  '/meals/$mealId/edit': typeof MealsMealIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
     | '/meals/$mealId'
+    | '/meals/new'
+    | '/meals/$mealId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
     | '/meals/$mealId'
+    | '/meals/new'
+    | '/meals/$mealId/edit'
   id:
     | '__root__'
     | '/'
     | '/components'
+    | '/login'
     | '/meal-plans'
     | '/meals'
     | '/shopping-lists'
     | '/meals/$mealId'
+    | '/meals/new'
+    | '/meals/$mealId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComponentsRoute: typeof ComponentsRoute
+  LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   MealsRoute: typeof MealsRouteWithChildren
   ShoppingListsRoute: typeof ShoppingListsRoute
@@ -130,6 +167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MealPlansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/components': {
       id: '/components'
       path: '/components'
@@ -144,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meals/new': {
+      id: '/meals/new'
+      path: '/new'
+      fullPath: '/meals/new'
+      preLoaderRoute: typeof MealsNewRouteImport
+      parentRoute: typeof MealsRoute
+    }
     '/meals/$mealId': {
       id: '/meals/$mealId'
       path: '/$mealId'
@@ -151,15 +202,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MealsMealIdRouteImport
       parentRoute: typeof MealsRoute
     }
+    '/meals/$mealId/edit': {
+      id: '/meals/$mealId/edit'
+      path: '/edit'
+      fullPath: '/meals/$mealId/edit'
+      preLoaderRoute: typeof MealsMealIdEditRouteImport
+      parentRoute: typeof MealsMealIdRoute
+    }
   }
 }
 
+interface MealsMealIdRouteChildren {
+  MealsMealIdEditRoute: typeof MealsMealIdEditRoute
+}
+
+const MealsMealIdRouteChildren: MealsMealIdRouteChildren = {
+  MealsMealIdEditRoute: MealsMealIdEditRoute,
+}
+
+const MealsMealIdRouteWithChildren = MealsMealIdRoute._addFileChildren(
+  MealsMealIdRouteChildren,
+)
+
 interface MealsRouteChildren {
-  MealsMealIdRoute: typeof MealsMealIdRoute
+  MealsMealIdRoute: typeof MealsMealIdRouteWithChildren
+  MealsNewRoute: typeof MealsNewRoute
 }
 
 const MealsRouteChildren: MealsRouteChildren = {
-  MealsMealIdRoute: MealsMealIdRoute,
+  MealsMealIdRoute: MealsMealIdRouteWithChildren,
+  MealsNewRoute: MealsNewRoute,
 }
 
 const MealsRouteWithChildren = MealsRoute._addFileChildren(MealsRouteChildren)
@@ -167,6 +239,7 @@ const MealsRouteWithChildren = MealsRoute._addFileChildren(MealsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComponentsRoute: ComponentsRoute,
+  LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   MealsRoute: MealsRouteWithChildren,
   ShoppingListsRoute: ShoppingListsRoute,
