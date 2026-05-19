@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsWriter } from "@/lib/auth";
 
-export const Route = createFileRoute("/meals/$mealId")({
+export const Route = createFileRoute("/meals/$mealId/")({
   component: MealDetailPage,
 });
 

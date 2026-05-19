@@ -16,7 +16,7 @@ import { Route as ComponentsRouteImport } from './routes/components'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MealsIndexRouteImport } from './routes/meals.index'
 import { Route as MealsNewRouteImport } from './routes/meals.new'
-import { Route as MealsMealIdRouteImport } from './routes/meals.$mealId'
+import { Route as MealsMealIdIndexRouteImport } from './routes/meals.$mealId.index'
 import { Route as MealsMealIdEditRouteImport } from './routes/meals.$mealId.edit'
 
 const ShoppingListsRoute = ShoppingListsRouteImport.update({
@@ -54,9 +54,9 @@ const MealsNewRoute = MealsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => MealsRoute,
 } as any)
-const MealsMealIdRoute = MealsMealIdRouteImport.update({
-  id: '/meals/$mealId',
-  path: '/meals/$mealId',
+const MealsMealIdIndexRoute = MealsMealIdIndexRouteImport.update({
+  id: '/meals/$mealId/',
+  path: '/meals/$mealId/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MealsMealIdEditRoute = MealsMealIdEditRouteImport.update({
@@ -71,10 +71,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
   '/meals/new': typeof MealsNewRoute
   '/meals/': typeof MealsIndexRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
+  '/meals/$mealId/': typeof MealsMealIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,10 +82,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
   '/meals/new': typeof MealsNewRoute
   '/meals': typeof MealsIndexRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
+  '/meals/$mealId': typeof MealsMealIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,10 +94,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
-  '/meals/$mealId': typeof MealsMealIdRouteWithChildren
   '/meals/new': typeof MealsNewRoute
   '/meals/': typeof MealsIndexRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
+  '/meals/$mealId/': typeof MealsMealIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,10 +107,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
-    | '/meals/$mealId'
     | '/meals/new'
     | '/meals/'
     | '/meals/$mealId/edit'
+    | '/meals/$mealId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,10 +118,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
-    | '/meals/$mealId'
     | '/meals/new'
     | '/meals'
     | '/meals/$mealId/edit'
+    | '/meals/$mealId'
   id:
     | '__root__'
     | '/'
@@ -129,10 +129,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
-    | '/meals/$mealId'
     | '/meals/new'
     | '/meals/'
     | '/meals/$mealId/edit'
+    | '/meals/$mealId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,8 +141,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   ShoppingListsRoute: typeof ShoppingListsRoute
-  MealsMealIdRoute: typeof MealsMealIdRouteWithChildren
   MealsIndexRoute: typeof MealsIndexRoute
+  MealsMealIdIndexRoute: typeof MealsMealIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -196,11 +196,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MealsNewRouteImport
       parentRoute: typeof MealsRoute
     }
-    '/meals/$mealId': {
-      id: '/meals/$mealId'
+    '/meals/$mealId/': {
+      id: '/meals/$mealId/'
       path: '/meals/$mealId'
-      fullPath: '/meals/$mealId'
-      preLoaderRoute: typeof MealsMealIdRouteImport
+      fullPath: '/meals/$mealId/'
+      preLoaderRoute: typeof MealsMealIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meals/$mealId/edit': {
@@ -213,26 +213,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface MealsMealIdRouteChildren {
-  MealsMealIdEditRoute: typeof MealsMealIdEditRoute
-}
-
-const MealsMealIdRouteChildren: MealsMealIdRouteChildren = {
-  MealsMealIdEditRoute: MealsMealIdEditRoute,
-}
-
-const MealsMealIdRouteWithChildren = MealsMealIdRoute._addFileChildren(
-  MealsMealIdRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComponentsRoute: ComponentsRoute,
   LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   ShoppingListsRoute: ShoppingListsRoute,
-  MealsMealIdRoute: MealsMealIdRouteWithChildren,
   MealsIndexRoute: MealsIndexRoute,
+  MealsMealIdIndexRoute: MealsMealIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
