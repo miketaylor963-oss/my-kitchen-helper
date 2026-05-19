@@ -218,7 +218,15 @@ function ListView({ items }: { items: MealRow[] }) {
         <tbody>
           {items.map((m) => (
             <tr key={m.id} className="border-t hover:bg-muted/30">
-              <td className="px-3 py-2 font-medium">{m.name}</td>
+              <td className="px-3 py-2 font-medium">
+                <Link
+                  to="/meals/$mealId"
+                  params={{ mealId: String(m.id) }}
+                  className="hover:underline"
+                >
+                  {m.name}
+                </Link>
+              </td>
               <td className="px-3 py-2">
                 <Badge variant={statusVariant(m.status)}>{m.status}</Badge>
               </td>
@@ -237,8 +245,14 @@ function GridView({ items }: { items: MealRow[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((m) => (
-        <Card key={m.id}>
-          <CardContent className="p-5">
+        <Link
+          key={m.id}
+          to="/meals/$mealId"
+          params={{ mealId: String(m.id) }}
+          className="block"
+        >
+          <Card className="transition-colors hover:bg-muted/30">
+            <CardContent className="p-5">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-semibold leading-tight">{m.name}</h3>
               <Badge variant={statusVariant(m.status)}>{m.status}</Badge>
@@ -248,8 +262,9 @@ function GridView({ items }: { items: MealRow[] }) {
               <div>{m.cuisine?.name ?? "—"}</div>
             </div>
             <div className="mt-3"><MealTypes row={m} /></div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );
