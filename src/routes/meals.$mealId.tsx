@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsWriter } from "@/lib/auth";
 
 export const Route = createFileRoute("/meals/$mealId")({
   component: MealDetailPage,
@@ -62,6 +65,7 @@ function statusVariant(status: string) {
 function MealDetailPage() {
   const { mealId } = Route.useParams();
   const id = Number(mealId);
+  const { isWriter } = useIsWriter();
 
   const q = useQuery({
     queryKey: ["meal", id],
@@ -107,14 +111,14 @@ function MealDetailPage() {
         ) : !q.data ? (
           <p className="mt-6 text-sm text-muted-foreground">Meal not found.</p>
         ) : (
-          <MealBody meal={q.data} />
+          <MealBody meal={q.data} isWriter={isWriter} mealId={mealId} />
         )}
       </div>
     </div>
   );
 }
 
-function MealBody({ meal }: { meal: MealDetail }) {
+function MealBody({ meal, isWriter, mealId }: { meal: MealDetail; isWriter: boolean; mealId: string }) {
   const restrictions = meal.meal_restriction
     .map((r) => r.dietary_restriction)
     .filter((x): x is { id: number; name: string } => !!x);
@@ -138,7 +142,14 @@ function MealBody({ meal }: { meal: MealDetail }) {
       <header className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">{meal.name}</h1>
-          <Badge variant={statusVariant(meal.status)}>{meal.status}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={statusVariant(meal.status)}>{meal.status}</Badge>
+            {isWriter && (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/meals/$mealId/edit" params={{ mealId }}><Pencil /> Edit</Link>
+              </Button>
+            )}
+          </div>
         </div>
         {meal.description && (
           <p className="text-muted-foreground">{meal.description}</p>
