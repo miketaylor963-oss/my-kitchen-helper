@@ -50,9 +50,9 @@ const MealsIndexRoute = MealsIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MealsNewRoute = MealsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => MealsRoute,
+  id: '/meals/new',
+  path: '/meals/new',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MealsMealIdIndexRoute = MealsMealIdIndexRouteImport.update({
   id: '/meals/$mealId/',
@@ -60,9 +60,9 @@ const MealsMealIdIndexRoute = MealsMealIdIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MealsMealIdEditRoute = MealsMealIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => MealsMealIdRoute,
+  id: '/meals/$mealId/edit',
+  path: '/meals/$mealId/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -141,7 +141,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   ShoppingListsRoute: typeof ShoppingListsRoute
+  MealsNewRoute: typeof MealsNewRoute
   MealsIndexRoute: typeof MealsIndexRoute
+  MealsMealIdEditRoute: typeof MealsMealIdEditRoute
   MealsMealIdIndexRoute: typeof MealsMealIdIndexRoute
 }
 
@@ -191,10 +193,10 @@ declare module '@tanstack/react-router' {
     }
     '/meals/new': {
       id: '/meals/new'
-      path: '/new'
+      path: '/meals/new'
       fullPath: '/meals/new'
       preLoaderRoute: typeof MealsNewRouteImport
-      parentRoute: typeof MealsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/meals/$mealId/': {
       id: '/meals/$mealId/'
@@ -205,10 +207,10 @@ declare module '@tanstack/react-router' {
     }
     '/meals/$mealId/edit': {
       id: '/meals/$mealId/edit'
-      path: '/edit'
+      path: '/meals/$mealId/edit'
       fullPath: '/meals/$mealId/edit'
       preLoaderRoute: typeof MealsMealIdEditRouteImport
-      parentRoute: typeof MealsMealIdRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -219,7 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   ShoppingListsRoute: ShoppingListsRoute,
+  MealsNewRoute: MealsNewRoute,
   MealsIndexRoute: MealsIndexRoute,
+  MealsMealIdEditRoute: MealsMealIdEditRoute,
   MealsMealIdIndexRoute: MealsMealIdIndexRoute,
 }
 export const routeTree = rootRouteImport
