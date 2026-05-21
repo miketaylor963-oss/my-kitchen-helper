@@ -1,0 +1,211 @@
+{
+  "recipe": {
+    "id": "black-bean-patties-portobello",
+    "title": "Black Bean Patties with Air-Fried Portobello Mushrooms",
+    "description": "Smoky, hearty black bean patties with fresh coriander and lime, served in a bun with garlicky air-fried Portobello mushrooms.",
+    "base_servings": 2,
+    "diet_tags": ["vegetarian", "dairy-free", "egg-free"],
+    "notes": "Leftover patties keep well in the fridge for 3 days and reheat in the air fryer at 180°C for 5–6 minutes. Freeze before cooking on a tray first, then bag up once solid.",
+    "ingredients": [
+      {
+        "id": "0001",
+        "name": "tin black beans, drained and rinsed",
+        "amount": 1,
+        "unit": null,
+        "group": "patty"
+      },
+      {
+        "id": "0002",
+        "name": "red onion, finely diced",
+        "amount": 0.5,
+        "unit": null,
+        "group": "patty"
+      },
+      {
+        "id": "0003",
+        "name": "garlic cloves, minced",
+        "amount": 3,
+        "unit": null,
+        "group": "patty"
+      },
+      {
+        "id": "0004",
+        "name": "red pepper, finely diced",
+        "amount": 0.5,
+        "unit": null,
+        "group": "patty"
+      },
+      {
+        "id": "0005",
+        "name": "breadcrumbs",
+        "amount": 4,
+        "unit": "tbsp",
+        "group": "patty"
+      },
+      {
+        "id": "0006",
+        "name": "smoked paprika",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "patty"
+      },
+      {
+        "id": "0007",
+        "name": "ground cumin",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "patty"
+      },
+      {
+        "id": "0008",
+        "name": "ground coriander",
+        "amount": 0.5,
+        "unit": "tsp",
+        "group": "patty"
+      },
+      {
+        "id": "0009",
+        "name": "chipotle paste (or pinch of chilli flakes)",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "patty"
+      },
+      {
+        "id": "0010",
+        "name": "white miso paste",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "patty"
+      },
+      {
+        "id": "0011",
+        "name": "soy sauce",
+        "amount": 1,
+        "unit": "tbsp",
+        "group": "patty"
+      },
+      {
+        "id": "0012",
+        "name": "fresh coriander, roughly chopped",
+        "amount": 3,
+        "unit": "tbsp",
+        "group": "patty"
+      },
+      {
+        "id": "0013",
+        "name": "lime, juiced",
+        "amount": 0.5,
+        "unit": null,
+        "group": "patty"
+      },
+      {
+        "id": "0014",
+        "name": "olive oil",
+        "amount": 1,
+        "unit": "tbsp",
+        "group": "patty"
+      },
+      {
+        "id": "0015",
+        "name": "large Portobello mushrooms",
+        "amount": 4,
+        "unit": null,
+        "group": "mushrooms"
+      },
+      {
+        "id": "0016",
+        "name": "garlic cloves, minced",
+        "amount": 2,
+        "unit": null,
+        "group": "mushrooms"
+      },
+      {
+        "id": "0017",
+        "name": "soy sauce",
+        "amount": 1,
+        "unit": "tbsp",
+        "group": "mushrooms"
+      },
+      {
+        "id": "0018",
+        "name": "olive oil",
+        "amount": 1,
+        "unit": "tbsp",
+        "group": "mushrooms"
+      },
+      {
+        "id": "0019",
+        "name": "burger buns",
+        "amount": 2,
+        "unit": null,
+        "group": "assembly"
+      }
+    ],
+    "steps": [
+      {
+        "id": "s1",
+        "order": 1,
+        "title": "Soften the veg",
+        "content": "Heat a little oil in a frying pan over medium heat. Sauté {0002} and {0004} for 5–6 minutes until softened. Add {0003} and cook for another minute. Set aside to cool slightly.",
+        "timer_seconds": null,
+        "ingredient_refs": ["0002", "0003", "0004"]
+      },
+      {
+        "id": "s2",
+        "order": 2,
+        "title": "Mash the beans",
+        "content": "Tip {0001} into a large bowl. Mash roughly two-thirds of them with a fork or potato masher, leaving the rest whole for texture.",
+        "timer_seconds": null,
+        "ingredient_refs": ["0001"]
+      },
+      {
+        "id": "s3",
+        "order": 3,
+        "title": "Mix the patty mixture",
+        "content": "Add the softened veg to the beans along with {0005}, {0006}, {0007}, {0008}, {0009}, {0010}, {0011}, {0012}, and the juice of {0013}. Mix well until everything is combined. The mixture should hold its shape when pressed — if it feels too wet, add another tablespoon of breadcrumbs.",
+        "timer_seconds": null,
+        "ingredient_refs": ["0005", "0006", "0007", "0008", "0009", "0010", "0011", "0012", "0013"]
+      },
+      {
+        "id": "s4",
+        "order": 4,
+        "title": "Shape and chill",
+        "content": "Divide the mixture into 4–5 patties, pressing firmly to compact them. Place on a plate, cover, and refrigerate for at least 20–30 minutes — this is important for helping them hold together during cooking.",
+        "timer_seconds": 1800,
+        "ingredient_refs": []
+      },
+      {
+        "id": "s5",
+        "order": 5,
+        "title": "Prep the mushrooms",
+        "content": "Mix {0016}, {0017}, and {0018} together. Brush over both sides of {0015}. Set aside until ready to cook.",
+        "timer_seconds": null,
+        "ingredient_refs": ["0015", "0016", "0017", "0018"]
+      },
+      {
+        "id": "s6",
+        "order": 6,
+        "title": "Air fry the patties",
+        "content": "Preheat your air fryer to 190°C. Brush both sides of the patties lightly with {0014}. Cook for 12–15 minutes, flipping carefully halfway through, until golden and firm on the outside.",
+        "timer_seconds": 780,
+        "ingredient_refs": ["0014"]
+      },
+      {
+        "id": "s7",
+        "order": 7,
+        "title": "Air fry the mushrooms",
+        "content": "While the patties rest, cook the mushrooms at 190°C for 8–10 minutes, gill-side up for the first half, until tender and slightly caramelised.",
+        "timer_seconds": 540,
+        "ingredient_refs": ["0015"]
+      },
+      {
+        "id": "s8",
+        "order": 8,
+        "title": "Assemble and serve",
+        "content": "Toast your {0019} lightly. Layer with a patty, a Portobello mushroom, and any toppings you like — smashed avocado, sliced tomato, or shredded lettuce all work well.",
+        "timer_seconds": null,
+        "ingredient_refs": ["0019"]
+      }
+    ]
+  }
+}

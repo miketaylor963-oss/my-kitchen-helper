@@ -1,0 +1,49 @@
+{
+  "import_type": "recipe",
+  "external_ref": "",
+  "name": "",
+  "description": "",
+  "source": "",
+
+  "cuisine": null,
+  "dietary_category": null,
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": [],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": null,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    {
+      "id": "0001",
+      "name": "",
+      "amount": null,
+      "unit": null,
+      "group": null,
+      "notes": null
+    }
+  ],
+
+  "steps": [
+    {
+      "title": "",
+      "content": "",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "",
+
+  "derived_components": []
+}

@@ -1,0 +1,78 @@
+{
+  "title": "Butter Bean, Mushroom & Walnut Loaf",
+  "description": "A simpler version of the full roll — same deeply savoury filling, cooked in a loaf tin for easy slicing. Straightforward to prepare and still a proper centrepiece.",
+  "base_servings": 6,
+  "ingredients": [
+    { "id": "0001", "name": "tins butter beans (400g each), drained and rinsed", "amount": 2 },
+    { "id": "0002", "name": "chestnut mushrooms, finely chopped", "amount": 400, "unit": "g" },
+    { "id": "0003", "name": "dried porcini mushrooms", "amount": 25, "unit": "g" },
+    { "id": "0004", "name": "large onion, finely diced", "amount": 1 },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 4 },
+    { "id": "0006", "name": "walnuts, roughly chopped", "amount": 100, "unit": "g" },
+    { "id": "0007", "name": "eggs, beaten", "amount": 2 },
+    { "id": "0008", "name": "olive oil", "amount": 3, "unit": "tbsp" },
+    { "id": "0009", "name": "tamari or soy sauce", "amount": 1, "unit": "tbsp" },
+    { "id": "0010", "name": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "id": "0011", "name": "dried rosemary, crushed", "amount": 0.5, "unit": "tsp" },
+    { "id": "0012", "name": "black pepper and salt", "amount": 1, "unit": "pinch" },
+    { "id": "0013", "name": "olive oil for the tin", "amount": 1, "unit": "tbsp" }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "title": "Soak the porcini",
+      "content": "Place dried porcini in a small bowl and cover with 150ml of just-boiled water. Set aside to soak for at least 20 minutes. Once soaked, drain and reserve the liquid — refrigerate or freeze it for use in a gravy another time. Roughly chop the porcini.",
+      "timer_seconds": 1200
+    },
+    {
+      "id": "s2",
+      "title": "Toast the walnuts",
+      "content": "Toast walnuts in a dry frying pan over medium heat until fragrant and just starting to colour. Set aside.",
+      "timer_seconds": 300
+    },
+    {
+      "id": "s3",
+      "title": "Cook the onion and garlic",
+      "content": "Heat olive oil in a large frying pan over medium-low heat. Add onion, dried thyme and crushed rosemary and cook gently until the onion is completely soft. Add garlic and cook for a further 2 minutes.",
+      "timer_seconds": 720
+    },
+    {
+      "id": "s4",
+      "title": "Cook down the mushrooms",
+      "content": "Add chestnut mushrooms to the pan and turn the heat up to medium-high. Cook, stirring occasionally, until all moisture has evaporated and the mushrooms are deeply coloured and almost dry. Add the chopped porcini and tamari. Season well with salt and pepper. Cook for 2 more minutes then set aside to cool slightly.",
+      "timer_seconds": 900
+    },
+    {
+      "id": "s5",
+      "title": "Prepare the tin",
+      "content": "Preheat your oven to 200°C / 180°C fan. Line a 900g loaf tin with baking parchment and brush with olive oil."
+    },
+    {
+      "id": "s6",
+      "title": "Make the filling",
+      "content": "Tip butter beans into a large bowl and roughly mash — mostly smooth but with some texture remaining. Add the mushroom mixture, toasted walnuts, and beaten eggs. Mix thoroughly. Taste and adjust seasoning. If the mixture feels very wet, stir in a tablespoon of oats."
+    },
+    {
+      "id": "s7",
+      "title": "Fill the tin",
+      "content": "Spoon the mixture into the prepared tin, pressing it down firmly and smoothing the top. A compact, even fill will help it slice cleanly."
+    },
+    {
+      "id": "s8",
+      "title": "Roast",
+      "content": "Roast until the top is firm and well coloured.",
+      "timer_seconds": 2400
+    },
+    {
+      "id": "s9",
+      "title": "Rest and serve",
+      "content": "Leave in the tin for 10 minutes before turning out — this is important for clean slices. Turn onto a board, remove the parchment, and slice with a sharp serrated knife.",
+      "timer_seconds": 600
+    }
+  ],
+  "notes": {
+    "porcini_liquid": "Strain through a fine sieve and keep in the fridge for up to 3 days, or freeze. It makes an excellent base for a porcini and red wine miso gravy.",
+    "texture": "Don't over-mash the beans — some texture makes for a better slice and a more interesting bite alongside the walnut chunks.",
+    "getting_ahead": "The filling can be made up to a day ahead and kept in the fridge. Spoon into the tin and roast when needed."
+  }
+}
