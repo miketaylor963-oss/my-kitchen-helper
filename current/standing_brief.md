@@ -99,6 +99,8 @@ Every writable content/state table has a `household_id` column (DEFAULT 1). v1 h
 - The `person_id` on `app_writer` is useful for defaulting "cooked by" when the user logs a cook event.
 - The application layer uses the presence of an `app_writer` row to decide whether to show edit/create buttons. RLS gates writes at the database; `app_writer` gates UI at the app.
 
+- Auth URLs are configured per-environment in Supabase dashboard. See section 13 for the production/local-dev URL configuration.
+
 ---
 
 ## 8. Condensed schema map
@@ -226,17 +228,60 @@ So you don't try to use them:
 
 ## 12. Tech stack
 
-- Frontend: React + Tailwind. Vite-based scaffold (carried forward from Lovable's original output).
-- Backend: Supabase (Postgres + Auth + RLS) — hosted in Mike's own Supabase account.
-- Build agent: Claude Code, running locally against a clone of the GitHub repo. Cursor or another editor is fine for hand-edits.
-- Source control: GitHub repo `miketaylor963-oss/my-kitchen-helper`. Push directly from local; no intermediate sync layer.
-- Hosting: Vercel, auto-deploy on push to `main`.
-- Local dev: `npm run dev` against the same Supabase instance as production. Env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) in `.env.local` (git-ignored) and in Vercel's environment settings.
-- Postgres extensions: `pg_trgm` (enabled by install script) for fuzzy ingredient matching at import time.
+- **Framework:** TanStack Start (full-stack React framework with file-based routing, server functions, and SSR), built on Vite.
+- **Styling:** Tailwind v4.
+- **Backend:** Supabase (Postgres + Auth + RLS) — hosted in Mike's own Supabase account.
+- **Build agent:** Claude Code, running locally against a clone of the GitHub repo. Cursor or another editor is fine for hand-edits.
+- **Source control:** GitHub repo `miketaylor963-oss/my-kitchen-helper` (public). Push directly from local; no intermediate sync layer.
+- **Hosting:** Cloudflare Workers via Workers Builds (Git-connected, auto-deploys on push to `main`). Production URL: `https://my-kitchen-helper.mike-taylor963.workers.dev`.
+- **Local dev:** `npm run dev`. Same Supabase instance as production — there is no staging Supabase. Env vars in `.env.local` (gitignored).
+- **Postgres extensions:** `pg_trgm` (enabled by install script) for fuzzy ingredient matching at import time.
+
+Previously deployed to Vercel and Cloudflare Pages during F2 pre-work; both were rejected. See planning log Stage 8 for the reasoning.
 
 ---
 
-## 13. When in doubt
+## 13. Deploy and environment configuration
+
+### Lockfiles
+
+The repo carries both `package-lock.json` (npm) and `bun.lock` (Bun). npm is the local dev tool. Bun's lockfile exists because Cloudflare Workers Builds hardcodes `bun install --frozen-lockfile` as its pre-install step and exposes no way to override it.
+
+**Workflow when dependencies change:**
+
+1. Make the change locally (`npm install <pkg>` or edit `package.json` directly).
+2. Run `bun install` locally to refresh `bun.lock`.
+3. Commit both lockfiles in the same commit.
+
+Skipping step 2 means the next Cloudflare build fails with "lockfile had changes, but lockfile is frozen". The error message is the only signal; nothing earlier catches it.
+
+### Environment variables
+
+Production env vars live in the Cloudflare Workers dashboard, in **two** sections:
+
+- **Settings → Build → Variables and Secrets** — baked into the client bundle at build time. `VITE_*` prefixed vars must be set here to reach the client.
+- **Settings → Variables and Secrets** (the runtime one) — available to the Worker at request time.
+
+The same values should be set in both for now. `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are the two that matter currently. Both are safe-to-expose values (anon publishable key, public Supabase URL).
+
+`.env` and `.env.local` are local-dev only. The Cloudflare dashboard is the source of truth for production. Changing an env var in the dashboard does not automatically trigger a rebuild — push an empty commit to trigger one.
+
+### Supabase auth URLs
+
+Supabase magic-link redirects route through Auth's URL configuration. Both production and local-dev URLs must be allowed:
+
+- **Site URL:** production Workers URL (`https://my-kitchen-helper.mike-taylor963.workers.dev`).
+- **Redirect URLs:** wildcard-pathed entries for both production and local — `https://my-kitchen-helper.mike-taylor963.workers.dev/**` and `http://localhost:5173/**`.
+
+Adding any new environment (preview deploy, custom domain) means revisiting these settings.
+
+### gitignore
+
+`.env`, `.env.*`, `!.env.example` are gitignored. Local `.env.local` is the practical credentials file; `.env` is also gitignored but is sometimes useful as a less-sensitive scratchpad. Never commit anything from either.
+
+---
+
+## 14. When in doubt
 
 - Ask before changing the schema.
 - Ask before changing RLS or role grants.

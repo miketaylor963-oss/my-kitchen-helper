@@ -122,6 +122,13 @@ This replaces the current manual-SQL-only workflow for adding writers. Jane's ac
 ### 3.10 Recipe Import from URLs (future)
 Pasting a URL from a public, copyright-free recipe site and having the app parse it. Useful but not v1. Image-based import (photos of recipe cards or cookbook pages) is **explicitly off the roadmap**.
 
+### 3.11 Ingredient master — deferred admin operations
+Some admin operations on the ingredient master are deferred from v1 because they're genuinely complicated or not yet load-bearing. Captured here so they don't get quietly forgotten.
+
+- **Merge.** Two ingredients that should be one ("salt" vs "fine salt") will eventually appear. Merging moves all `meal_ingredient.ingredient_id` references from source to target, moves aliases, deletes the source. Transactional, audit-trail-relevant, irreversible. Until merge exists, the only recovery for duplicates is careful create-time validation.
+- **Soft delete / archive flag.** Only relevant if the v1 "prevent delete if referenced" rule becomes annoying in practice. Adds a state machine that propagates into every query and shopping-list aggregation, so worth avoiding unless clearly needed.
+- **Bulk operations.** Bulk edit (e.g. re-categorise N ingredients at once), bulk re-category, bulk alias add. Useful at scale but not at the current 200-ish ingredient count.
+
 ---
 
 ## 4. Data / Domain Requirements
@@ -156,14 +163,14 @@ A meal can carry multiple formats where it suits more than one.
 
 ### 5.1 Tech Stack
 - **Editor / build agent:** Claude Code running locally against the project repo. Cursor or another editor is fine for hand-edits; the AI workflow assumes Claude Code.
-- **Frontend:** React + Tailwind (carried forward from the original Lovable scaffold).
+- **Frontend framework:** TanStack Start (full-stack React framework with file-based routing, server functions, and SSR) on Vite, with Tailwind v4.
 - **Database & Auth:** Supabase Postgres in Mike's own Supabase account. ~36 tables after the v2 schema rewrite.
 - **Schema installation:** done directly via Supabase SQL editor, in dependency order. The canonical install file is `current/recipe_db_install.sql` (single paste, includes role grants).
-- **Hosting:** Vercel, auto-deploy on push to GitHub `main`. Free tier.
-- **Version control:** GitHub repo `miketaylor963-oss/my-kitchen-helper`. Push from local after each working chunk.
+- **Hosting:** Cloudflare Workers via Workers Builds (Git-connected, auto-deploys on push to `main`). Free tier.
+- **Version control:** GitHub repo `miketaylor963-oss/my-kitchen-helper` (public). Push from local after each working chunk.
 - **Postgres extensions:** `pg_trgm` for fuzzy ingredient matching at import time.
 
-**Tooling history.** F1 (Meal Library) was built in Lovable. Between F1 and F2, the project moved off Lovable to local Claude Code + Vercel — Lovable's round-tripping and schema-confusion behaviour made it the wrong fit for the import-heavy work coming next. The Lovable-generated codebase is the starting point; subsequent work happens in Claude Code. See the migration log for details.
+**Tooling history.** F1 (Meal Library) was built in Lovable. Between F1 and F2 the project moved off Lovable to local Claude Code — Lovable's round-tripping and schema-confusion behaviour made it the wrong fit for the import-heavy work coming next. The initial deploy target after the migration was Vercel, but Vercel proved unable to serve TanStack Start's SSR output without adapter work the installed framework version doesn't ship. Cloudflare Workers is the current target. See planning log Stages 6 and 8 for details. Standing brief §12 and §13 cover the active stack and deploy/env workflow.
 
 ### 5.2 Build Order
 Strictly vertical slices (DB → UI per feature):
@@ -211,10 +218,10 @@ Per-table reads, locked in for v2 RLS:
 
 ### 6.4 Repo and naming hygiene
 - Repo: `miketaylor963-oss/my-kitchen-helper`. Public.
-- Deployed at `https://my-kitchen-helper.vercel.app/`.
+- Deployed at `https://my-kitchen-helper.mike-taylor963.workers.dev/`.
 - Commit messages: descriptive, present-tense, one logical change per commit. Push after each working chunk.
 - README explains what the app is and how to run it locally.
-- Secrets (Supabase URL and anon key) live in `.env.local` (git-ignored) and in Vercel's environment variables. Never in the repo.
+- Secrets (Supabase URL and anon key) live in `.env.local` (gitignored) locally, and in the Cloudflare Workers dashboard for production (Build and Runtime variables — see standing brief §13). Never in the repo.
 
 ### 6.5 Build journal
 Keep notes as you build: decisions made, what worked, what didn't, prompts that landed cleanly, prompts that produced rework. The story of building this with AI *is* the portfolio asset. Trivial to keep going; near-impossible to reconstruct after the fact. The canonical log is `current/planning_log.md`. Per-feature build logs live in `current/` while a feature is active and move to `archive/` at close-out; F1's `build_log_post_f1.md`, the `schema_build_log.md`, and `migration_log.md` are already in `archive/`.
@@ -225,7 +232,7 @@ Keep notes as you build: decisions made, what worked, what didn't, prompts that 
 
 - **Import schema design.** Resolved at v2 — see `recipe_import_spec.md` and `recipe_import_template.json`.
 - **Plan template flexibility.** Defer until the basic planner is in use.
-- **Production smoke-test cadence.** Whether to run a quick sign-in + read + write on the Vercel deployment after each merge, or trust the dev environment. Decide during F2.
+- **Production smoke-test cadence.** Whether to run a quick sign-in + read + write on the deployed Cloudflare Workers URL after each merge, or trust the dev environment. Decide during F2.
 
 ---
 

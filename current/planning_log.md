@@ -572,3 +572,179 @@ Items flagged for capture when F2 is done:
 - Write the **full Claude Code prompt patterns document** as the F2 close-out artefact, replacing the light paragraph in project instructions with a proper feature-prompts file (mirroring F1's `feature_01_meal_library_prompts_post_f1.md`).
 - **Update the standing brief and requirements** to reflect the F2 ingredient master and recipe importer as built — including any decisions taken during 2A and 2B that don't appear here.
 - **Move the warm-up add-on SQL to archive** once the live database is on v3.1 state.
+
+---
+
+## Stage 8 — F2 pre-work: deploy infrastructure correction
+
+A new chat started for F2 work loaded the standing brief and requirements per Decision 25, then discovered the deployed app URL returned 404. Investigation surfaced a sequence of misconceptions about the stack and deploy target carried from the Lovable era. None of the actual F2 work landed in this stage — every hour went to deploy infrastructure. Captured here in full because the misconceptions were load-bearing and the gotchas may catch others taking similar routes.
+
+---
+
+### Decision 29 — Make the GitHub repo public
+
+**Context:** Decision 25 established GitHub as source-of-truth and pointed fresh chats at raw URLs via the project instructions' load-on-startup step. At the start of Stage 8 the load-on-startup step failed: the repo was private, so `web_fetch` against the raw URLs returned 404 (private repos require authenticated requests, which `web_fetch` can't make). The standing brief and requirements weren't loadable without manual workarounds.
+
+**Options considered:**
+- **A. Make the repo public.** Restores the intended load-on-startup workflow. Means anything ever committed is permanently visible.
+- **B. Keep private, upload key docs as Project knowledge files.** Workaround. Requires re-uploading after every change.
+
+**Choice:** A. Repo flipped to public after auditing for committed secrets.
+
+**Reasoning:** The credentials in `.env` (the only file remotely sensitive) decode to Supabase's anon publishable key — designed to be public, RLS does the protecting. The service role key is not and has never been in the repo. With the editing model now being Claude Code (each commit individually approved) plus Vercel/Cloudflare (read-only consumers of the repo), the "secrets get pushed silently" risk that justified caution earlier no longer applies. Public also makes the project usable as a portfolio piece later without re-flipping.
+
+**Pre-flip hygiene:** Added `.env`, `.env.*`, `!.env.example` to `.gitignore`. Untracked `.env` from history via `git rm --cached`. Verified no service role keys or LLM API keys anywhere in the tree.
+
+**Implication:** The load-on-startup workflow now works as designed. New gitignore conventions documented in the standing brief.
+
+---
+
+### Issue 8 — `.env` was tracked in history despite being a credentials file
+
+**Symptom:** Pre-flip secret audit revealed `.env` had been committed at some point during the Lovable era. The current `.gitignore` covered `*.local` (catching `.env.local`) but not `.env` itself.
+
+**Cause:** Lovable's initial scaffold didn't include `.env` in `.gitignore`. The file was committed once, then sat in the repo with its anon-key contents.
+
+**Fix:** Sequence run by hand:
+1. Added `.env`, `.env.*`, `!.env.example` to `.gitignore`.
+2. `git rm --cached .env` to untrack without deleting the local copy.
+3. `git pull --rebase` to reconcile with remote (which had diverged via a web-edit commit).
+4. The rebase aborted because the historical state being replayed wanted to check `.env` back out, and the local working tree had a `.env` it wouldn't clobber. Moved `.env` outside the repo (`mv .env ../env-backup`), re-ran the rebase, restored `.env` afterwards.
+5. Re-appended the gitignore lines (lost in the rebase) — one of the `echo` lines failed because Bash interpreted `!` as history expansion. Quoted with single quotes.
+6. Committed and pushed clean.
+
+**Implication:** Future projects start with `.env` in `.gitignore` from commit 1. The anon-key-only state of this `.env` meant nothing sensitive was actually exposed, but the cleanup pattern (`git rm --cached` + restore-outside-repo for the rebase) is worth knowing — it comes up any time you remove a tracked file that the working tree still needs.
+
+---
+
+### Issue 9 — Standing brief and requirements both described the wrong stack
+
+**Symptom:** Standing brief §12 and requirements §5.1 described the stack as "React + Tailwind on Vite" with Vercel as the deploy target. The actual codebase is TanStack Start (a full-stack React framework with file-based routing, server functions, and SSR) + Tailwind v4 + Vite, originally targeting Cloudflare Workers via Lovable's bundled config plugin `@lovable.dev/vite-tanstack-config`.
+
+**Cause:** Lovable shipped a more opinionated stack than the docs captured. The wrapper config hid that TanStack Start + Cloudflare were the real foundations — the user-facing `vite.config.ts` was a thin shim. "Migrated to Vercel" was assumed to mean working on Vercel; in fact no Vercel deploy had ever rendered the app.
+
+**Fix:** Documented stack corrections rolled into Stage 8 close-out updates to the standing brief and requirements.
+
+**Implication:** The "moved to Vercel" entry in prior chat memory was misleading. Decision 15's Vercel commitment is partially superseded — see Decision 32.
+
+---
+
+### Decision 30 — Cut the Lovable config wrapper
+
+**Context:** `@lovable.dev/vite-tanstack-config` bundled `tanstackStart`, `viteReact`, `tailwindcss`, `tsconfigPaths`, the Cloudflare Vite plugin, dev-only Lovable instrumentation, and various opinionated defaults into a single importable. Working under it meant inheriting all of them and not being able to change any one independently.
+
+**Choice:** Replace with direct imports of each plugin in `vite.config.ts`. Remove `@lovable.dev/vite-tanstack-config` from dependencies entirely.
+
+**Reasoning:** Lovable is no longer the editing tool (per Decision 15). The wrapper added a layer of indirection with no remaining payoff. Direct config is the same number of lines, more readable, and lets individual plugins be swapped without touching a third-party shim.
+
+**Implication:** `vite.config.ts` is now ~22 lines of plain Vite config. `src/server.ts`, `src/lib/error-capture.ts`, and `bunfig.toml` were also cut as Lovable-era artefacts. `src/lib/error-page.ts` retained — `src/start.ts` references it for branded SSR error rendering, which is platform-agnostic and useful.
+
+---
+
+### Issue 10 — Vercel can't serve TanStack Start (this version) without adapter work
+
+**Symptom:** With the Lovable wrapper and Cloudflare plugin removed, Vercel deployments built successfully but every URL returned 404. `dist/client/` contained only an `assets/` folder — no `index.html`.
+
+**Cause:** TanStack Start at v1.167.50 (the installed version) produces SSR-only output: `dist/client/` for client assets, `dist/server/server.js` for the runtime SSR handler. There's no pre-rendered HTML. Vercel can run Node functions, but only with a `vercel.json` and an entry shim mapping Vercel's Node function shape to whatever `dist/server/server.js` expects — adapter work the framework doesn't ship at this version. Newer TanStack Start versions include first-party platform presets via Nitro; this one doesn't.
+
+**Fix:** Reverse course back to Cloudflare. See Decision 31.
+
+**Implication:** Vercel is a viable target if the project later upgrades TanStack Start. Not today.
+
+---
+
+### Decision 31 — Restore Cloudflare deployment support without the Lovable wrapper
+
+**Context:** Cloudflare is the framework's native target via `@cloudflare/vite-plugin`. The Lovable wrapper had been wiring this up under the hood; cutting it (per Decision 30) removed the Cloudflare plugin alongside the Lovable indirection.
+
+**Choice:** Re-add `@cloudflare/vite-plugin` directly to `package.json`. Restore `wrangler.jsonc` and a minimal `src/server.ts` (a one-liner re-exporting TanStack Start's server entry — the previous elaborate error-wrapping is now handled platform-agnostically by `src/start.ts`'s middleware).
+
+**Reasoning:** Path of least resistance to a working deploy. The framework already targets Cloudflare; restoring the plugin without the wrapper is a minimal change. The branded error handling moved into the framework's middleware layer during Decision 30's clean-up, so the original server.ts's custom h3-error-swallowing detection isn't needed anymore.
+
+**Implication:** The repo carries Cloudflare-specific config again, cleanly. Sets up the choice of *which* Cloudflare product to deploy to — see Issue 11.
+
+---
+
+### Issue 11 — Cloudflare Pages doesn't understand TanStack Start's build output
+
+**Symptom:** First Cloudflare attempt used Pages. Build succeeded; deploy uploaded 44 static files; production URL returned 404. Build logs showed: `A Wrangler configuration file was found but it does not appear to be valid. Did you mean to use wrangler.toml to configure Pages?` and `No functions dir at /functions found. Skipping.`
+
+**Cause:** Cloudflare Pages expects a static-with-functions layout — either a `functions/` directory of route handlers, or a `wrangler.toml` with `pages_build_output_dir` pointing at a folder structured as `<dir>/_worker.js` plus assets. The `@cloudflare/vite-plugin`'s output (a Worker-shaped bundle in `dist/server/` plus assets in `dist/client/`) doesn't match either. Pages fell back to static-only mode, uploaded the client assets, and silently dropped the Worker.
+
+**Fix:** Switch from Pages to Workers. See Decision 32.
+
+**Implication:** Pages is the wrong product for SSR-via-Vite-plugin builds. It works for static sites and for simple Functions-based dynamic routes; not for full SSR frameworks where the build tooling produces Worker-shaped output.
+
+---
+
+### Decision 32 — Deploy to Cloudflare Workers via Workers Builds
+
+**Context:** Three options after Pages was rejected:
+- **A. Stay on Pages, add a `wrangler.toml` and restructure the build output to match Pages' expectations.** Possible but working against the grain — the framework's plugin doesn't ship Pages-shaped output and there's no clean way to coerce it without writing a post-build step.
+- **B. Cloudflare Workers via manual `wrangler deploy` from CLI.** Works but loses Git-connected builds — every deploy would require a local terminal run.
+- **C. Cloudflare Workers via Workers Builds.** Git-connected; same workflow as Pages but pointed at Workers rather than Pages. Deploy command is `npx wrangler deploy` rather than Pages' automatic upload.
+
+**Choice:** C.
+
+**Reasoning:** Cloudflare has been steering SSR frameworks toward Workers + Static Assets over Pages for the last 12-18 months. Workers Builds gives the same Git-push-to-deploy experience as Pages with native support for the bundle shape the framework's plugin produces. Cloudflare's dashboard pushed toward Workers during initial setup — consistent signal.
+
+**Implication:** Supersedes the Vercel side of Decision 15. Deploy target is Cloudflare Workers; production URL is `https://my-kitchen-helper.mike-taylor963.workers.dev`. The Vercel project still exists but is dead — flagged for deletion at Stage 8 close-out.
+
+---
+
+### Issue 12 — Cloudflare Workers Builds hardcodes `bun install --frozen-lockfile`
+
+**Symptom:** Every Cloudflare build failed before reaching the user's build command, with `bun install v1.2.15 ... lockfile had changes, but lockfile is frozen`.
+
+**Cause:** Cloudflare Workers Builds runs a pre-install step before the user-specified build command. It auto-detects Bun and uses it when present, with `--frozen-lockfile`. The dashboard exposes no field to override the install command or the package manager. The `packageManager` field in `package.json` is ignored. Prefixing the build command with `npm install` has no effect because the pre-step fails first. The Lovable-era `bun.lock` had drifted out of sync with `package.json` after the wrapper removal in Decision 30.
+
+**Fix:** Generate a fresh `bun.lock` locally (via `bun install`) and commit it. Cloudflare's frozen-lockfile install then succeeds — Bun installs the same `node_modules` from `package.json` that npm would, and the user build command (`npm install && npm run build`) runs cleanly after.
+
+**Implication:** The repo now carries both `package-lock.json` and `bun.lock`. npm remains the local dev tool. Whenever dependencies change, `bun install` needs running locally before commit so the lockfiles stay in step. Documented in the standing brief as a deploy gotcha.
+
+---
+
+### Issue 13 — `.env` pointed at a Supabase project that no longer exists
+
+**Symptom:** Once the build and deploy worked, the deployed app loaded but every Supabase request failed with `ERR_NAME_NOT_RESOLVED`. The hostname in `.env` (`rzndxshqrkofrnpybghq.supabase.co`) didn't resolve.
+
+**Cause:** The committed `.env` values pointed at a Supabase project that was either never the live one or was deleted at some point in the Lovable handoff. The actual live Supabase project (where the schema was installed and F1 data lives) is at a different ref (`hpryimdnqsfegishuyfo`) and uses the newer `sb_publishable_*` key format rather than the legacy JWT format. Local dev had been using `.env.local` (gitignored, correct values), masking the problem during F1.
+
+**Fix:** Updated `.env` to the live project's values. Updated Cloudflare Workers Build variables and Runtime variables to the same values. Triggered a rebuild.
+
+**Implication:** Two corrections worth carrying forward. First: `.env` is now correct, but is not the authoritative source for production — the Cloudflare dashboard is. Second: the standing brief should document the env var workflow explicitly (build vs runtime variables, where each is needed, the fact that `VITE_*` vars are baked at build time and need to be set in Build settings to reach the client bundle).
+
+---
+
+### Issue 14 — Supabase auth URLs scoped to localhost only
+
+**Symptom:** Magic link emails arrived correctly but the link redirected to `localhost`, which refused the connection from any non-local browser.
+
+**Cause:** Supabase Auth's "Site URL" and "Redirect URLs" were configured for local dev only. The deployed Cloudflare URL was never added.
+
+**Fix:** Set Site URL to the production Workers URL; added both the production URL and `http://localhost:5173/**` as allowed Redirect URLs (with wildcard paths) so local dev continues to work.
+
+**Implication:** Adding a new environment (preview deploys, custom domain) means revisiting this setting. Documented as a checklist item in the standing brief.
+
+---
+
+### Decision 33 — Slice-done bookkeeping treats this as a complete slice on its own
+
+**Context:** This stage produced no F2 feature code. But it's a substantial, decision-heavy piece of work that updates the stack description, deploy target, and environment configuration — all things that affect every slice after it.
+
+**Choice:** Treat it as its own slice for close-out purposes. Run the four-item checklist from Decision 26 against it: deployment ✓ (the app is live), demo ✓ (F1's meals load against the live Supabase, magic link auth works), planning log updated (this entry), standing brief and requirements updated (Stage 8 close-out).
+
+**Reasoning:** Folding this into Slice 2A's eventual close-out would obscure how much of "F2" was actually infrastructure correction. Calling it out explicitly keeps the record honest and makes it easier to spot if similar pre-work shows up before F3.
+
+**Implication:** Slice 2A starts from a clean, documented baseline. No carry-forward debt from Stage 8 into 2A itself.
+
+---
+
+## Carry-forward to Slice 2A (revised)
+
+The original carry-forward list from Stage 7 remains valid. Stage 8 additions:
+
+- Slice 2A development assumes Cloudflare Workers as the deploy target. Local dev unchanged (`npm run dev`); production deploys via push to `main`.
+- `bun.lock` requires refreshing locally whenever dependencies change. Workflow: `bun install`, commit the updated lockfile alongside `package-lock.json`.
+- Env var changes for production go through the Cloudflare dashboard (both Build and Runtime sections). `.env` is local-dev only.
+- The Vercel project is dead and needs deleting — non-blocking but worth doing during Slice 2A to avoid future confusion.
