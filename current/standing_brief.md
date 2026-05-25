@@ -295,14 +295,36 @@ Reference data and admin functions live under a sixth top-level entry, **Admin**
 ---
 
 15. TanStack Router file layout
-For a list + detail route pair under flat-file routing, use three files:
 
-foo.tsx — minimal <Outlet /> layout, anchors the route group
-foo.index.tsx — list view at /foo
-foo.$id.tsx — detail view at /foo/$id
+**List + detail (three files):**
 
-Naming the list foo.tsx and adding a sibling foo.$id.tsx will cause the detail to render inside the list, because the filename prefix matches and foo.tsx becomes the parent route. That's the failure mode 2A.2 hit.
-F1's meals routes use a two-file pattern (meals.index.tsx + meals.$mealId.*) with no parent layout. It works but is inconsistent with the above. To be reconciled when meals routes are next substantially touched — don't refactor speculatively.
+```
+foo.tsx          — minimal <Outlet /> layout, anchors the route group
+foo.index.tsx    — list view at /foo
+foo.$id.tsx      — detail view at /foo/$id
+```
+
+**List + detail + edit (five files):** when an edit route is a sibling of the detail, the same collision applies one level deeper. Fix: apply the same pattern recursively.
+
+```
+foo.tsx              — minimal <Outlet /> layout
+foo.index.tsx        — list at /foo
+foo.$id.tsx          — minimal <Outlet /> layout (NOT the detail view)
+foo.$id.index.tsx    — detail at /foo/$id
+foo.$id.edit.tsx     — edit form at /foo/$id/edit
+```
+
+`foo.new.tsx` is a sibling of `foo.$id.tsx` under the `foo` layout. Static segments take precedence over dynamic ones in TanStack Router, so `/foo/new` correctly matches `foo.new.tsx` before `foo.$id.tsx`.
+
+The failure mode (2A.2): naming the list `foo.tsx` and adding a sibling `foo.$id.tsx` causes the detail to render nested inside the list because the filename prefix match makes `foo.tsx` the parent route.
+
+F1's meals routes use a two-file pattern (`meals.index.tsx` + `meals.$mealId.*`) with no parent layout. It works but is inconsistent with the above. Reconcile when meals routes are next substantially touched — don't refactor speculatively.
+
+**Auth gate pattern (UI-only), settled in 2A.3:** write pages use `useIsWriter()` from `src/lib/auth.tsx`. The page chrome always renders; within the content area, writers see the form, non-writers see a panel. Two non-writer states: `!user` → "Sign in to edit" (link to `/login`); `user && !isWriter` → "You don't have writer access on this household." Do not use F1's `useEffect`-based redirect to `/login` — the UI-only panel is the convention going forward.
+
+F1's meals routes still use a `useEffect`-based redirect to `/login` rather than the UI-only panel. To be reconciled when meals routes are next substantially touched — don't refactor speculatively.
+
+Moving auth gating to `beforeLoad` (TanStack Router's server-side loader hook) would give cleaner loading states and allow server-side redirects. Deferred: it requires touching every write route and possibly the auth hook, and is a cross-cutting change that should land as its own slice. Raise before doing it.
 
 ---
 

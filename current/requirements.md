@@ -128,6 +128,7 @@ Some admin operations on the ingredient master are deferred from v1 because they
 - **Merge.** Two ingredients that should be one ("salt" vs "fine salt") will eventually appear. Merging moves all `meal_ingredient.ingredient_id` references from source to target, moves aliases, deletes the source. Transactional, audit-trail-relevant, irreversible. Until merge exists, the only recovery for duplicates is careful create-time validation.
 - **Soft delete / archive flag.** Only relevant if the v1 "prevent delete if referenced" rule becomes annoying in practice. Adds a state machine that propagates into every query and shopping-list aggregation, so worth avoiding unless clearly needed.
 - **Bulk operations.** Bulk edit (e.g. re-categorise N ingredients at once), bulk re-category, bulk alias add. Useful at scale but not at the current 200-ish ingredient count.
+- **Sort order and column-sort.** The ingredient list currently returns rows in whatever order Supabase gives back (effectively id ascending). v1 should default to alphabetical by `canonical_name`. Column-selectable sort (name, category, default_unit, dietary category) is the stretch version. Noticed in 2A.3 smoke testing; deferred to its own slice.
 
 ---
 

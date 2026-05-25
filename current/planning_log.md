@@ -858,3 +858,39 @@ The browse query sorts by `coalesce(ingredient_category.sort_order, 999)` to pus
 **Fix:** Pushed the commit, fixed the lockfile drift (Issue 16), waited for green build, smoke-tested on production.
 
 **Implication:** Issue 15's fix language already requires production evidence for slice-done. Two consecutive slices have stumbled on the push step despite that. Project instructions need amending: future slice prompts should close with an explicit "push to main and wait for green build before declaring done" instruction, so the deploy step lives in the prompt itself rather than only in the project rules. Flagged for review.
+
+### Slice 2A.3 — Ingredient create and edit
+
+**Built:** create page at `/admin/ingredients/new` and edit page at `/admin/ingredients/$id/edit`, sharing a single `IngredientForm` component. Fields: `canonical_name` (required), `default_unit`, `category_id` (select from `ingredient_category` ordered by `sort_order`), `dietary_category_id` (select from `dietary_category` ordered by `rank`), `notes`. On save, navigates to the detail view. On cancel, navigates to detail if editing, list if creating. UNIQUE constraint violation (Postgres code `23505`) surfaces as "An ingredient with this name already exists." rather than the raw Postgres message. Both pages use the UI-only auth gate settled in this slice (see Decision 41). Commits: `8ce62e2` (routing restructure), `9455e7d` (form addition). Build green; smoke tested on production.
+
+#### Decision 41 — UI-only auth gate, settled as the convention for write routes
+
+**Context:** F1's `meals.new.tsx` and `meals.$mealId.edit.tsx` use a `useEffect`-based redirect to `/login` when the session is absent. The question for 2A.3 was whether to copy that pattern or settle something different.
+
+**Choice:** UI-only gate. The page chrome always renders. Within the content area, writers see the form; non-writers see a panel. Two states: `!user` → "Sign in to edit" (link to `/login`); `user && !isWriter` → "You don't have writer access on this household." No redirect, no flash, no `useEffect`.
+
+**Reasoning:** The redirect approach requires the session to resolve before anything renders — on slow connections the page is blank, and server-side rendering can't pre-populate the session state. The panel approach is immediately renderable and communicates the auth state clearly without relying on timing. It also avoids the question of where to redirect back to after login.
+
+**Implication:** 2A.3's write routes follow the UI-only pattern. F1's meals routes still use the redirect — to be reconciled when meals routes are next substantially touched. The `beforeLoad`-based approach (server-side auth gating via TanStack Router's loader hooks) is the right long-term answer but is a cross-cutting change; deferred and documented in standing brief §15.
+
+#### Decision 42 — Five-file routing pattern for list + detail + edit groups
+
+**Context:** Adding `admin.ingredients.$id.edit.tsx` as a sibling of `admin.ingredients.$id.tsx` triggers the same parent-layout collision 2A.2 hit at the list level. The detail route (`$id.tsx`) becomes the parent of the edit route because their filename prefix matches.
+
+**Choice:** Apply the three-file pattern one level deeper. `admin.ingredients.$id.tsx` becomes a minimal `<Outlet />` layout; the detail content moves to `admin.ingredients.$id.index.tsx`; the edit form sits at `admin.ingredients.$id.edit.tsx` as a sibling.
+
+**Reasoning:** Same reasoning as Decision 39 — this is idiomatic TanStack Router flat-file routing for a route group that needs siblings. The pattern composes cleanly.
+
+**Implication:** Convention updated in standing brief §15. Any future route group that needs list + detail + edit follows this five-file shape from the start. `admin.ingredients.new.tsx` is a sibling of `$id.tsx` under the `admin.ingredients` layout; static segments take precedence, so `/new` routes correctly before the dynamic `$id` segment.
+
+#### Finding — Diff-vs-approved-diff guard caught an affordance gap on first use
+
+The 2A.3 prompt included a new line: "if the final diff differs materially from what I approved, surface the difference before committing — don't fold it in silently." CC's first proposed diff added Edit and New buttons that weren't in the spec's file list — required to walk the smoke test path but missing from the prompt. CC flagged them in the proposed-diff summary rather than including them silently. Approved on the spot. Guard line earned its keep on first use; staying in future prompts.
+
+#### Finding — Ingredient list sort order is wrong
+
+Smoke testing revealed the ingredient list returns rows in effectively `id` ascending order. The sort applied in `admin.ingredients.index.tsx` sorts the client-side result array by `ingredient_category.sort_order` then `canonical_name`, but the Supabase query has no `order()` call, so the row set that arrives is in an arbitrary order that the client-side sort then acts on. For the current 227-row set this is mostly harmless, but it's not the intended v1 default (alphabetical by `canonical_name`). Deferred; added to requirements §3.11 as a deferred admin operation.
+
+#### Finding — Docs updated before build green / smoke test (process slip)
+
+CC began editing `standing_brief.md` immediately after pushing, before the Cloudflare build had completed and before production smoke testing. The slice-done checklist explicitly orders these: build green and smoke test first, then docs. No actual cost this slice (build was green, smoke test passed), but the order matters if either step fails — docs would describe a shipped state that's still in flux. Worth keeping the checklist order explicit in future slice prompts as a closing reminder, the same way Stage 9 flagged the push step.
