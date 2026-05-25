@@ -281,7 +281,20 @@ Adding any new environment (preview deploy, custom domain) means revisiting thes
 
 ---
 
-## 14. When in doubt
+## 14. Route and navigation conventions
+
+Top-level nav has five user-facing entries: **Home, Meals, Components, Meal Plans, Shopping Lists**. These are the things people open the app to *do*.
+
+Reference data and admin functions live under a sixth top-level entry, **Admin**. Routes are prefixed `/admin/...`. Ingredients sit at `/admin/ingredients`; future reference-data CRUD screens and Writer Management (requirements §3.9) follow the same pattern.
+
+**Conventions:**
+- Admin pages use an "Admin / <Thing>" breadcrumb-style label above the h1.
+- The Admin section appears in nav regardless of auth state — read access is public per RLS (§5). Write affordances (edit/add/delete buttons) appear only for users with an `app_writer` row.
+- New reference-data tables that gain a CRUD UI go under `/admin`. Don't add them to the top-level nav.
+
+---
+
+## 15. When in doubt
 
 - Ask before changing the schema.
 - Ask before changing RLS or role grants.

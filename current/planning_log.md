@@ -748,3 +748,61 @@ The original carry-forward list from Stage 7 remains valid. Stage 8 additions:
 - `bun.lock` requires refreshing locally whenever dependencies change. Workflow: `bun install`, commit the updated lockfile alongside `package-lock.json`.
 - Env var changes for production go through the Cloudflare dashboard (both Build and Runtime sections). `.env` is local-dev only.
 - The Vercel project is dead and needs deleting — non-blocking but worth doing during Slice 2A to avoid future confusion.
+
+## Stage 9 — F2 build: ingredient master and import flow
+
+The deferred actual feature work begins here. Stage 8 closed out the deploy infrastructure; this stage builds 2A (ingredient master) and 2B (recipe importer) as a sequence of narrow slices.
+
+---
+
+### Slice 2A.1 — Ingredient master, read path
+
+**Built:** browse view at `/admin/ingredients` with search (canonical + aliases), `ingredient_category` and `dietary_category` filters, sorted by category sort_order then alphabetic. Details in `current/build_log_f2.md`.
+
+#### Decision 34 — Split 2A into four sub-slices
+
+**Context:** 2A as originally scoped (browse / search / filter / view / edit / add / alias / safe-delete) is too broad for a single Claude Code prompt under the project's narrow-prompt discipline.
+
+**Choice:** Split into four:
+- 2A.1 — read path *(this slice, complete)*.
+- 2A.2 — detail view + edit form (auth-gated).
+- 2A.3 — create + alias management.
+- 2A.4 — safe-delete (prevent if referenced).
+
+**Reasoning:** Each is independently demonstrable and small enough to prompt cleanly. The read path comes first because it needs no auth, has real seeded data to render, and surfaces routing/data-fetching patterns before the write path multiplies them.
+
+#### Decision 35 — Admin section in nav for reference data and writer management
+
+**Context:** Where does ingredient CRUD live in the nav? Top-level slots (Meals, Components, Meal Plans, Shopping Lists) are user-facing content. Ingredients are reference data — putting them at the top level dilutes the user-facing nav.
+
+**Choice:** New top-level "Admin" entry. Reference data sits under it (ingredients first); future reference-data screens follow the same pattern. Writer Management (requirements §3.9) will also live here when built.
+
+**Implication:** Route prefix `/admin/...`. Convention captured in the standing brief.
+
+#### Decision 36 — Build log filename drops the `_post_<feature>` suffix
+
+**Context:** F1's build log is `build_log_post_f1.md`. The `_post_` suffix encoded timeline info — "after F1 was complete". Decision 25's folder structure (`current/` vs `archive/`) already encodes that.
+
+**Choice:** F2's build log is `current/build_log_f2.md`. No prefix. Moves to `archive/` at F2 close-out.
+
+#### Decision 37 — Defer pg_trgm to 2B's importer
+
+**Context:** The schema has trigram indexes on `ingredient.canonical_name` and `ingredient_alias.alias` (install SQL §11), built for fuzzy matching at import time.
+
+**Choice:** Browse-view search uses plain `ilike`, not trigram. The 227 seeded ingredients don't benefit meaningfully from fuzzy match in the UI — a writer browsing the list knows what they're looking for.
+
+**Reasoning:** Fuzzy matching earns its keep when the input is uncertain (importer proposing matches against unknown user-supplied text). Browsing the list is certain input. Anything more would be premature.
+
+#### Finding — null-category sort fallback is dead code (for now)
+
+The browse query sorts by `coalesce(ingredient_category.sort_order, 999)` to push null-category rows to the bottom. All 227 seeded ingredients have categories, so the fallback path isn't exercised. Documented in the build log; revisit if uncategorised ingredients ever appear in practice.
+
+#### Issue 15 — Slice closed against local verification only; nothing reached production
+
+**Symptom:** Slice 2A.1 was reported complete with a clean Playwright verification. At that point, none of it was on production. The repo's `src/routes/` had no admin route, `current/build_log_f2.md` didn't exist, and the live Workers URL was unchanged. The route was eventually pushed after a separate diagnostic step; the build log only landed during slice close-out.
+
+**Cause:** Verification ran against `localhost:5173`. The done-list step that called for a production smoke test got skipped, and the slice was declared done before any commit landed on `main`. The build log creation (also on the done-list) was similarly missed.
+
+**Fix:** Commit the work, refresh `bun.lock`, push, re-run the smoke test against the live URL. Create the build log as part of slice close-out.
+
+**Implication:** "Done" requires evidence from production, not from `localhost`. From 2A.2 onwards, the done-list explicitly requires (a) a commit hash on `main`, (b) a green Cloudflare build, and (c) the smoke-test claim quoting the live URL — not a localhost port. Verification reports that quote `localhost:5173` are not slice-done evidence. The build log file must exist in the repo at slice-close time, not just locally.
