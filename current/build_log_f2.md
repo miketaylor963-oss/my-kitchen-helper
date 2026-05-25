@@ -29,3 +29,17 @@ Per-slice notes from building F2. Format mirrors `archive/build_log_post_f1.md`.
 - Detail view at `/admin/ingredients/[id]`: canonical row + alias list.
 - Edit form behind auth: canonical_name, default_unit, category_id, dietary_category_id, notes.
 - Decision needed at prompt time: edit on the same page or push to a separate `/edit` route.
+
+** Slice 2A.2 — Ingredient detail page (read-only)
+Closed: 2026-05-25. Commits: 4fcd23e, b32c635.
+Built:
+
+admin.ingredients.tsx — minimal <Outlet /> layout
+admin.ingredients.index.tsx — list (renamed from admin.ingredients.tsx, name cells now link to detail)
+admin.ingredients.$id.tsx — detail page: breadcrumb, h1, four field rows (default_unit, category, dietary_category, notes — with "—" for null), aliases section, not-found state
+
+Decision: Carry-forward 2A.2 was split. This slice is read-only. Edit (auth-gated form) moved to 2A.3. Alias add/remove deferred to 2A.4+.
+Routing pattern: Initial implementation as two files (.tsx list + .$id.tsx detail) caused the detail to render as a nested child of the list. Restructured to three files matching F2 convention (now pinned in standing brief §14). F1's meals routes use a different pattern; reconciled when next touched.
+workerd added to dependencies. Was missing from local node_modules, blocking the dev server. Committed to package.json so fresh clones get it. First commit (4fcd23e) only updated package-lock.json; Cloudflare build failed on frozen-lockfile. Second commit (b32c635) added the synced bun.lock. Standing brief §13 now spells out the both-lockfiles rule.
+Playwright still ad-hoc via npx, not a committed dev dep. Same as 2A.1. Park for a tidy slice — possibly bundled with a wider environment-setup pass alongside .gitattributes for line endings.
+Verification: Playwright cold-start, 8 steps green. Production smoke test on Workers URL passed after initial browser-cache stumble (chunk filenames changed; incognito confirmed the deployment was correct).

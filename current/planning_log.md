@@ -806,3 +806,55 @@ The browse query sorts by `coalesce(ingredient_category.sort_order, 999)` to pus
 **Fix:** Commit the work, refresh `bun.lock`, push, re-run the smoke test against the live URL. Create the build log as part of slice close-out.
 
 **Implication:** "Done" requires evidence from production, not from `localhost`. From 2A.2 onwards, the done-list explicitly requires (a) a commit hash on `main`, (b) a green Cloudflare build, and (c) the smoke-test claim quoting the live URL — not a localhost port. Verification reports that quote `localhost:5173` are not slice-done evidence. The build log file must exist in the repo at slice-close time, not just locally.
+
+### Slice 2A.2 — Ingredient detail view (read-only)
+
+**Built:** detail page at /admin/ingredients/$id rendering canonical row (breadcrumb, h1, default_unit, category and dietary_category as joined names, notes — with "—" for nulls) and aliases section. List page name cells now link to the detail. Not-found state for missing ids. Details in current/build_log_f2.md.
+
+#### Decision 38 — Split 2A.2 into read-detail and edit
+
+**Context:** Carry-forward 2A.2 from Stage 9 bundled the read-detail view with an auth-gated edit form. Two distinct vertical concerns — different RLS surface, different auth state, different UI affordances — in one prompt.
+
+**Choice:** Split. 2A.2 is read-only (this slice). 2A.3 becomes the edit form (auth-gated). Alias add/remove deferred again, to 2A.4+.
+
+**Reasoning:** Prompt-discipline rule is one vertical slice at a time. Splitting keeps each prompt narrow and each smoke test crisp. The sub-slice numbering was already a four-way split (Decision 34); this just renumbers within that.
+
+**Implication:** Original 2A.3 (create + alias management) and 2A.4 (safe-delete) shift to 2A.4 and 2A.5. Standing brief and requirements updated.
+
+#### Decision 39 — Three-file routing pattern for list + detail pairs
+
+**Context:** First implementation used two files: admin.ingredients.tsx (list) and admin.ingredients.$id.tsx (detail). TanStack Router's flat-file naming made admin.ingredients.tsx the parent route of admin.ingredients.$id.tsx because the filename prefix matched. The detail rendered nested inside the list, with no <Outlet />, so it never mounted.
+
+**Choice:** Three files — admin.ingredients.tsx (minimal <Outlet /> layout), admin.ingredients.index.tsx (list), admin.ingredients.$id.tsx (detail). Detail and index become root-level siblings under the layout.
+
+**Reasoning:** This is idiomatic for TanStack Router flat-file routing when a route group needs siblings. F1's meals uses a different (two-file) pattern with no parent layout; it works but is inconsistent. Reconciliation deferred to whenever meals routes are next substantially touched — no speculative refactor.
+
+**Implication:** Convention captured in standing brief §15. Future list + detail pairs under /admin/... follow the three-file pattern from the start.
+
+#### Decision 40 — Commit workerd as a dev dependency
+
+**Context:** workerd was missing from node_modules and blocking the dev server on a fresh clone. Claude Code installed it locally to unblock; the question was whether to commit it.
+
+**Choice:** Commit to package.json. Cloudflare's Workers runtime needs it; every developer cloning the repo will hit the same missing-dep wall without it.
+
+**Implication:** Lockfile-sync rule (standing brief §13) became load-bearing. See Issue 16.
+
+#### Issue 16 — Dependency added without syncing bun.lock; Cloudflare build failed
+
+**Symptom:** Commit 4fcd23e added workerd to package.json and package-lock.json but not bun.lock. Cloudflare's bun install --frozen-lockfile rejected the build: "lockfile had changes, but lockfile is frozen".
+
+**Cause:** The both-lockfiles workflow was in the standing brief (then §13) but as a paragraph, not a checklist. Claude Code added the dependency via npm install, which updated only the npm lockfile. The bun lockfile drift wasn't surfaced locally — frozen-lockfile only fires at the remote build.
+
+**Fix:** Ran bun install to regenerate bun.lock against the current package.json, committed as b32c635, pushed. Cloudflare rebuilt green.
+
+**Implication:** Standing brief §13 rewritten as a four-step checklist: npm install → bun install → git add both lockfiles → commit together. The frozen-lockfile error remains the only signal available; the rule is now phrased to be impossible to misread.
+
+#### Issue 17 — Slice declared verified before being pushed to main
+
+**Symptom:** Claude Code reported 2A.2 verified against localhost:5173. The user then noticed the live Workers URL was unchanged. The commit had been applied locally but never pushed; production was still on 2A.1.
+
+**Cause:** Same root as Issue 15. Local verification was read as slice-done. The done-list's push-to-main step was assumed to have happened.
+
+**Fix:** Pushed the commit, fixed the lockfile drift (Issue 16), waited for green build, smoke-tested on production.
+
+**Implication:** Issue 15's fix language already requires production evidence for slice-done. Two consecutive slices have stumbled on the push step despite that. Project instructions need amending: future slice prompts should close with an explicit "push to main and wait for green build before declaring done" instruction, so the deploy step lives in the prompt itself rather than only in the project rules. Flagged for review.

@@ -243,17 +243,17 @@ Previously deployed to Vercel and Cloudflare Pages during F2 pre-work; both were
 
 ## 13. Deploy and environment configuration
 
-### Lockfiles
+### Package management
 
-The repo carries both `package-lock.json` (npm) and `bun.lock` (Bun). npm is the local dev tool. Bun's lockfile exists because Cloudflare Workers Builds hardcodes `bun install --frozen-lockfile` as its pre-install step and exposes no way to override it.
+npm is the local tool. Bun is used only by Cloudflare Workers Builds at the remote build step (bun install --frozen-lockfile).
+Any change to package.json requires regenerating both lockfiles before the commit lands on main:
 
-**Workflow when dependencies change:**
+npm install (updates package-lock.json)
+bun install (updates bun.lock)
+git add package.json package-lock.json bun.lock
+Commit all three together.
 
-1. Make the change locally (`npm install <pkg>` or edit `package.json` directly).
-2. Run `bun install` locally to refresh `bun.lock`.
-3. Commit both lockfiles in the same commit.
-
-Skipping step 2 means the next Cloudflare build fails with "lockfile had changes, but lockfile is frozen". The error message is the only signal; nothing earlier catches it.
+The frozen-lockfile error on Cloudflare is the only signal you'll get if bun.lock drifts. There is no local equivalent. Adding a dependency without syncing both lockfiles will fail the production build.
 
 ### Environment variables
 
@@ -291,6 +291,18 @@ Reference data and admin functions live under a sixth top-level entry, **Admin**
 - Admin pages use an "Admin / <Thing>" breadcrumb-style label above the h1.
 - The Admin section appears in nav regardless of auth state — read access is public per RLS (§5). Write affordances (edit/add/delete buttons) appear only for users with an `app_writer` row.
 - New reference-data tables that gain a CRUD UI go under `/admin`. Don't add them to the top-level nav.
+
+---
+
+15. TanStack Router file layout
+For a list + detail route pair under flat-file routing, use three files:
+
+foo.tsx — minimal <Outlet /> layout, anchors the route group
+foo.index.tsx — list view at /foo
+foo.$id.tsx — detail view at /foo/$id
+
+Naming the list foo.tsx and adding a sibling foo.$id.tsx will cause the detail to render inside the list, because the filename prefix matches and foo.tsx becomes the parent route. That's the failure mode 2A.2 hit.
+F1's meals routes use a two-file pattern (meals.index.tsx + meals.$mealId.*) with no parent layout. It works but is inconsistent with the above. To be reconciled when meals routes are next substantially touched — don't refactor speculatively.
 
 ---
 
