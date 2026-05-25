@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsWriter } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/ingredients/")({
   component: Page,
@@ -31,6 +33,7 @@ function Page() {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>(ALL);
   const [dietaryId, setDietaryId] = useState<string>(ALL);
+  const { isWriter } = useIsWriter();
 
   const lookups = useQuery({
     queryKey: ["ingredient-lookups"],
@@ -122,6 +125,13 @@ function Page() {
               ? "Loading…"
               : `${items.length} ingredient${items.length === 1 ? "" : "s"}`}
           </p>
+          {isWriter && (
+            <div className="mt-3">
+              <Button asChild size="sm">
+                <Link to="/admin/ingredients/new">New ingredient</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 grid gap-3 md:grid-cols-[1fr_auto_auto]">
