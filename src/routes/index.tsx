@@ -10,6 +10,7 @@ const sections = [
   { to: "/components", title: "Components", description: "Reusable building blocks like sauces and bases." },
   { to: "/meal-plans", title: "Meal Plans", description: "Plan a week of meals by date and diner." },
   { to: "/shopping-lists", title: "Shopping Lists", description: "Generate shopping lists from a plan." },
+  { to: "/admin/ingredients", title: "Admin", description: "Manage the ingredient master and reference data." },
 ] as const;
 
 function Index() {
