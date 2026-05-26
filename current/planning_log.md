@@ -894,3 +894,44 @@ Smoke testing revealed the ingredient list returns rows in effectively `id` asce
 #### Finding — Docs updated before build green / smoke test (process slip)
 
 CC began editing `standing_brief.md` immediately after pushing, before the Cloudflare build had completed and before production smoke testing. The slice-done checklist explicitly orders these: build green and smoke test first, then docs. No actual cost this slice (build was green, smoke test passed), but the order matters if either step fails — docs would describe a shipped state that's still in flux. Worth keeping the checklist order explicit in future slice prompts as a closing reminder, the same way Stage 9 flagged the push step.
+
+### Slice 2A.4 — Ingredient list sort fix + alias add/remove
+
+**Built:** two-concern slice. Sort fix: one `.order("canonical_name")` call on the ingredient list query; client-side category-then-name sort memo dropped. Alias write affordances: `AliasSection` component on the detail page, writer-gated (same `useIsWriter()` pattern as edit/new), add input + per-alias remove button, `invalidateQueries` on success. Commit `d446533`, smoke-tested on production 26/05/2026. Details in `current/build_log_f2.md`.
+
+#### Finding — Sort fix was a one-liner once the bug was located
+
+The list query built `q` incrementally (filters appended conditionally) and awaited it at the end with no `.order()` call. The client-side sort then acted on an arbitrarily-ordered result set rather than a sorted one. Fix: `.order("canonical_name")` before the `await`. The category-then-name client-side sort was dropped entirely — §3.11's v1 default is name-only alphabetical. The column-selectable sort (by category, dietary, unit) remains deferred.
+
+#### Finding — Alias uniqueness is global, not per-ingredient
+
+`ingredient_alias.alias` has a global UNIQUE constraint, not a per-ingredient composite. The `23505` error is the correct signal — "This alias already exists." means it exists anywhere in the table, not just on this ingredient. Consistent with how `canonical_name` uniqueness is handled in `IngredientForm`. Worth knowing before designing any future bulk-alias or merge UI.
+
+#### Finding — Alias list needed `id` for correct keying and delete
+
+The existing query fetched `ingredient_alias(alias)` — string-only. Adding write affordances required `id` for two reasons: stable React list keys (unaffected if alias text changes elsewhere), and the delete call (`.delete().eq("id", ...)` is safer than matching by text). Type updated to `{ id: number; alias: string }[]` throughout.
+
+#### Finding — CC over-blocked itself on the smoke test
+
+CC ran the production smoke test by fetching the page once with `WebFetch`, observed the empty client-side-rendered shell, and bailed to "needs a real browser" for all seven items. Half the path didn't need a real browser. Items 1 and 2 (alphabetical sort on `/admin/ingredients`, logged-out detail page showing the alias list with no buttons) are unauthenticated and entirely scriptable via Playwright cold-start — the same approach 2A.2's build log already records working. Items 3–7 are genuinely awkward to automate because magic-link OTP isn't scriptable without either intercepting the email or a pre-saved Playwright auth storage state, neither of which is set up.
+
+The framing CC gave back ("client-side React app, needs a real browser") conflated the two cases. The actual gap: CC reached for `gh` for build status, got blocked (`gh: command not found`), and didn't try Playwright either.
+
+**Open question — unresolved:** how to close this. Two options on the table:
+
+- **Cheap convention.** State in every slice prompt which smoke-test items are unauthenticated (CC + Playwright) and which are authenticated (human). Zero setup cost; Playwright is already working ad-hoc per 2A.2.
+- **Tidier fix.** Commit Playwright as a dev dep, persist an authenticated storage state for a writer session. CC can then run the full smoke test. This is the "tidy slice" 2A.2's build log already flagged, possibly bundled with `.gitattributes` for line endings — an environment-setup pass.
+
+Leaving open for now. If the same friction bites again in 2A.5 or F2B, settle the convention. If it doesn't, the tidy slice can wait until it's load-bearing.
+
+#### Marker — Diff-guard line stayed in, didn't fire
+
+The diff-guard line ("if the final diff differs materially from what I approved, surface the difference before committing — don't fold it in silently") was carried forward from 2A.3 into the 2A.4 prompt. Final committed diff matched the approved diff; no surface needed. Recorded so future slices have a baseline for when the guard fires vs holds steady.
+
+#### Marker — Close-out reminder did its job
+
+The 2A.4 prompt closed with an explicit ordering: push, wait for green build, smoke test on production, then update docs. CC followed it — pushed, asked for confirmation that the build was green and the smoke test had passed, then opened the docs. No repeat of the 2A.3 process slip (docs edited before build green). Worth keeping the closing reminder in future slice prompts on the same basis as the diff-guard line.
+
+#### Carry-forward to 2A.5
+
+Safe-delete (prevent ingredient deletion if referenced by `meal_ingredient`) is the remaining 2A sub-slice. Originally 2A.4 (Decision 34), shifted to 2A.5 when 2A.2 was split (Decision 38) — that same decision moved alias add/remove into the 2A.4 slot, where it shipped this slice. Safe-delete has been at 2A.5 since. Schema enforcement via the existing FK constraint is already in place; the slice adds UI that surfaces the constraint error cleanly and — optionally — lists the referencing recipes.

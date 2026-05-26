@@ -43,3 +43,33 @@ Routing pattern: Initial implementation as two files (.tsx list + .$id.tsx detai
 workerd added to dependencies. Was missing from local node_modules, blocking the dev server. Committed to package.json so fresh clones get it. First commit (4fcd23e) only updated package-lock.json; Cloudflare build failed on frozen-lockfile. Second commit (b32c635) added the synced bun.lock. Standing brief §13 now spells out the both-lockfiles rule.
 Playwright still ad-hoc via npx, not a committed dev dep. Same as 2A.1. Park for a tidy slice — possibly bundled with a wider environment-setup pass alongside .gitattributes for line endings.
 Verification: Playwright cold-start, 8 steps green. Production smoke test on Workers URL passed after initial browser-cache stumble (chunk filenames changed; incognito confirmed the deployment was correct).
+
+## Slice 2A.3 — Ingredient create and edit
+
+**Status:** complete, deployed, smoke-tested 25/05/2026. Commits: `8ce62e2` (routing restructure), `9455e7d` (form addition).
+
+**Built:**
+- `IngredientForm` component at `src/components/ingredient-form.tsx`: fields for `canonical_name` (required), `default_unit`, `category_id`, `dietary_category_id`, `notes`. Shared between create and edit via an `initial` prop.
+- Create page at `/admin/ingredients/new`. Edit page at `/admin/ingredients/$id/edit`.
+- UI-only auth gate: writers see the form; non-writers see a sign-in or no-access panel (no redirect).
+- `23505` constraint violation on `canonical_name` surfaces as "An ingredient with this name already exists." Non-23505 errors expose the raw Postgres message. On success, navigates to the detail page.
+- `admin.ingredients.$id.tsx` restructured from detail view to a minimal `<Outlet />` layout; detail content moved to `admin.ingredients.$id.index.tsx`; edit sits at `admin.ingredients.$id.edit.tsx` as a sibling — the five-file pattern.
+
+**Notes:**
+- Diff-vs-approved guard (added to the 2A.3 prompt) caught an affordance gap on first use: CC's first proposed diff added Edit and New buttons that weren't in the spec's file list but were required to walk the smoke test path. CC flagged them rather than folding them in silently.
+- Sort order still wrong at slice close-out — carried forward to 2A.4.
+- Docs updated before build was confirmed green (process slip, no practical cost).
+
+## Slice 2A.4 — Ingredient list sort fix + alias add/remove
+
+**Status:** complete, deployed, smoke-tested 26/05/2026. Commit: `d446533`.
+
+**Built:**
+- **Sort fix** (`admin.ingredients.index.tsx`): added `.order("canonical_name")` to the list query before `await`. Dropped the client-side `useMemo` sort (which sorted by `ingredient_category.sort_order` then name — the v1 default per §3.11 is name-only alphabetical). Removed unused `useMemo` import.
+- **`AliasSection` component** (`admin.ingredients.$id.index.tsx`): writer-gated add input + per-alias remove button. Query updated to fetch `ingredient_alias(id, alias)` (was `alias` only — `id` needed for React keying and the delete call). `IngredientDetail` type updated throughout.
+- Add: inserts into `ingredient_alias`, clears input on success, surfaces `23505` as "This alias already exists.", exposes raw Postgres message otherwise — consistent with `IngredientForm`.
+- Remove: deletes by `id`. No confirmation dialog.
+- Both mutations call `queryClient.invalidateQueries` on `["admin-ingredient", id]` to re-fetch the full detail including the updated alias list.
+- Single `busy` flag across add and remove — disables all affordances while a mutation is in-flight.
+
+**Smoke test (7 items, all green):** alphabetical sort on list; logged-out alias list visible, no buttons; logged-in writer sees add input + X buttons; add works; remove works; duplicate alias → "This alias already exists."; whitespace-only input leaves button disabled (client-side trim guard).
