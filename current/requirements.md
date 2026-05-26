@@ -128,6 +128,7 @@ Some admin operations on the ingredient master are deferred from v1 because they
 - **Merge.** Two ingredients that should be one ("salt" vs "fine salt") will eventually appear. Merging moves all `meal_ingredient.ingredient_id` references from source to target, moves aliases, deletes the source. Transactional, audit-trail-relevant, irreversible. Until merge exists, the only recovery for duplicates is careful create-time validation.
 - **Soft delete / archive flag.** Only relevant if the v1 "prevent delete if referenced" rule becomes annoying in practice. Adds a state machine that propagates into every query and shopping-list aggregation, so worth avoiding unless clearly needed.
 - **Bulk operations.** Bulk edit (e.g. re-categorise N ingredients at once), bulk re-category, bulk alias add. Useful at scale but not at the current 200-ish ingredient count.
+- **Safe-delete with referential pre-check.** Shipped in 2A.5. Delete button (writer-only) runs a pre-check against `meal_ingredient`, `component_ingredient`, and `shopping_list_item` before opening a dialog. Blocked state lists references grouped by type; unblocked state shows a standard confirm + delete flow. Aliases cascade via the existing FK.
 - **Column-selectable sort.** Alphabetical by `canonical_name` shipped in 2A.4 as the v1 default. Column-selectable sort (name, category, default_unit, dietary category) is the stretch version, still deferred.
 
 ---

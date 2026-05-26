@@ -73,3 +73,30 @@ Verification: Playwright cold-start, 8 steps green. Production smoke test on Wor
 - Single `busy` flag across add and remove — disables all affordances while a mutation is in-flight.
 
 **Smoke test (7 items, all green):** alphabetical sort on list; logged-out alias list visible, no buttons; logged-in writer sees add input + X buttons; add works; remove works; duplicate alias → "This alias already exists."; whitespace-only input leaves button disabled (client-side trim guard).
+
+## Slice 2A.5 — Safe-delete on ingredient detail page
+
+**Status:** complete, deployed, smoke-tested (unauth items) 26/05/2026. Commit: `1837f5f`. Auth items handed to Mike.
+
+**Built:**
+- **`DeleteSection` component** (`admin.ingredients.$id.index.tsx`): writer-gated Delete ingredient button at the bottom of the detail page, below `AliasSection`, separated by a `border-t`.
+- **Pre-check** (runs on Delete-button click, not on page load): three parallel Supabase queries against `meal_ingredient`, `component_ingredient`, and `shopping_list_item`, each joined to their parent name via PostgREST embedded resource syntax (`meal:meal_id(id, name)` etc.). Each query carries `.order("name", { foreignTable: "…" })` so display order is alphabetical and stable across repeat clicks. JS deduplication via `Map` keyed on id (preserves DB insertion order, which is the sorted order after the `.order()` call).
+- **Dialog — two states** using `AlertDialog` (controlled via `open` state; plain `Button` elements in the footer rather than `AlertDialogAction`/`AlertDialogCancel`, so async delete controls open/close):
+  - *Blocked*: header "Cannot delete '…'. It's used by:"; grouped sections (meals, components, shopping list items) shown only if non-empty; count + names with singular/plural; shopping list items show list names in parentheses. Single Close button, no Delete affordance.
+  - *Confirm*: header "Delete '…'?"; body "Aliases will be removed. This cannot be undone." Cancel + Delete buttons.
+- **Delete action**: `supabase.from("ingredient").delete().eq("id", …)`. Aliases cascade via existing `ingredient_alias.ingredient_id ON DELETE CASCADE` (verified in `recipe_db_install.sql` Section 4 before relying on it). On success: invalidates `["admin-ingredients"]` (prefix match covers all filter variants of the list query) then navigates to `/admin/ingredients`. On failure: closes dialog, surfaces "Could not delete — refresh and try again." inline on the detail page.
+- **Error handling symmetry**: pre-check failure uses generic "Could not check references — refresh and try again." (not raw Supabase message), matching the delete-failure message style.
+
+**Notes:**
+- `shopping_list_item` is a writer-only table (authenticated read + write per RLS §5). The pre-check only runs when the Delete button is visible — which is writer-only — so the authenticated session is guaranteed when those queries fire.
+- `AlertDialogDescription` is omitted in the blocked state (the title acts as the description); present in the confirm state for accessibility.
+- List invalidation uses the partial key `["admin-ingredients"]` rather than the full `["admin-ingredients", { search, categoryId, dietaryId }]` — TanStack Query's partial-key invalidation hits all cached variants automatically.
+
+**Smoke test:**
+- Items 1–2 (unauthenticated, Playwright cold-start on production): **both green**.
+  - [1] List page alphabetical sort — first 10 rows: apple, arborio rice, aubergine… — confirmed sorted.
+  - [2] Detail page — Delete ingredient button not present for unauthenticated visitor — confirmed absent.
+- Items 3–5 (authenticated, human-in-browser): **all green** (Mike, 26/05/2026).
+  - [3] Signed in as writer — Delete ingredient button visible. ✓
+  - [4] Referenced ingredient — not testable yet: adding ingredients to a meal or component is a future slice. Deferred; will re-run when that path exists.
+  - [5] Unreferenced ingredient with aliases and without — confirmation dialog ("Aliases will be removed. This cannot be undone."), delete succeeds, redirects to ingredient list, row gone. ✓

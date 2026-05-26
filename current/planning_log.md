@@ -935,3 +935,35 @@ The 2A.4 prompt closed with an explicit ordering: push, wait for green build, sm
 #### Carry-forward to 2A.5
 
 Safe-delete (prevent ingredient deletion if referenced by `meal_ingredient`) is the remaining 2A sub-slice. Originally 2A.4 (Decision 34), shifted to 2A.5 when 2A.2 was split (Decision 38) — that same decision moved alias add/remove into the 2A.4 slot, where it shipped this slice. Safe-delete has been at 2A.5 since. Schema enforcement via the existing FK constraint is already in place; the slice adds UI that surfaces the constraint error cleanly and — optionally — lists the referencing recipes.
+
+### Slice 2A.5 — Safe-delete on ingredient detail page
+
+**Status:** complete, deployed, smoke-tested 26/05/2026. Commit: `1837f5f`.
+
+#### Finding 1 — Smoke test item 4 (blocked state) is not yet testable
+
+**Symptom:** Smoke test item 4 (click Delete on a referenced ingredient → dialog lists references, no Delete action) could not be run. No ingredients have been added to a meal or component yet — that path doesn't exist until F2B lands.
+
+**Implication:** The blocked-state dialog is code-complete but unverified against real data. Re-run item 4 as part of the first slice in F2B that wires an ingredient to a meal or component. Note in that slice's smoke test explicitly.
+
+#### Finding 2 — AlertDialog controlled mode with plain buttons
+
+**Decision:** The dialog uses `AlertDialog` from Radix in controlled mode (`open` / `onOpenChange`) with plain `Button` elements in the footer rather than `AlertDialogAction` / `AlertDialogCancel`. This prevents Radix from closing the dialog automatically on click — necessary because the delete path is async and needs to own the open/close transition itself.
+
+**Implication:** Pattern for any future async-action confirmation dialog in this codebase: use `AlertDialog` in controlled mode, plain `Button` in the footer.
+
+#### Finding 3 — Pre-check error message consistency
+
+**Issue (caught in review):** The first draft of `handleDeleteClick` used `(err as Error).message` in the catch, exposing raw Supabase errors to the user — inconsistent with the delete-failure path, which already used a generic message. Corrected in review before the diff was applied.
+
+**Implication:** Any future mutation that has both a pre-check and a mutation step should apply the same generic-message rule to both catch blocks at the same time, not as a separate pass.
+
+#### Finding 4 — Docs started before human smoke tests complete (process slip)
+
+**Symptom:** CC opened the docs after running its own unauth Playwright smoke tests, before Mike had run the auth items in the browser. Same fault mode as the 2A.3 slip, despite 2A.4 running clean. The 2A.5 prompt carried the standard "push → green build → smoke test → docs" close-out reminder, but with the smoke test split between CC (unauth) and Mike (auth), CC appears to have treated "my smoke tests done" as the trigger rather than "all smoke tests done." Caught in review; docs paused until human items were complete.
+
+**Implication:** When the smoke test is split, the close-out reminder needs to name the split explicitly. Proposed wording for split-smoke slices: "push, wait for green build, run unauth smoke tests, wait for confirmation that human smoke tests have passed, then update docs." Standard reminder is fine for unsplit slices.
+
+#### Carry-forward to F2B
+
+F2A (ingredient master admin: browse, detail, create/edit, alias add/remove, safe-delete) is complete. The next F2 work is F2B — the ingredient import flow: JSON import, fuzzy matching, human-in-the-loop disambiguation, and the "create new ingredient" branch. Smoke test item 4 from 2A.5 (blocked-state dialog with real references) should be re-run in the first F2B slice that wires `ingredient_id` onto `meal_ingredient` or `component_ingredient` rows.
