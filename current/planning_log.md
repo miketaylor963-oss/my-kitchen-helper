@@ -967,3 +967,81 @@ Safe-delete (prevent ingredient deletion if referenced by `meal_ingredient`) is 
 #### Carry-forward to F2B
 
 F2A (ingredient master admin: browse, detail, create/edit, alias add/remove, safe-delete) is complete. The next F2 work is F2B — the ingredient import flow: JSON import, fuzzy matching, human-in-the-loop disambiguation, and the "create new ingredient" branch. Smoke test item 4 from 2A.5 (blocked-state dialog with real references) should be re-run in the first F2B slice that wires `ingredient_id` onto `meal_ingredient` or `component_ingredient` rows.
+
+### F2B planning — recipe import flow
+
+F2A closed with the ingredient master admin shipped. F2B is the import flow: paste a JSON template, validate, match ingredients against the canonical master with human-in-the-loop disambiguation, commit to `meal` + `meal_ingredient` + `meal_step` + the related lookup joins. Six decisions taken before any sub-slice prompt is drafted.
+
+#### Decision 43 — F2B sub-split: fixture prep, then three build slices
+
+**Context:** F2B is broader than any 2A sub-slice — JSON validation, ingredient matching, disambiguation UI, "create new ingredient" branch, multi-table transactional commit. Needs splitting before any CC prompt.
+
+**Choice:** One fixture-prep step followed by three build slices.
+
+- **Pre-2B.1 — Test fixture prep.** No CC prompt. Chat-based work: synthesised edge-case JSONs stressing template fields, plus 5-ish web-PDF conversions for shape variety. Committed to `current/import_test_fixtures/` as `recipes/`, `components/`, `edge_cases/`.
+- **2B.1 — Validate-only.** `/admin/import`, paste textarea, validate button. Schema-shape check, lookup-code resolution against the live DB, `{NNNN}` placeholder validity. No matching, no writes. Validator covers all three shapes (recipe / recipe+derived / component) even though commit ships recipe-only — see Decision 45.
+- **2B.2 — Ingredient matching, read-only.** Service: exact canonical → exact alias → `pg_trgm` fuzzy. Per-ingredient preview rows with candidate(s) and match type. Still no writes.
+- **2B.3 — Disambiguation + commit.** Per-row accept / override-with-existing / create-new-inline. On submit (writer-only): single transaction writing `import_log` + `meal` + `meal_ingredient` + `meal_step` + the four `meal_*` joins. Recipe-only; derived components and re-import deferred to 2C per Decision 18.
+
+**Reasoning:** The pipeline structure (parse → match → commit) is the cleanest seam. Each build slice has a demonstrable smoke surface, even .1 and .2 which don't write — they validate against fixture data the operator can see. The fixture-prep step is load-bearing because the validator's coverage and the matching's vocabulary gaps both need real input variety before they're considered done; it's not a CC slice because it's content work, not code work.
+
+**Implication:** 2B.3 is the heaviest by far. If scope creep bites mid-prompt, split it on the same precedent as Decision 38 (the 2A.2 mid-flight split) rather than pre-emptively. Component import (`import_type: "component"`) stays deferred to F3 per Decision 19.
+
+#### Decision 44 — Test fixture prep in fresh chats
+
+**Context:** Fixture prep covers (a) synthesising edge-case JSONs and (b) sourcing PDFs from the web and converting them to template format. Both could happen in this planning chat or in fresh ones.
+
+**Choice:** Both in fresh chats.
+
+**Reasoning:** A fresh chat with no warm context is closer to what an unconfigured AI converter actually does with the template — which is exactly what the (b2) content milestone (Decision 46) is meant to test. The convenience of "I already know the template inside-out" works against the test. Same reasoning the original F2 planning chat applied when raising the question.
+
+**Implication:** Two new chats kick off after this commit lands. PDFs sourced by Mike, converted by Claude in the fixture-prep chat. Edge-case synthesis done in its own chat against the spec only. Both failure modes (conversion fails/fudges vs importer would struggle) tracked separately when results are reviewed.
+
+#### Decision 45 — Validator covers all three shapes structurally; commit ships recipe-only
+
+**Context:** The import spec defines three shapes — recipe, recipe with derived components, component. 2B.3 only commits the first per Decision 19. The question is whether 2B.1's validator covers all three.
+
+**Choice:** All three covered structurally. Discriminator-keyed rules, cross-reference checks (placeholder resolution, `derived_components.ingredient_ids` against parent ids, `step_indices` against parent step range), and lookup-code resolution all implemented in 2B.1.
+
+**Reasoning:** The contract is the asset locked by 2B.1. A validator that only handles recipe-shape leaves 2C and F3 inheriting a partial validator, which either gets extended (re-touching .1's code, drift risk) or paralleled. Implementing the discriminator branch once is cheap relative to that.
+
+**Implication:** 2B.1's fixture set includes at least one minimal component-shape JSON and at least one recipe-with-derived JSON (shepherd's pie qualifies) for validator coverage. 2B.3's commit refuses non-empty `derived_components` with an explicit "Derived component import lands in F2C; strip them and re-import to land the parent" message — block, not silent skip.
+
+#### Decision 46 — F2 done in the (b2) shape
+
+**Context:** The original F2 planning (Stage 7) framed F2 done as either (b1) the four hand-converted JSONs land cleanly, or (b2) those plus at least one fresh conversion from an unprocessed source. (b2) was the agreed milestone. The fixture-prep step makes (b2) concrete.
+
+**Choice:** F2 done = all recipe-shape fixtures land cleanly in `/meals`, including the four originally hand-converted JSONs and at least one of the web-PDF conversions produced during fixture prep. Derived components and re-import explicitly out of F2 scope.
+
+**Reasoning:** Tests conversion (PDF → template) + importer + matching together, which is the actual user pathway. (b1) alone tests only the importer against pre-cleaned input — too narrow.
+
+**Implication:** Shepherd's pie's derived lentil base does not block F2 done — it's a 2C item. The parent recipe still lands in F2. Any web-PDF conversion that uncovers a spec gap during fixture prep gets the spec updated before 2B.1's prompt is drafted, so the validator is built against the corrected contract.
+
+#### Decision 47 — Re-import: surface a blocked-state message, defer the upsert to 2C
+
+**Context:** The spec says same `external_ref` means update, not duplicate. The DB has a UNIQUE constraint that will reject a second import with a raw Postgres `23505` error. Building real upsert is 2C work per Decision 18.
+
+**Choice:** 2B.3 catches `23505` on `external_ref` at the service layer and surfaces it as "An import with this external_ref already exists. Re-import / update lands in F2C." No silent overwrite.
+
+**Reasoning:** Letting the raw Postgres error bubble through is dishonest UX. Catching it with an explicit "this is a known deferred case" message keeps the boundary visible to the operator without committing to upsert semantics that 2C will need to design properly.
+
+**Implication:** Cheap addition to 2B.3's commit path. Same pattern as the UNIQUE handling in `IngredientForm` (canonical_name) and `AliasSection` (alias) from 2A.3 and 2A.4 — consistency carries forward.
+
+#### Decision 48 — Smoke-test convention: keep the existing split, settle the wording
+
+**Context:** 2A.4's Finding flagged the unauth-vs-auth smoke-test split as an open question — cheap convention (state what's auth-gated per prompt) vs tidy slice (commit Playwright as a dev dep, persist an authenticated storage state). 2A.5 reproduced the same split. F2B is split-smoke throughout.
+
+**Choice:** Cheap convention wins. Every slice prompt states which smoke-test items are unauth (CC + Playwright) and which are auth (human). The sharpened split-smoke close-out reminder from 2A.5's Finding 4 — "push, wait for green build, run unauth smoke tests, wait for confirmation that human smoke tests have passed, then update docs" — applies unconditionally from 2B.1 onwards. The tidy slice (Playwright auth storage state) stays parked.
+
+**Reasoning:** Cheap convention has run twice (2A.4 ran clean, 2A.5 surfaced the docs-timing slip that the sharpened wording addresses). Tidy slice has setup cost — Playwright as dev dep, storage-state regeneration when sessions expire, `.gitattributes` for line endings — none of which is load-bearing yet. Worth deferring until either (a) the cheap convention bites again in a way the wording can't fix, or (b) a future slice needs auth-gated automation for reasons beyond smoke-testing.
+
+**Implication:** Resolves the open question in requirements §7. The convention earns its way into the standing brief at F2 close-out if it survives 2B.1/.2/.3 cleanly; until then it lives in the planning log and the slice prompts.
+
+#### Carry-forward to 2B.1
+
+Before any CC prompt is drafted, Pre-2B.1 fixture prep runs in fresh chats — synthesised edge-case JSONs and 5-ish web-PDF conversions both committed to `current/import_test_fixtures/`. Spec gaps surfaced during prep get fixed before .1's prompt is written.
+
+For the 2B.1 prompt itself when it's drafted:
+- Diff-guard line, same wording as 2A.3 onwards.
+- Sharpened split-smoke close-out reminder (Decision 48). 2B.1's smoke test is unauth-only (validation has no auth gate), so the human-auth wait is null — but the wording goes in for consistency and to keep the reflex.
+- Blocked-state delete smoke (2A.5 Finding 1, re-run on a real `meal_ingredient` reference) reserved for 2B.3, not .1 or .2. .1 and .2 don't write to `meal_ingredient`.

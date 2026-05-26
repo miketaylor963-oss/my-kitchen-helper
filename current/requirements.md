@@ -234,7 +234,7 @@ Keep notes as you build: decisions made, what worked, what didn't, prompts that 
 
 - **Import schema design.** Resolved at v2 — see `recipe_import_spec.md` and `recipe_import_template.json`.
 - **Plan template flexibility.** Defer until the basic planner is in use.
-- **Production smoke-test cadence.** Whether to run a quick sign-in + read + write on the deployed Cloudflare Workers URL after each merge, or trust the dev environment. Decide during F2.
+- **Production smoke-test cadence.** Resolved during F2B planning — see planning log Decision 48. Every slice's smoke test runs against the live production URL after green build, with the split between unauth (CC + Playwright) and auth (human) items stated explicitly in the slice prompt.
 
 ---
 
