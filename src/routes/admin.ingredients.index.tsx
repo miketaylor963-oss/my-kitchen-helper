@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,22 +89,13 @@ function Page() {
       if (categoryId !== ALL) q = q.eq("category_id", Number(categoryId));
       if (dietaryId !== ALL) q = q.eq("dietary_category_id", Number(dietaryId));
 
-      const { data, error } = await q;
+      const { data, error } = await q.order("canonical_name");
       if (error) throw error;
       return (data ?? []) as unknown as ingredient_row[];
     },
   });
 
-  const items = useMemo(
-    () =>
-      [...(ingredients.data ?? [])].sort((a, b) => {
-        const sortA = a.ingredient_category?.sort_order ?? 999;
-        const sortB = b.ingredient_category?.sort_order ?? 999;
-        if (sortA !== sortB) return sortA - sortB;
-        return a.canonical_name.localeCompare(b.canonical_name);
-      }),
-    [ingredients.data]
-  );
+  const items = ingredients.data ?? [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsWriter } from "@/lib/auth";
 
@@ -17,7 +19,7 @@ type IngredientDetail = {
   notes: string | null;
   ingredient_category: { name: string } | null;
   dietary_category: { name: string } | null;
-  ingredient_alias: { alias: string }[];
+  ingredient_alias: { id: number; alias: string }[];
 };
 
 function Page() {
@@ -34,7 +36,7 @@ function Page() {
           "id, canonical_name, default_unit, notes, " +
             "ingredient_category:category_id(name), " +
             "dietary_category:dietary_category_id(name), " +
-            "ingredient_alias(alias)"
+            "ingredient_alias(id, alias)"
         )
         .eq("id", numId)
         .maybeSingle();
@@ -43,7 +45,7 @@ function Page() {
       return {
         ...data,
         ingredient_alias: [
-          ...(data.ingredient_alias as { alias: string }[]),
+          ...(data.ingredient_alias as { id: number; alias: string }[]),
         ].sort((a, b) => a.alias.localeCompare(b.alias)),
       } as IngredientDetail;
     },
@@ -122,21 +124,114 @@ function Detail({
         <FieldRow label="Notes" value={ingredient.notes} />
       </dl>
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Aliases</h2>
-        {ingredient.ingredient_alias.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No aliases.</p>
-        ) : (
-          <ul className="mt-2 divide-y rounded-md border">
-            {ingredient.ingredient_alias.map(({ alias }) => (
-              <li key={alias} className="px-3 py-2 text-sm">
-                {alias}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <AliasSection
+        ingredientId={ingredient.id}
+        aliases={ingredient.ingredient_alias}
+        isWriter={isWriter}
+      />
     </div>
+  );
+}
+
+function AliasSection({
+  ingredientId,
+  aliases,
+  isWriter,
+}: {
+  ingredientId: number;
+  aliases: { id: number; alias: string }[];
+  isWriter: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function addAlias(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const { error } = await supabase
+        .from("ingredient_alias")
+        .insert({ ingredient_id: ingredientId, alias: trimmed });
+      if (error) throw error;
+      setInput("");
+      await queryClient.invalidateQueries({ queryKey: ["admin-ingredient", ingredientId] });
+    } catch (err) {
+      const pgErr = err as { code?: string; message: string };
+      if (pgErr.code === "23505") {
+        setError("This alias already exists.");
+      } else {
+        setError(pgErr.message);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeAlias(id: number) {
+    setError(null);
+    setBusy(true);
+    try {
+      const { error } = await supabase
+        .from("ingredient_alias")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["admin-ingredient", ingredientId] });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-lg font-semibold">Aliases</h2>
+      {aliases.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">No aliases.</p>
+      ) : (
+        <ul className="mt-2 divide-y rounded-md border">
+          {aliases.map(({ id, alias }) => (
+            <li
+              key={id}
+              className="flex items-center justify-between px-3 py-2 text-sm"
+            >
+              <span>{alias}</span>
+              {isWriter && (
+                <button
+                  onClick={() => removeAlias(id)}
+                  disabled={busy}
+                  aria-label={`Remove alias ${alias}`}
+                  className="ml-2 text-muted-foreground hover:text-destructive disabled:opacity-50"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {isWriter && (
+        <form onSubmit={addAlias} className="mt-3 flex gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="New alias…"
+            disabled={busy}
+            className="max-w-xs"
+          />
+          <Button type="submit" size="sm" disabled={busy || !input.trim()}>
+            {busy ? "Adding…" : "Add alias"}
+          </Button>
+        </form>
+      )}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+    </section>
   );
 }
 
