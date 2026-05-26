@@ -1,16 +1,31 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pencil, X } from "lucide-react";
+import { Pencil, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsWriter } from "@/lib/auth";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/ingredients/$id/")({
   component: Page,
 });
+
+type RefCheckResult = {
+  meals: { id: number; name: string }[];
+  components: { id: number; name: string }[];
+  itemCount: number;
+  listNames: string[];
+};
 
 type IngredientDetail = {
   id: number;
@@ -129,6 +144,11 @@ function Detail({
         aliases={ingredient.ingredient_alias}
         isWriter={isWriter}
       />
+      <DeleteSection
+        ingredientId={ingredient.id}
+        canonicalName={ingredient.canonical_name}
+        isWriter={isWriter}
+      />
     </div>
   );
 }
@@ -231,6 +251,167 @@ function AliasSection({
         </form>
       )}
       {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+    </section>
+  );
+}
+
+function DeleteSection({
+  ingredientId,
+  canonicalName,
+  isWriter,
+}: {
+  ingredientId: number;
+  canonicalName: string;
+  isWriter: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [refs, setRefs] = useState<RefCheckResult | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  if (!isWriter) return null;
+
+  async function handleDeleteClick() {
+    setChecking(true);
+    setDeleteError(null);
+    try {
+      const [mealsRes, compsRes, itemsRes] = await Promise.all([
+        supabase
+          .from("meal_ingredient")
+          .select("meal:meal_id(id, name)")
+          .order("name", { foreignTable: "meal" })
+          .eq("ingredient_id", ingredientId),
+        supabase
+          .from("component_ingredient")
+          .select("component:component_id(id, name)")
+          .order("name", { foreignTable: "component" })
+          .eq("ingredient_id", ingredientId),
+        supabase
+          .from("shopping_list_item")
+          .select("id, shopping_list:shopping_list_id(id, name)")
+          .order("name", { foreignTable: "shopping_list" })
+          .eq("ingredient_id", ingredientId),
+      ]);
+      if (mealsRes.error) throw mealsRes.error;
+      if (compsRes.error) throw compsRes.error;
+      if (itemsRes.error) throw itemsRes.error;
+
+      const mealRows = mealsRes.data as unknown as { meal: { id: number; name: string } }[];
+      const compRows = compsRes.data as unknown as { component: { id: number; name: string } }[];
+      const itemRows = itemsRes.data as unknown as { id: number; shopping_list: { id: number; name: string } }[];
+
+      const meals = [...new Map(mealRows.map((r) => [r.meal.id, r.meal])).values()];
+      const components = [...new Map(compRows.map((r) => [r.component.id, r.component])).values()];
+      const listMap = new Map<number, string>();
+      itemRows.forEach((r) => listMap.set(r.shopping_list.id, r.shopping_list.name));
+
+      setRefs({ meals, components, itemCount: itemRows.length, listNames: [...listMap.values()] });
+      setDialogOpen(true);
+    } catch {
+      setDeleteError("Could not check references — refresh and try again.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("ingredient").delete().eq("id", ingredientId);
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ["admin-ingredients"] });
+      navigate({ to: "/admin/ingredients" });
+    } catch {
+      setDialogOpen(false);
+      setDeleteError("Could not delete — refresh and try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const isBlocked =
+    refs !== null &&
+    (refs.meals.length > 0 || refs.components.length > 0 || refs.itemCount > 0);
+
+  return (
+    <section className="mt-8 border-t pt-6">
+      <Button variant="destructive" size="sm" onClick={handleDeleteClick} disabled={checking}>
+        <Trash2 className="mr-1 h-3.5 w-3.5" />
+        {checking ? "Checking…" : "Delete ingredient"}
+      </Button>
+      {deleteError && <p className="mt-2 text-sm text-destructive">{deleteError}</p>}
+
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isBlocked
+                ? `Cannot delete '${canonicalName}'. It's used by:`
+                : `Delete '${canonicalName}'?`}
+            </AlertDialogTitle>
+            {!isBlocked && (
+              <AlertDialogDescription>
+                Aliases will be removed. This cannot be undone.
+              </AlertDialogDescription>
+            )}
+          </AlertDialogHeader>
+
+          {isBlocked && refs && (
+            <div className="space-y-2 text-sm">
+              {refs.meals.length > 0 && (
+                <p>
+                  <span className="font-medium">
+                    {refs.meals.length} {refs.meals.length === 1 ? "meal" : "meals"}:
+                  </span>{" "}
+                  {refs.meals.map((m) => m.name).join(", ")}
+                </p>
+              )}
+              {refs.components.length > 0 && (
+                <p>
+                  <span className="font-medium">
+                    {refs.components.length}{" "}
+                    {refs.components.length === 1 ? "component" : "components"}:
+                  </span>{" "}
+                  {refs.components.map((c) => c.name).join(", ")}
+                </p>
+              )}
+              {refs.itemCount > 0 && (
+                <p>
+                  <span className="font-medium">
+                    {refs.itemCount}{" "}
+                    {refs.itemCount === 1 ? "shopping list item" : "shopping list items"}
+                  </span>
+                  {refs.listNames.length > 0 && <> (in: {refs.listNames.join(", ")})</>}
+                </p>
+              )}
+            </div>
+          )}
+
+          <AlertDialogFooter>
+            {isBlocked ? (
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Close
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Deleting…" : "Delete"}
+                </Button>
+              </>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
