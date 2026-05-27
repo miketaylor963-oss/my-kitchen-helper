@@ -1,0 +1,103 @@
+{
+  "import_type": "recipe",
+  "external_ref": "butter-bean-mushroom-walnut-loaf",
+  "name": "Butter Bean, Mushroom & Walnut Loaf",
+  "description": "A simply prepared vegetarian centrepiece — deeply savoury, slices cleanly at the table. Fits the omega 3/6 strategy throughout.",
+  "source": "",
+
+  "cuisine": "british",
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["eggs", "soy", "nuts"],
+  "nutritional_tags": ["omega3_strong"],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "lunch"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 6,
+  "prep_time_minutes": 35,
+  "cook_time_minutes": 70,
+
+  "ingredients": [
+    { "id": "0001", "name": "butter beans, drained and rinsed", "amount": 800, "unit": "g", "group": null, "notes": "2 × 400g tins" },
+    { "id": "0002", "name": "chestnut mushrooms, finely chopped", "amount": 400, "unit": "g", "group": null, "notes": null },
+    { "id": "0003", "name": "dried porcini mushrooms", "amount": 25, "unit": "g", "group": null, "notes": null },
+    { "id": "0004", "name": "large onion, finely diced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 4, "unit": null, "group": null, "notes": null },
+    { "id": "0006", "name": "walnuts, roughly chopped", "amount": 100, "unit": "g", "group": null, "notes": null },
+    { "id": "0007", "name": "eggs, beaten", "amount": 2, "unit": null, "group": null, "notes": null },
+    { "id": "0008", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0009", "name": "tamari or soy sauce", "amount": 1, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0010", "name": "dried thyme", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0011", "name": "dried rosemary, crushed", "amount": 0.5, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0012", "name": "salt and black pepper", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "0013", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": null, "notes": "for the tin" },
+    { "id": "0014", "name": "rolled oats", "amount": 1, "unit": "tbsp", "group": null, "notes": "optional, if the mixture feels very wet" }
+  ],
+
+  "steps": [
+    {
+      "title": "Soak the porcini",
+      "content": "Place {0003} in a small bowl and cover with 150ml of just-boiled water. Set aside to soak for at least 20 minutes. Once soaked, drain and reserve the liquid — refrigerate or freeze it for use in a gravy another time. Roughly chop the porcini.",
+      "timer_seconds": 1200,
+      "group": null
+    },
+    {
+      "title": "Toast the walnuts",
+      "content": "Toast {0006} in a dry frying pan over medium heat until fragrant and just starting to colour. Set aside.",
+      "timer_seconds": 240,
+      "group": null
+    },
+    {
+      "title": "Cook the onion and garlic",
+      "content": "Heat {0008} in a large frying pan over medium-low heat. Add {0004}, {0010} and {0011} and cook gently until the onion is completely soft. Add {0005} and cook for a further 2 minutes.",
+      "timer_seconds": 600,
+      "group": null
+    },
+    {
+      "title": "Cook down the mushrooms",
+      "content": "Add {0002} and turn the heat up to medium-high. Cook, stirring occasionally, until all moisture has evaporated and the mushrooms are deeply coloured and almost dry. Add the chopped {0003} and {0009}. Season well with {0012}. Cook for 2 more minutes then set aside to cool slightly.",
+      "timer_seconds": 720,
+      "group": null
+    },
+    {
+      "title": "Prepare the tin",
+      "content": "Preheat your oven to 200°C / 180°C fan. Line a 900g loaf tin with baking parchment and brush with {0013}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Make the filling",
+      "content": "Tip {0001} into a large bowl and roughly mash — mostly smooth but with some texture remaining. Add the mushroom mixture, the toasted {0006} and {0007}. Mix thoroughly. Taste and adjust seasoning. If the mixture feels very wet, stir in {0014}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Fill the tin",
+      "content": "Spoon the mixture into the prepared tin, pressing it down firmly and smoothing the top. A compact, even fill will help it slice cleanly.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Roast",
+      "content": "Roast for 35–40 minutes until the top is firm and well coloured.",
+      "timer_seconds": 2400,
+      "group": null
+    },
+    {
+      "title": "Rest and serve",
+      "content": "Leave in the tin for 10 minutes before turning out — this is important for clean slices. Turn onto a board, remove the parchment, and slice with a sharp serrated knife.",
+      "timer_seconds": 600,
+      "group": null
+    }
+  ],
+
+  "notes": "**Porcini liquid:** Strain through a fine sieve and keep in the fridge for up to 3 days, or freeze. It makes an excellent base for a porcini and red wine miso gravy.\n\n**Texture:** Don't over-mash the beans — some texture makes for a better slice and a more interesting bite alongside the walnut chunks.\n\n**Getting ahead:** The filling can be made up to a day ahead and kept in the fridge. Spoon into the tin and roast when needed.",
+
+  "derived_components": []
+}

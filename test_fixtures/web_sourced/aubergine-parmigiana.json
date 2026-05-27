@@ -1,0 +1,104 @@
+{
+  "import_type": "recipe",
+  "external_ref": "aubergine-parmigiana-cloake",
+  "name": "Aubergine Parmigiana",
+  "description": "Felicity Cloake's perfect version: layered aubergines (half fried, half blanched) with a slow-simmered red wine tomato sauce, mozzarella, Parmesan, and a crisp Parmesan-breadcrumb top.",
+  "source": "https://www.theguardian.com/lifeandstyle/wordofmouth/2013/feb/20/how-to-cook-the-perfect-aubergine-parmigiana",
+
+  "cuisine": "italian",
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["dairy", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "lunch", "side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "aubergines", "amount": 1.5, "unit": "kg", "group": "aubergines", "notes": null },
+    { "id": "0002", "name": "fine salt", "amount": null, "unit": null, "group": "aubergines", "notes": "for salting the aubergines and seasoning" },
+    { "id": "0003", "name": "olive oil for frying", "amount": null, "unit": null, "group": "aubergines", "notes": "enough to coat the bottom of a frying pan well" },
+
+    { "id": "0004", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "sauce", "notes": "for the sauce" },
+    { "id": "0005", "name": "garlic cloves, crushed", "amount": 3, "unit": null, "group": "sauce", "notes": null },
+    { "id": "0006", "name": "good tinned tomatoes", "amount": 800, "unit": "g", "group": "sauce", "notes": null },
+    { "id": "0007", "name": "red wine", "amount": 150, "unit": "ml", "group": "sauce", "notes": null },
+    { "id": "0008", "name": "sugar", "amount": null, "unit": null, "group": "sauce", "notes": "pinch" },
+    { "id": "0009", "name": "dried oregano", "amount": 0.5, "unit": "tsp", "group": "sauce", "notes": null },
+
+    { "id": "0010", "name": "mozzarella, thinly sliced", "amount": 200, "unit": "g", "group": "layers", "notes": "firm pizza-topping style, not buffalo" },
+    { "id": "0011", "name": "Parmesan, grated", "amount": 125, "unit": "g", "group": "layers", "notes": "reserve a little for the breadcrumb topping" },
+    { "id": "0012", "name": "breadcrumbs", "amount": 50, "unit": "g", "group": "topping", "notes": null },
+    { "id": "0013", "name": "basil leaves", "amount": null, "unit": null, "group": "finish", "notes": "a handful" }
+  ],
+
+  "steps": [
+    {
+      "title": "Salt the aubergines",
+      "content": "Cut {0001} lengthways into 5mm slices, sprinkle with {0002} and leave in a colander to drain for half an hour.",
+      "timer_seconds": 1800,
+      "group": "aubergines"
+    },
+    {
+      "title": "Make the tomato sauce",
+      "content": "Meanwhile, heat {0004} in a medium pan over medium-high heat and add {0005}. Fry for a minute, then tip in {0006} and {0007}. Bring to the boil, mashing the tomatoes, stir and then turn down the heat slightly. Add {0008}, a little seasoning and {0009}, and simmer gently for 45 minutes, stirring occasionally. Puree until smooth.",
+      "timer_seconds": 2700,
+      "group": "sauce"
+    },
+    {
+      "title": "Preheat and prep",
+      "content": "Preheat the oven to 180°C. Put a large pan of water on to boil. Rinse the aubergines well and dry thoroughly with kitchen paper.",
+      "timer_seconds": null,
+      "group": "aubergines"
+    },
+    {
+      "title": "Fry the aubergines",
+      "content": "Pour enough {0003} into a frying pan to coat the bottom well, and put on high heat. Fry half (or all) of the aubergine slices until golden brown on both sides, working in batches. Put the cooked slices on paper towel to drain.",
+      "timer_seconds": null,
+      "group": "aubergines"
+    },
+    {
+      "title": "Blanch the remaining aubergines",
+      "content": "Blanch the other half, if necessary, in the boiling water for 2 minutes, then drain well.",
+      "timer_seconds": 120,
+      "group": "aubergines"
+    },
+    {
+      "title": "Layer the dish",
+      "content": "Lightly grease a baking dish and spread with a thin layer of sauce, followed by a layer of aubergines (packing them tightly), {0010}, {0011} and seasoning. Add another layer of aubergines, followed by sauce, the cheeses and seasoning. Repeat until you've used up all the aubergine, finishing with a layer of sauce (you may not need all the sauce). Keep a little Parmesan back for the top.",
+      "timer_seconds": null,
+      "group": "layers"
+    },
+    {
+      "title": "Add the breadcrumb topping",
+      "content": "Toss {0012} with a little olive oil and the reserved {0011} and sprinkle on top.",
+      "timer_seconds": null,
+      "group": "topping"
+    },
+    {
+      "title": "Bake",
+      "content": "Bake for about 30 minutes, until bubbling and browned.",
+      "timer_seconds": 1800,
+      "group": "topping"
+    },
+    {
+      "title": "Rest and finish",
+      "content": "Allow to cool slightly, then sprinkle with torn {0013} before serving. Best served warm rather than piping hot.",
+      "timer_seconds": null,
+      "group": "finish"
+    }
+  ],
+
+  "notes": "The recipe is a synthesis of Felicity Cloake's testing across Anna del Conte, Jane Grigson, Jamie Oliver, the Silver Spoon, Mele e Pere and Ed Schneider. Frying half the aubergines and blanching the rest gives tender slices without the dish becoming greasy. Avoid wet buffalo mozzarella here — firm pizza-style mozzarella melts better. Best served warm rather than hot.",
+
+  "derived_components": []
+}

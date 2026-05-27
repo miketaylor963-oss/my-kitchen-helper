@@ -1,0 +1,83 @@
+{
+  "import_type": "recipe",
+  "external_ref": "marinated-teriyaki-eggplant",
+  "name": "Marinated Teriyaki Eggplant",
+  "description": "Sweet, sticky and salty marinated teriyaki aubergine, griddled until charred and served over rice with sesame seeds and spring onion.",
+  "source": "https://cupfulofkale.com/vegan-marinated-teriyaki-eggplant/",
+
+  "cuisine": "japanese",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy", "gluten", "sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": 10,
+  "carbs_g": 56,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "lunch"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 20,
+  "cook_time_minutes": 10,
+
+  "ingredients": [
+    { "id": "0001", "name": "aubergines", "amount": 2, "unit": null, "group": null, "notes": null },
+
+    { "id": "0002", "name": "soy sauce", "amount": 120, "unit": "ml", "group": "marinade", "notes": "1/2 cup" },
+    { "id": "0003", "name": "mirin", "amount": 60, "unit": "ml", "group": "marinade", "notes": "1/4 cup" },
+    { "id": "0004", "name": "rice wine vinegar", "amount": 1, "unit": "tbsp", "group": "marinade", "notes": null },
+    { "id": "0005", "name": "brown sugar", "amount": 1, "unit": "tbsp", "group": "marinade", "notes": "1–2 tbsp to taste" },
+    { "id": "0006", "name": "ginger, grated", "amount": null, "unit": null, "group": "marinade", "notes": "1 inch piece" },
+    { "id": "0007", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "marinade", "notes": null },
+
+    { "id": "0008", "name": "sushi or short-grained rice", "amount": null, "unit": null, "group": "serve", "notes": "to serve" },
+    { "id": "0009", "name": "sesame seeds", "amount": null, "unit": null, "group": "serve", "notes": "to top" },
+    { "id": "0010", "name": "spring onion, sliced", "amount": null, "unit": null, "group": "serve", "notes": "to top" }
+  ],
+
+  "steps": [
+    {
+      "title": "Whisk the marinade",
+      "content": "Whisk {0002}, {0003}, {0004}, {0005}, {0006} and {0007} in a bowl, making sure the sugar is dissolved.",
+      "timer_seconds": null,
+      "group": "marinade"
+    },
+    {
+      "title": "Coat the aubergine",
+      "content": "Cut {0001} into small chunks, place in a large bowl and pour the marinade over the top. Stir and make sure it is all coated, then set aside.",
+      "timer_seconds": null,
+      "group": "marinade"
+    },
+    {
+      "title": "Marinate",
+      "content": "Let marinate for at least 20 minutes, stirring a few times.",
+      "timer_seconds": 1200,
+      "group": "marinade"
+    },
+    {
+      "title": "Griddle the aubergine",
+      "content": "Place a griddle pan on the hob over medium-high heat. Once hot, place the marinated aubergine in. Pour any excess marinade over the top whilst cooking. You may need to do it in two batches — keep the first batch warm on a low heat in the oven.",
+      "timer_seconds": null,
+      "group": "cook"
+    },
+    {
+      "title": "Cook until charred",
+      "content": "Cook for a few minutes on each side until brown and starting to char from the griddle lines.",
+      "timer_seconds": null,
+      "group": "cook"
+    },
+    {
+      "title": "Serve",
+      "content": "Serve straight away with {0008}, topped with {0009} and {0010}.",
+      "timer_seconds": null,
+      "group": "serve"
+    }
+  ],
+
+  "notes": "Mix it up by adding different vegetables or adding tofu for extra protein.\n\nNutrition per serving (yield 2): 342 kcal, 7g fat (1g saturated), 0mg cholesterol, 3510mg sodium, 56g carbohydrates, 3g fibre, 24g sugar, 10g protein.",
+
+  "derived_components": []
+}

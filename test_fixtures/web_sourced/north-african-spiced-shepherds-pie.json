@@ -1,0 +1,131 @@
+{
+  "import_type": "recipe",
+  "external_ref": "north-african-spiced-shepherds-pie",
+  "name": "North African Spiced Shepherd's Pie",
+  "description": "A harissa-spiced lentil and mushroom filling with a golden olive oil mash — warming, hearty, and even better the next day.",
+  "source": "",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "lunch"],
+  "meal_formats": ["microwave"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 25,
+  "cook_time_minutes": 70,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0002", "name": "leek, sliced", "amount": 1, "unit": null, "group": "filling", "notes": null },
+    { "id": "0003", "name": "celery stalks, diced", "amount": 2, "unit": null, "group": "filling", "notes": null },
+    { "id": "0004", "name": "carrots, diced", "amount": 2, "unit": null, "group": "filling", "notes": null },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "filling", "notes": null },
+    { "id": "0006", "name": "cumin seeds", "amount": 1, "unit": "tsp", "group": "filling", "notes": null },
+    { "id": "0007", "name": "ground cumin", "amount": 1, "unit": "tsp", "group": "filling", "notes": null },
+    { "id": "0008", "name": "rose harissa paste", "amount": 2, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0009", "name": "mushrooms, roughly chopped", "amount": 200, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0010", "name": "green or brown lentils, dried", "amount": 150, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0011", "name": "white beans, drained", "amount": 400, "unit": "g", "group": "filling", "notes": "tinned" },
+    { "id": "0012", "name": "tinned tomatoes", "amount": 400, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0013", "name": "vegetable stock", "amount": 300, "unit": "ml", "group": "filling", "notes": null },
+    { "id": "0014", "name": "miso paste", "amount": 1, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0015", "name": "lemon, juiced", "amount": 0.5, "unit": null, "group": "filling", "notes": null },
+    { "id": "0016", "name": "floury potatoes, peeled and chopped", "amount": 800, "unit": "g", "group": "mash", "notes": null },
+    { "id": "0017", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "mash", "notes": "for the mash" },
+    { "id": "0018", "name": "salt and black pepper", "amount": null, "unit": null, "group": "mash", "notes": "to taste" }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook the lentils",
+      "content": "Rinse {0010} and simmer in plenty of water for 20-25 minutes until just tender but still holding their shape. Drain and set aside.",
+      "timer_seconds": 1500,
+      "group": "filling"
+    },
+    {
+      "title": "Build the base",
+      "content": "Heat {0001} in a large pan over medium heat. Add {0006} and let them sizzle for 30 seconds, then add {0002}, {0003} and {0004}. Cook for 8-10 minutes until softened.",
+      "timer_seconds": 540,
+      "group": "filling"
+    },
+    {
+      "title": "Add garlic and spices",
+      "content": "Add {0005}, {0007} and {0008}. Stir well and cook for 2 minutes until fragrant.",
+      "timer_seconds": 120,
+      "group": "filling"
+    },
+    {
+      "title": "Add mushrooms",
+      "content": "Add {0009} and cook for 5 minutes until they've released their moisture and started to colour.",
+      "timer_seconds": 300,
+      "group": "filling"
+    },
+    {
+      "title": "Build the sauce",
+      "content": "Add {0012}, {0013} and {0014}. Stir to combine, then add the cooked lentils and {0011}. Simmer on a low heat for 15-20 minutes until thick and rich. It should not be sloppy — let it reduce properly. Finish with {0015} and season well.",
+      "timer_seconds": 1200,
+      "group": "filling"
+    },
+    {
+      "title": "Make the mash",
+      "content": "While the filling simmers, boil {0016} in salted water until tender, around 20 minutes. Drain thoroughly, then mash with {0017} and a splash of the cooking water if needed. Season generously with {0018}. You want it smooth and spreadable but not too loose.",
+      "timer_seconds": 1200,
+      "group": "mash"
+    },
+    {
+      "title": "Assemble",
+      "content": "Preheat oven to 200°C. Spoon the filling into a baking dish. Spread the mash over the top evenly, then rough up the surface with a fork to create ridges — these will catch and brown nicely. Drizzle a little extra olive oil over the top.",
+      "timer_seconds": null,
+      "group": "assembly"
+    },
+    {
+      "title": "Bake",
+      "content": "Bake for 25-30 minutes until the top is golden and the filling is bubbling at the edges. Rest for 5 minutes before serving.",
+      "timer_seconds": 1800,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "The filling genuinely improves overnight as the harissa and spices develop. If reheating the next day, add a splash of water or stock before putting it back in the oven covered with foil, then uncover for the last 10 minutes to re-crisp the mash. You can add a little extra harissa on top of the mash before baking if you want more heat on the surface.",
+
+  "derived_components": [
+    {
+      "external_ref": "north-african-spiced-lentil-bean-base",
+      "name": "North African Spiced Lentil & Bean Base",
+      "description": "Harissa-spiced lentils, white beans and mushrooms in a rich tomato base. A reusable dinner base that pairs with mash, sliced potato, polenta, or grain toppings.",
+      "notes": "Improves overnight. Freezes well in portions.",
+
+      "component_layers": [
+        { "framework": "component_dinner", "layer": "base", "family": null }
+      ],
+
+      "cuisine": "moroccan",
+      "dietary_category": "vegan",
+      "dietary_restrictions": ["soy"],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 4,
+      "prep_time_minutes": 15,
+      "cook_time_minutes": 50,
+
+      "ingredient_ids": [
+        "0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008",
+        "0009", "0010", "0011", "0012", "0013", "0014", "0015"
+      ],
+      "step_indices": [0, 1, 2, 3, 4]
+    }
+  ]
+}
