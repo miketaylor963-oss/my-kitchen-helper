@@ -70,8 +70,8 @@ Each `component_layers` entry:
 | Field | Type | Notes |
 |---|---|---|
 | `base_servings` | integer | Number of servings the ingredient quantities make. Shopping-list scaling multiplies against this. |
-| `prep_time_minutes` | integer \| null | Hands-on time. |
-| `cook_time_minutes` | integer \| null | Unattended cooking/resting time. |
+| `prep_time_minutes` | integer \| null | Hands-on time. Leave `null` when the source doesn't state it — don't estimate. |
+| `cook_time_minutes` | integer \| null | In-session unattended time: oven, hob, fryer, short chills (≤2 hours). Leave `null` when the source doesn't state it — don't estimate. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, not here. |
 
 ## Ingredients
 
@@ -81,10 +81,10 @@ Array of ingredient rows. Order matters — used as `sort_order` in the database
 |---|---|---|---|
 | `id` | string | yes | Unique within this recipe. Convention: 4-char zero-padded (`0001`, `0002`). Referenced by step placeholders and by derived components. |
 | `name` | string | yes | Display name including any prep notes (`"red onion, finely diced"`, `"lemon, juiced"`). Master ingredient matching happens at import time, human-in-the-loop. |
-| `amount` | number \| null | no | Numeric quantity. Null for "to taste" cases. |
+| `amount` | number \| null | no | Numeric quantity. Null for "to taste", "to serve", "for frying", and similar functional amounts. For ranges ("1–2 tbsp", "2–3 tsp"), use the lower bound and note the range. |
 | `unit` | string \| null | no | `g`, `ml`, `tbsp`, `tsp`, `cup`, etc. Null for whole/countable items — in that case fold the counting noun into `name` (`"garlic cloves"`, `"large eggs"`). |
 | `group` | string \| null | no | Free-text group label (`"patty"`, `"mushrooms"`, `"mash"`). For ungrouped recipes leave null. Groups are also useful as derivation candidates — see [Derived components](#derived-components). |
-| `notes` | string \| null | no | Per-ingredient notes (`"Maldon if possible"`, `"optional"`, `"to taste"`). |
+| `notes` | string \| null | no | Per-ingredient notes (`"Maldon if possible"`, `"optional"`, `"to taste"`, range notes for range quantities, original imperial values for converted amounts). |
 
 ## Steps
 
@@ -98,6 +98,37 @@ Array of step rows. Order matters — used as `sort_order`. No step IDs needed.
 | `group` | string \| null | no | Free-text group label matching the ingredient group vocabulary (`"filling"`, `"mash"`, `"assembly"`). Sections the cooking-mode UI and helps the conversion prompt's derivation heuristic. Leave null for ungrouped recipes. |
 
 **Step-to-ingredient links are derived automatically** from `{NNNN}` placeholders in `content` at import time. No explicit `ingredient_refs` field needed. If an ingredient is used in a step but you don't want the quantity inline ("season to taste"), reference it as `{0018}` anyway — placeholder syntax is the canonical way to express "this step uses this ingredient".
+
+## Conversion conventions
+
+Conventions for converting human-written recipes into template form. None of these are validator rules — they're consistency conventions for converters so fixtures and imports stay comparable.
+
+**Inline alternatives.** When a recipe lists alternatives inline ("tamari or soy sauce", "ricotta or cottage cheese", "kombu or seaweed flakes"), take the first-named option as the canonical ingredient. Put the alternatives in `notes`. Classification (dietary category, restrictions) follows the canonical choice. Alternative ingredients are not first-class in the spec.
+
+**Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
+
+**Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`).
+
+**Tin weight, not drained weight.** Where a recipe specifies tinned ingredients, use the tin weight (e.g. `400` for "1 × 400g tin of chickpeas"), not the drained weight. The shopping list maps to "buy a tin", and this matches the worked example. Note the tin format in `notes` if useful ("1 × 400g tin").
+
+**Imperial-to-metric.** Use the standard British cookbook conversion table:
+
+| Imperial | Metric |
+|---|---|
+| 1 oz | 25 g |
+| 2 oz | 50 g |
+| 3 oz | 85 g |
+| 4 oz | 115 g |
+| 8 oz | 225 g |
+| 1 lb | 450 g |
+| 4 fl oz | 115 ml |
+| 1 pint | 570 ml |
+
+For amounts not in the table, interpolate to the nearest 5g / 25g step as the table itself does. Keep originals in `notes` for traceability where useful.
+
+**Times not stated.** Leave `prep_time_minutes` and `cook_time_minutes` as `null`. Estimating produces dishonest data and breaks downstream "active vs total" filtering.
+
+**Long unattended time.** Overnight soaks, multi-hour chills, day-ahead marinades — don't put these in `cook_time_minutes`. Describe in `notes`.
 
 ## Derived components
 
@@ -159,7 +190,7 @@ The original `north_african_shepherds_pie.json` converted to the template format
 
 Notable conversions from the original source JSON:
 - Added `import_type`, `external_ref`.
-- Added cuisine and dietary classification (`vegan`).
+- Added cuisine and dietary classification (`vegan`), and `["soy"]` for the miso paste in both parent and derived component.
 - Tagged as both a dinner and a microwave lunch (per the lunch options doc).
 - Grouped ingredients into "filling" and "mash" — the original was flat.
 - Step `group` labels match ingredient groups.
@@ -178,7 +209,7 @@ Notable conversions from the original source JSON:
 
   "cuisine": "moroccan",
   "dietary_category": "vegan",
-  "dietary_restrictions": [],
+  "dietary_restrictions": ["soy"],
   "nutritional_tags": [],
 
   "protein_g": null,
@@ -281,7 +312,7 @@ Notable conversions from the original source JSON:
 
       "cuisine": "moroccan",
       "dietary_category": "vegan",
-      "dietary_restrictions": [],
+      "dietary_restrictions": ["soy"],
       "nutritional_tags": [],
 
       "protein_g": null,
