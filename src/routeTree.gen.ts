@@ -17,10 +17,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MealsIndexRouteImport } from './routes/meals.index'
 import { Route as MealsNewRouteImport } from './routes/meals.new'
 import { Route as AdminIngredientsRouteImport } from './routes/admin.ingredients'
+import { Route as AdminImportRouteImport } from './routes/admin.import'
 import { Route as MealsMealIdIndexRouteImport } from './routes/meals.$mealId.index'
 import { Route as AdminIngredientsIndexRouteImport } from './routes/admin.ingredients.index'
 import { Route as MealsMealIdEditRouteImport } from './routes/meals.$mealId.edit'
+import { Route as AdminIngredientsNewRouteImport } from './routes/admin.ingredients.new'
 import { Route as AdminIngredientsIdRouteImport } from './routes/admin.ingredients.$id'
+import { Route as AdminIngredientsIdIndexRouteImport } from './routes/admin.ingredients.$id.index'
+import { Route as AdminIngredientsIdEditRouteImport } from './routes/admin.ingredients.$id.edit'
 
 const ShoppingListsRoute = ShoppingListsRouteImport.update({
   id: '/shopping-lists',
@@ -62,6 +66,11 @@ const AdminIngredientsRoute = AdminIngredientsRouteImport.update({
   path: '/admin/ingredients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminImportRoute = AdminImportRouteImport.update({
+  id: '/admin/import',
+  path: '/admin/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MealsMealIdIndexRoute = MealsMealIdIndexRouteImport.update({
   id: '/meals/$mealId/',
   path: '/meals/$mealId/',
@@ -77,10 +86,25 @@ const MealsMealIdEditRoute = MealsMealIdEditRouteImport.update({
   path: '/meals/$mealId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIngredientsNewRoute = AdminIngredientsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminIngredientsRoute,
+} as any)
 const AdminIngredientsIdRoute = AdminIngredientsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminIngredientsRoute,
+} as any)
+const AdminIngredientsIdIndexRoute = AdminIngredientsIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminIngredientsIdRoute,
+} as any)
+const AdminIngredientsIdEditRoute = AdminIngredientsIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AdminIngredientsIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -89,13 +113,17 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
+  '/admin/import': typeof AdminImportRoute
   '/admin/ingredients': typeof AdminIngredientsRouteWithChildren
   '/meals/new': typeof MealsNewRoute
   '/meals/': typeof MealsIndexRoute
-  '/admin/ingredients/$id': typeof AdminIngredientsIdRoute
+  '/admin/ingredients/$id': typeof AdminIngredientsIdRouteWithChildren
+  '/admin/ingredients/new': typeof AdminIngredientsNewRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
   '/admin/ingredients/': typeof AdminIngredientsIndexRoute
   '/meals/$mealId/': typeof MealsMealIdIndexRoute
+  '/admin/ingredients/$id/edit': typeof AdminIngredientsIdEditRoute
+  '/admin/ingredients/$id/': typeof AdminIngredientsIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,12 +131,15 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
+  '/admin/import': typeof AdminImportRoute
   '/meals/new': typeof MealsNewRoute
   '/meals': typeof MealsIndexRoute
-  '/admin/ingredients/$id': typeof AdminIngredientsIdRoute
+  '/admin/ingredients/new': typeof AdminIngredientsNewRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
   '/admin/ingredients': typeof AdminIngredientsIndexRoute
   '/meals/$mealId': typeof MealsMealIdIndexRoute
+  '/admin/ingredients/$id/edit': typeof AdminIngredientsIdEditRoute
+  '/admin/ingredients/$id': typeof AdminIngredientsIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,13 +148,17 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meal-plans': typeof MealPlansRoute
   '/shopping-lists': typeof ShoppingListsRoute
+  '/admin/import': typeof AdminImportRoute
   '/admin/ingredients': typeof AdminIngredientsRouteWithChildren
   '/meals/new': typeof MealsNewRoute
   '/meals/': typeof MealsIndexRoute
-  '/admin/ingredients/$id': typeof AdminIngredientsIdRoute
+  '/admin/ingredients/$id': typeof AdminIngredientsIdRouteWithChildren
+  '/admin/ingredients/new': typeof AdminIngredientsNewRoute
   '/meals/$mealId/edit': typeof MealsMealIdEditRoute
   '/admin/ingredients/': typeof AdminIngredientsIndexRoute
   '/meals/$mealId/': typeof MealsMealIdIndexRoute
+  '/admin/ingredients/$id/edit': typeof AdminIngredientsIdEditRoute
+  '/admin/ingredients/$id/': typeof AdminIngredientsIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,13 +168,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
+    | '/admin/import'
     | '/admin/ingredients'
     | '/meals/new'
     | '/meals/'
     | '/admin/ingredients/$id'
+    | '/admin/ingredients/new'
     | '/meals/$mealId/edit'
     | '/admin/ingredients/'
     | '/meals/$mealId/'
+    | '/admin/ingredients/$id/edit'
+    | '/admin/ingredients/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -147,12 +186,15 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
+    | '/admin/import'
     | '/meals/new'
     | '/meals'
-    | '/admin/ingredients/$id'
+    | '/admin/ingredients/new'
     | '/meals/$mealId/edit'
     | '/admin/ingredients'
     | '/meals/$mealId'
+    | '/admin/ingredients/$id/edit'
+    | '/admin/ingredients/$id'
   id:
     | '__root__'
     | '/'
@@ -160,13 +202,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/meal-plans'
     | '/shopping-lists'
+    | '/admin/import'
     | '/admin/ingredients'
     | '/meals/new'
     | '/meals/'
     | '/admin/ingredients/$id'
+    | '/admin/ingredients/new'
     | '/meals/$mealId/edit'
     | '/admin/ingredients/'
     | '/meals/$mealId/'
+    | '/admin/ingredients/$id/edit'
+    | '/admin/ingredients/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,6 +221,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MealPlansRoute: typeof MealPlansRoute
   ShoppingListsRoute: typeof ShoppingListsRoute
+  AdminImportRoute: typeof AdminImportRoute
   AdminIngredientsRoute: typeof AdminIngredientsRouteWithChildren
   MealsNewRoute: typeof MealsNewRoute
   MealsIndexRoute: typeof MealsIndexRoute
@@ -240,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIngredientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/import': {
+      id: '/admin/import'
+      path: '/admin/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meals/$mealId/': {
       id: '/meals/$mealId/'
       path: '/meals/$mealId'
@@ -261,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MealsMealIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/ingredients/new': {
+      id: '/admin/ingredients/new'
+      path: '/new'
+      fullPath: '/admin/ingredients/new'
+      preLoaderRoute: typeof AdminIngredientsNewRouteImport
+      parentRoute: typeof AdminIngredientsRoute
+    }
     '/admin/ingredients/$id': {
       id: '/admin/ingredients/$id'
       path: '/$id'
@@ -268,16 +329,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIngredientsIdRouteImport
       parentRoute: typeof AdminIngredientsRoute
     }
+    '/admin/ingredients/$id/': {
+      id: '/admin/ingredients/$id/'
+      path: '/'
+      fullPath: '/admin/ingredients/$id/'
+      preLoaderRoute: typeof AdminIngredientsIdIndexRouteImport
+      parentRoute: typeof AdminIngredientsIdRoute
+    }
+    '/admin/ingredients/$id/edit': {
+      id: '/admin/ingredients/$id/edit'
+      path: '/edit'
+      fullPath: '/admin/ingredients/$id/edit'
+      preLoaderRoute: typeof AdminIngredientsIdEditRouteImport
+      parentRoute: typeof AdminIngredientsIdRoute
+    }
   }
 }
 
+interface AdminIngredientsIdRouteChildren {
+  AdminIngredientsIdEditRoute: typeof AdminIngredientsIdEditRoute
+  AdminIngredientsIdIndexRoute: typeof AdminIngredientsIdIndexRoute
+}
+
+const AdminIngredientsIdRouteChildren: AdminIngredientsIdRouteChildren = {
+  AdminIngredientsIdEditRoute: AdminIngredientsIdEditRoute,
+  AdminIngredientsIdIndexRoute: AdminIngredientsIdIndexRoute,
+}
+
+const AdminIngredientsIdRouteWithChildren =
+  AdminIngredientsIdRoute._addFileChildren(AdminIngredientsIdRouteChildren)
+
 interface AdminIngredientsRouteChildren {
-  AdminIngredientsIdRoute: typeof AdminIngredientsIdRoute
+  AdminIngredientsIdRoute: typeof AdminIngredientsIdRouteWithChildren
+  AdminIngredientsNewRoute: typeof AdminIngredientsNewRoute
   AdminIngredientsIndexRoute: typeof AdminIngredientsIndexRoute
 }
 
 const AdminIngredientsRouteChildren: AdminIngredientsRouteChildren = {
-  AdminIngredientsIdRoute: AdminIngredientsIdRoute,
+  AdminIngredientsIdRoute: AdminIngredientsIdRouteWithChildren,
+  AdminIngredientsNewRoute: AdminIngredientsNewRoute,
   AdminIngredientsIndexRoute: AdminIngredientsIndexRoute,
 }
 
@@ -290,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MealPlansRoute: MealPlansRoute,
   ShoppingListsRoute: ShoppingListsRoute,
+  AdminImportRoute: AdminImportRoute,
   AdminIngredientsRoute: AdminIngredientsRouteWithChildren,
   MealsNewRoute: MealsNewRoute,
   MealsIndexRoute: MealsIndexRoute,
