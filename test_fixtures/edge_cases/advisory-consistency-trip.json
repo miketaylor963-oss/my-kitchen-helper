@@ -1,0 +1,54 @@
+{
+  "_fixture_notes": "Case 18: Advisory ingredient consistency trip. dietary_category is declared 'vegan' but the ingredient list includes 'unsalted butter' and 'double cream' — clearly not vegan. dietary_restrictions also empty despite obvious dairy content. The spec's ingredient consistency check is advisory (not blocking). Tests whether the importer surfaces the advisory warning, whether the operator override flow works, and whether the importer correctly identifies the dairy content despite the absent restriction code.",
+
+  "import_type": "recipe",
+  "external_ref": "advisory-consistency-trip",
+  "name": "Mushroom Cream Sauce (Mis-classified)",
+  "description": "Deliberately mis-classified — dietary_category 'vegan' contradicted by dairy ingredients. Fixture for the advisory consistency check.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": 15,
+
+  "ingredients": [
+    { "id": "0001", "name": "unsalted butter", "amount": 30, "unit": "g", "group": null, "notes": null },
+    { "id": "0002", "name": "chestnut mushrooms, sliced", "amount": 300, "unit": "g", "group": null, "notes": null },
+    { "id": "0003", "name": "garlic cloves, minced", "amount": 2, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "double cream", "amount": 150, "unit": "ml", "group": null, "notes": null },
+    { "id": "0005", "name": "thyme leaves, picked", "amount": 1, "unit": "tsp", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook mushrooms",
+      "content": "Melt {0001} in a frying pan, then add {0002} and cook for 8-10 minutes until deeply browned.",
+      "timer_seconds": 540,
+      "group": null
+    },
+    {
+      "title": "Finish",
+      "content": "Add {0003} and {0005} and cook for 30 seconds. Pour in {0004} and simmer for 2 minutes until thickened.",
+      "timer_seconds": 150,
+      "group": null
+    }
+  ],
+
+  "notes": "Dietary classification is intentionally wrong for this fixture.",
+
+  "derived_components": []
+}

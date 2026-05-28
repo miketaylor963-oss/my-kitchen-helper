@@ -1,0 +1,48 @@
+{
+  "_fixture_notes": "Case 17: Non-standard ingredient IDs. Convention is 4-char zero-padded ('0001', '0002') but the validator only requires uniqueness within the recipe. IDs in this fixture: '1' (no padding), 'a' (alphabetic), 'ING-001' (with separator), '00001' (over-padding), 'item_3' (underscore + alphanumeric). All unique. No placeholders used in step content — placeholder-format edges are tested separately in placeholder-parsing-edges.json. Tests whether the validator enforces the convention or only the uniqueness rule.",
+
+  "import_type": "recipe",
+  "external_ref": "nonstandard-ingredient-ids",
+  "name": "Non-Standard IDs Probe",
+  "description": "Ingredient IDs deliberately deviate from the 4-char zero-padded convention. No step placeholders.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "1", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "a", "name": "garlic clove, sliced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "ING-001", "name": "stale bread, torn", "amount": 100, "unit": "g", "group": null, "notes": null },
+    { "id": "00001", "name": "sea salt flakes", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "item_3", "name": "chilli flakes", "amount": 0.5, "unit": "tsp", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Crisp the bread",
+      "content": "Heat the oil with the garlic and chilli flakes in a pan, then add the bread and toss to coat. Cook for 5-6 minutes until golden. Season with the salt.",
+      "timer_seconds": 360,
+      "group": null
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": []
+}

@@ -1,0 +1,66 @@
+{
+  "_fixture_notes": "Case 15: Step groups include labels not used by any ingredient. Ingredient groups: ['sauce', 'pasta']. Step groups: ['sauce', 'pasta', 'finishing', 'plating']. The 'finishing' and 'plating' step groups have no corresponding ingredient group. Spec says step group labels should match ingredient group vocabulary but doesn't enforce. Tests cooking-mode UI behaviour when step groups are a strict superset of ingredient groups.",
+
+  "import_type": "recipe",
+  "external_ref": "step-group-not-in-ingredient-groups",
+  "name": "Garlic & Chilli Spaghetti",
+  "description": "Classic aglio e olio. Fixture exercising step-group / ingredient-group label mismatch.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": 15,
+
+  "ingredients": [
+    { "id": "0001", "name": "extra virgin olive oil", "amount": 4, "unit": "tbsp", "group": "sauce", "notes": null },
+    { "id": "0002", "name": "garlic cloves, finely sliced", "amount": 4, "unit": null, "group": "sauce", "notes": null },
+    { "id": "0003", "name": "chilli flakes", "amount": 1, "unit": "tsp", "group": "sauce", "notes": null },
+    { "id": "0004", "name": "flat-leaf parsley, finely chopped", "amount": 20, "unit": "g", "group": "sauce", "notes": null },
+    { "id": "0005", "name": "spaghetti", "amount": 200, "unit": "g", "group": "pasta", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook the pasta",
+      "content": "Boil well-salted water and cook {0005} according to packet timing.",
+      "timer_seconds": 540,
+      "group": "pasta"
+    },
+    {
+      "title": "Infuse the oil",
+      "content": "Meanwhile, heat {0001} gently with {0002} and {0003} until the garlic is pale gold and the oil is fragrant.",
+      "timer_seconds": 240,
+      "group": "sauce"
+    },
+    {
+      "title": "Toss everything together",
+      "content": "Drain {0005} (reserving a splash of pasta water) and add to the pan. Toss with the sauce, adding pasta water if needed for emulsion.",
+      "timer_seconds": null,
+      "group": "finishing"
+    },
+    {
+      "title": "Plate and serve",
+      "content": "Twist into bowls and finish with {0004}.",
+      "timer_seconds": null,
+      "group": "plating"
+    }
+  ],
+
+  "notes": "The 'finishing' and 'plating' step groups don't correspond to any ingredient group — intentional for this fixture.",
+
+  "derived_components": []
+}

@@ -1,0 +1,81 @@
+{
+  "_fixture_notes": "Case 19: Derived component external_ref collides with parent external_ref. Both are 'colliding-slug'. Spec rules require derived component slugs to be unique. This fixture intentionally violates that rule. Tests whether the validator catches the collision and how the error is surfaced.",
+
+  "import_type": "recipe",
+  "external_ref": "colliding-slug",
+  "name": "Tomato Pasta with Identical-Slug Component",
+  "description": "Parent and derived component share the same external_ref. Intentional violation for validator-rejection testing.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": 20,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "sauce", "notes": null },
+    { "id": "0002", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "sauce", "notes": null },
+    { "id": "0003", "name": "tinned tomatoes", "amount": 400, "unit": "g", "group": "sauce", "notes": "1 × 400g tin" },
+    { "id": "0004", "name": "basil leaves", "amount": 10, "unit": "g", "group": "sauce", "notes": null },
+    { "id": "0005", "name": "spaghetti", "amount": 320, "unit": "g", "group": "pasta", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Make the sauce",
+      "content": "Heat {0001}, add {0002}, then {0003}. Simmer 15 minutes. Stir in {0004}.",
+      "timer_seconds": 900,
+      "group": "sauce"
+    },
+    {
+      "title": "Cook the pasta",
+      "content": "Boil {0005} until al dente. Drain and toss with the sauce.",
+      "timer_seconds": 540,
+      "group": "pasta"
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": [
+    {
+      "external_ref": "colliding-slug",
+      "name": "Tomato Sauce (Collision)",
+      "description": "Identical external_ref to parent — should be rejected.",
+      "notes": null,
+
+      "component_layers": [
+        { "framework": "component_dinner", "layer": "base", "family": null }
+      ],
+
+      "cuisine": "british",
+      "dietary_category": "vegan",
+      "dietary_restrictions": [],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 4,
+      "prep_time_minutes": 5,
+      "cook_time_minutes": 15,
+
+      "ingredient_ids": ["0001", "0002", "0003", "0004"],
+      "step_indices": [0]
+    }
+  ]
+}

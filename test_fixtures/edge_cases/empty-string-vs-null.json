@@ -1,0 +1,45 @@
+{
+  "_fixture_notes": "Case 23 (spec gap): Nullable freeform string fields set to '' instead of null. Probed fields: description, source, top-level notes, ingredient.notes, ingredient.unit, ingredient.group, step.group. cuisine and dietary_category use null because empty string would fail lookup validation independently — a separate failure mode worth probing in its own fixture. Tests whether the validator treats '' as equivalent to null, as a valid value, or as invalid for freeform string fields.",
+
+  "import_type": "recipe",
+  "external_ref": "empty-string-vs-null",
+  "name": "Empty String Probe",
+  "description": "",
+  "source": "",
+
+  "cuisine": null,
+  "dietary_category": null,
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": "", "notes": "" },
+    { "id": "0002", "name": "garlic clove, sliced", "amount": 1, "unit": "", "group": "", "notes": "" }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook",
+      "content": "Heat {0001} and {0002} together until fragrant.",
+      "timer_seconds": null,
+      "group": ""
+    }
+  ],
+
+  "notes": "",
+
+  "derived_components": []
+}

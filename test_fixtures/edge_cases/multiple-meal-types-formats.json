@@ -1,0 +1,68 @@
+{
+  "_fixture_notes": "Case 5: Multiple meal_types and meal_formats. Four meal_types (breakfast, lunch, dinner, snack) and all three meal_formats (no_reheat, microwave, thermos). Tests classification breadth and whether downstream meal-planning queries handle high-fan-out classifications correctly.",
+
+  "import_type": "recipe",
+  "external_ref": "multiple-meal-types-formats",
+  "name": "Spiced Chickpea & Spinach Hash",
+  "description": "A versatile chickpea hash that works any time of day. Fixture exercising maximum meal_types and meal_formats breadth.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": 14.0,
+  "carbs_g": 32.0,
+  "gi_index": null,
+
+  "meal_types": ["breakfast", "lunch", "dinner", "snack"],
+  "meal_formats": ["no_reheat", "microwave", "thermos"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": 20,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0002", "name": "onion, diced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0003", "name": "smoked paprika", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0004", "name": "ground cumin", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0005", "name": "tinned chickpeas, drained", "amount": 400, "unit": "g", "group": null, "notes": "1 × 400g tin" },
+    { "id": "0006", "name": "baby spinach", "amount": 100, "unit": "g", "group": null, "notes": null },
+    { "id": "0007", "name": "lemon, juiced", "amount": 0.5, "unit": null, "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Soften the onion",
+      "content": "Heat {0001} in a large frying pan over medium heat. Add {0002} and cook for 6-8 minutes until softened and lightly golden.",
+      "timer_seconds": 480,
+      "group": null
+    },
+    {
+      "title": "Toast the spices",
+      "content": "Stir in {0003} and {0004} and cook for 30 seconds until fragrant.",
+      "timer_seconds": 30,
+      "group": null
+    },
+    {
+      "title": "Add chickpeas",
+      "content": "Add {0005} and toss to coat. Cook for 5 minutes, pressing the chickpeas with a wooden spoon to crisp some of them up.",
+      "timer_seconds": 300,
+      "group": null
+    },
+    {
+      "title": "Wilt spinach and finish",
+      "content": "Add {0006} a handful at a time, stirring until wilted. Squeeze over {0007} and season to taste.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Eats well cold or hot. Holds up in a thermos for lunch, reheats cleanly in the microwave, and can be eaten straight from the fridge as a snack.",
+
+  "derived_components": []
+}

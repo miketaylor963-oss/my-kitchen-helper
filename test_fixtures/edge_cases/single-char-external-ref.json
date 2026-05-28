@@ -1,0 +1,44 @@
+{
+  "_fixture_notes": "Case 24 (spec gap): external_ref of length 1 ('a'). The slug regex ^[a-z0-9-]+$ allows it. Spec doesn't state a minimum length. Tests whether the validator enforces a minimum-length rule beyond the regex, and whether downstream URL routing or linking has any edge cases with single-character slugs.",
+
+  "import_type": "recipe",
+  "external_ref": "a",
+  "name": "Single-Char Slug Probe",
+  "description": "external_ref is the single character 'a'. Regex-valid; possibly a UI or linking edge.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": null,
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 1,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "apple", "amount": 1, "unit": null, "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Eat",
+      "content": "Wash {0001} and eat.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": []
+}

@@ -1,0 +1,71 @@
+{
+  "_fixture_notes": "Case 11: Every macro field populated with non-null values. protein_g, carbs_g, gi_index all set. Tests numerical macro handling, aggregation queries that depend on all-known values, and display of full macro panels.",
+
+  "import_type": "recipe",
+  "external_ref": "all-macros-populated",
+  "name": "Lentil Bolognese with Wholewheat Pasta",
+  "description": "Lentil ragu over wholewheat penne. Fixture exercising all macro fields populated.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": 22.5,
+  "carbs_g": 68.0,
+  "gi_index": 48,
+
+  "meal_types": ["dinner"],
+  "meal_formats": ["microwave"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 15,
+  "cook_time_minutes": 45,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "ragu", "notes": null },
+    { "id": "0002", "name": "onion, diced", "amount": 1, "unit": null, "group": "ragu", "notes": null },
+    { "id": "0003", "name": "carrots, diced", "amount": 2, "unit": null, "group": "ragu", "notes": null },
+    { "id": "0004", "name": "celery sticks, diced", "amount": 2, "unit": null, "group": "ragu", "notes": null },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "ragu", "notes": null },
+    { "id": "0006", "name": "puy lentils", "amount": 200, "unit": "g", "group": "ragu", "notes": null },
+    { "id": "0007", "name": "tinned tomatoes", "amount": 400, "unit": "g", "group": "ragu", "notes": "1 × 400g tin" },
+    { "id": "0008", "name": "vegetable stock", "amount": 500, "unit": "ml", "group": "ragu", "notes": null },
+    { "id": "0009", "name": "tomato purée", "amount": 2, "unit": "tbsp", "group": "ragu", "notes": null },
+    { "id": "0010", "name": "wholewheat penne", "amount": 320, "unit": "g", "group": "pasta", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Soften the soffritto",
+      "content": "Heat {0001} in a heavy pan. Add {0002}, {0003} and {0004}. Cook for 10 minutes until softened.",
+      "timer_seconds": 600,
+      "group": "ragu"
+    },
+    {
+      "title": "Add garlic and lentils",
+      "content": "Stir in {0005}, then {0006}. Cook for 1 minute.",
+      "timer_seconds": null,
+      "group": "ragu"
+    },
+    {
+      "title": "Build and simmer",
+      "content": "Add {0007}, {0008} and {0009}. Simmer for 30 minutes until the lentils are tender and the sauce has thickened.",
+      "timer_seconds": 1800,
+      "group": "ragu"
+    },
+    {
+      "title": "Cook the pasta",
+      "content": "Cook {0010} in well-salted boiling water until al dente. Drain and toss through the ragu.",
+      "timer_seconds": 720,
+      "group": "pasta"
+    }
+  ],
+
+  "notes": "Improves overnight.",
+
+  "derived_components": []
+}

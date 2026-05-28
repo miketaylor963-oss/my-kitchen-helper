@@ -1,0 +1,26 @@
+{
+  "_fixture_notes": "Case 12: Recipe with every optional field omitted from the JSON entirely (key not present, not set to null). Includes only fields with 'Required: yes' in the spec table, plus the array fields that need to be empty-for-recipes (component_layers, derived_components) and meal_types/meal_formats which the spec treats as recipe-only. Spec gap: the template provides explicit null values for cuisine, dietary_category, macros, etc., and explicit [] for dietary_restrictions, nutritional_tags. Does the validator treat 'key missing' as equivalent to 'key present with null/empty value', or require all keys per the template? This fixture takes the aggressive 'omit if not required' interpretation. A 'minimal but template-conforming' companion fixture would test the other reading.",
+
+  "import_type": "recipe",
+  "external_ref": "minimal-recipe",
+  "name": "Boiled Egg",
+
+  "meal_types": [],
+  "meal_formats": [],
+  "component_layers": [],
+
+  "base_servings": 1,
+
+  "ingredients": [
+    { "id": "0001", "name": "large egg" }
+  ],
+
+  "steps": [
+    {
+      "title": "Boil",
+      "content": "Lower {0001} into simmering water and cook for 7 minutes for a just-set yolk."
+    }
+  ],
+
+  "derived_components": []
+}

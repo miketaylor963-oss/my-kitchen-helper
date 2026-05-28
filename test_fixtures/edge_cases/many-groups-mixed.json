@@ -1,0 +1,114 @@
+{
+  "_fixture_notes": "Case 2: Recipe with many distinct group labels and some ingredients/steps left ungrouped (group: null) alongside grouped ones. Six ingredient groups: pickle, dressing, crispy topping, base, roasted veg, herb salad — plus three ungrouped 'to finish' ingredients. Steps mix group labels with two null-group assembly/finishing steps that span multiple sections. Tests cooking-mode UI sectioning when the section vocabulary is dense and non-exhaustive.",
+
+  "import_type": "recipe",
+  "external_ref": "many-groups-mixed",
+  "name": "Layered Freekeh & Roasted Vegetable Bowl",
+  "description": "A layered mezze-style bowl with quick-pickled onion, herb-flecked freekeh, roasted vegetables and crispy chickpeas. Fixture for many-group / mixed-null group testing.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["gluten", "sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["lunch", "dinner"],
+  "meal_formats": ["no_reheat"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 25,
+  "cook_time_minutes": 35,
+
+  "ingredients": [
+    { "id": "0001", "name": "red onion, finely sliced", "amount": 1, "unit": null, "group": "pickle", "notes": null },
+    { "id": "0002", "name": "red wine vinegar", "amount": 3, "unit": "tbsp", "group": "pickle", "notes": null },
+
+    { "id": "0003", "name": "tahini", "amount": 4, "unit": "tbsp", "group": "dressing", "notes": null },
+    { "id": "0004", "name": "lemon, juiced", "amount": 1, "unit": null, "group": "dressing", "notes": null },
+    { "id": "0005", "name": "garlic clove, minced", "amount": 1, "unit": null, "group": "dressing", "notes": null },
+    { "id": "0006", "name": "warm water", "amount": 4, "unit": "tbsp", "group": "dressing", "notes": "more as needed" },
+
+    { "id": "0007", "name": "tinned chickpeas, drained and patted dry", "amount": 400, "unit": "g", "group": "crispy topping", "notes": "1 × 400g tin" },
+    { "id": "0008", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "crispy topping", "notes": null },
+    { "id": "0009", "name": "ground cumin", "amount": 1, "unit": "tsp", "group": "crispy topping", "notes": null },
+
+    { "id": "0010", "name": "freekeh", "amount": 250, "unit": "g", "group": "base", "notes": null },
+    { "id": "0011", "name": "vegetable stock", "amount": 600, "unit": "ml", "group": "base", "notes": null },
+    { "id": "0012", "name": "bay leaf", "amount": 1, "unit": null, "group": "base", "notes": null },
+
+    { "id": "0013", "name": "aubergine, cubed", "amount": 1, "unit": null, "group": "roasted veg", "notes": null },
+    { "id": "0014", "name": "red pepper, sliced", "amount": 1, "unit": null, "group": "roasted veg", "notes": null },
+    { "id": "0015", "name": "courgette, half-mooned", "amount": 1, "unit": null, "group": "roasted veg", "notes": null },
+    { "id": "0016", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "roasted veg", "notes": "for roasting" },
+    { "id": "0017", "name": "za'atar", "amount": 2, "unit": "tsp", "group": "roasted veg", "notes": null },
+
+    { "id": "0018", "name": "flat-leaf parsley, roughly chopped", "amount": 20, "unit": "g", "group": "herb salad", "notes": null },
+    { "id": "0019", "name": "mint leaves, torn", "amount": 10, "unit": "g", "group": "herb salad", "notes": null },
+    { "id": "0020", "name": "cucumber, diced", "amount": 1, "unit": null, "group": "herb salad", "notes": null },
+
+    { "id": "0021", "name": "pomegranate seeds", "amount": 4, "unit": "tbsp", "group": null, "notes": "to scatter" },
+    { "id": "0022", "name": "extra virgin olive oil", "amount": null, "unit": null, "group": null, "notes": "to finish" },
+    { "id": "0023", "name": "sea salt flakes", "amount": null, "unit": null, "group": null, "notes": "to finish" }
+  ],
+
+  "steps": [
+    {
+      "title": "Quick-pickle the onion",
+      "content": "Combine {0001} with {0002} and a pinch of salt in a small bowl. Toss with your hands to coat, then leave to soften while you prepare the rest.",
+      "timer_seconds": null,
+      "group": "pickle"
+    },
+    {
+      "title": "Make the tahini dressing",
+      "content": "Whisk {0003}, {0004} and {0005} together — it will thicken first, then loosen. Whisk in {0006} a tablespoon at a time until pourable but still coating.",
+      "timer_seconds": null,
+      "group": "dressing"
+    },
+    {
+      "title": "Cook the freekeh",
+      "content": "Rinse {0010}, then combine with {0011} and {0012} in a saucepan. Bring to a boil, reduce to a simmer, cover, and cook for 20-25 minutes until tender. Drain any residual liquid and fluff with a fork.",
+      "timer_seconds": 1500,
+      "group": "base"
+    },
+    {
+      "title": "Roast the vegetables",
+      "content": "Heat oven to 220°C. Toss {0013}, {0014} and {0015} with {0016} and {0017} on a large tray. Roast for 25-30 minutes, turning halfway, until caramelised at the edges.",
+      "timer_seconds": 1800,
+      "group": "roasted veg"
+    },
+    {
+      "title": "Crisp the chickpeas",
+      "content": "Heat {0008} in a frying pan over medium-high heat. Add {0007} and fry for 6-8 minutes, shaking the pan occasionally, until golden and crisp at the edges. Stir through {0009} for the last 30 seconds and season.",
+      "timer_seconds": 480,
+      "group": "crispy topping"
+    },
+    {
+      "title": "Toss the herb salad",
+      "content": "In a bowl, combine {0018}, {0019} and {0020}. Don't dress — it will keep fresher for assembly.",
+      "timer_seconds": null,
+      "group": "herb salad"
+    },
+    {
+      "title": "Assemble the bowls",
+      "content": "Spoon the freekeh into four bowls. Top with the roasted vegetables, the herb salad, the crispy chickpeas and the pickled onion (drained). Drizzle generously with the tahini dressing.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Finish and serve",
+      "content": "Scatter over {0021}, drizzle with {0022} and sprinkle with {0023}. Serve immediately.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "All components hold well separately — assemble at the table for meal prep. The dressing keeps for 3 days in the fridge but will need loosening with water before serving.",
+
+  "derived_components": []
+}

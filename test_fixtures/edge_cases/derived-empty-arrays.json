@@ -1,0 +1,72 @@
+{
+  "_fixture_notes": "Case 22 (spec gap): Derived component with empty ingredient_ids and empty step_indices arrays. Both fields are required arrays per spec, but spec doesn't state minimum length. Tests whether 'required array' means 'present and non-empty' or just 'present'. Semantically nonsensical (a component with no ingredients or steps) but literally permitted by the spec wording.",
+
+  "import_type": "recipe",
+  "external_ref": "derived-empty-arrays",
+  "name": "Dressed Rocket with Empty-Arrays Derived Component",
+  "description": "Tests validator behaviour on a derived component where both required reference arrays are empty.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "extra virgin olive oil", "amount": 1, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0002", "name": "rocket leaves", "amount": 80, "unit": "g", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Dress",
+      "content": "Toss {0002} with {0001} and a pinch of salt.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": [
+    {
+      "external_ref": "empty-arrays-component",
+      "name": "Empty Reference Arrays",
+      "description": "A derived component declaring no ingredients and no steps.",
+      "notes": "Spec gap — semantically nonsensical, literally permitted.",
+
+      "component_layers": [
+        { "framework": "component_dinner", "layer": "veg", "family": null }
+      ],
+
+      "cuisine": "british",
+      "dietary_category": "vegan",
+      "dietary_restrictions": [],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 2,
+      "prep_time_minutes": null,
+      "cook_time_minutes": null,
+
+      "ingredient_ids": [],
+      "step_indices": []
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "_fixture_notes": "Case 8: Minimal valid component. Includes only required fields: import_type, external_ref, name, base_servings, component_layers (≥1 entry), ingredients (≥1 with id+name), steps (≥1 with title+content). All optional/nullable fields set to null or empty arrays where the spec requires them present. Tests the floor of what counts as a valid component.",
+
+  "import_type": "component",
+  "external_ref": "minimal-component",
+  "name": "Plain Boiled Rice",
+  "description": null,
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": null,
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": [],
+  "meal_formats": [],
+
+  "component_layers": [
+    { "framework": "component_dinner", "layer": "base", "family": null }
+  ],
+
+  "base_servings": 2,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "basmati rice", "amount": 150, "unit": "g", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook",
+      "content": "Cook {0001} according to packet instructions.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": []
+}

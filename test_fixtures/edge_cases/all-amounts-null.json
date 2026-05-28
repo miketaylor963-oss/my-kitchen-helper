@@ -1,0 +1,50 @@
+{
+  "_fixture_notes": "Case 13: Recipe with every ingredient at amount: null. Variations: 'to taste', 'to serve', 'for drizzling', 'to scatter'. Tests display of recipes with no scalable quantities — shopping-list scaling logic, ingredient render, and whether the UI flags this as unscalable or handles it gracefully.",
+
+  "import_type": "recipe",
+  "external_ref": "all-amounts-null",
+  "name": "Finishing Plate",
+  "description": "A pure-finisher plate of garnishes and seasonings, used as a shared serving board. Fixture exercising amount: null across every ingredient.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": null,
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "extra virgin olive oil", "amount": null, "unit": null, "group": null, "notes": "for drizzling" },
+    { "id": "0002", "name": "sea salt flakes", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "0003", "name": "black pepper, freshly cracked", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "0004", "name": "lemon wedges", "amount": null, "unit": null, "group": null, "notes": "to serve" },
+    { "id": "0005", "name": "fresh dill sprigs", "amount": null, "unit": null, "group": null, "notes": "to garnish" },
+    { "id": "0006", "name": "toasted sesame seeds", "amount": null, "unit": null, "group": null, "notes": "to scatter" },
+    { "id": "0007", "name": "harissa", "amount": null, "unit": null, "group": null, "notes": "to serve on the side" }
+  ],
+
+  "steps": [
+    {
+      "title": "Assemble the plate",
+      "content": "Drizzle the dish with {0001}, scatter generously with {0002}, {0003} and {0006}. Garnish with {0005} and {0004}. Serve {0007} alongside.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Quantities are deliberately left unspecified — adjust to the dish being finished.",
+
+  "derived_components": []
+}

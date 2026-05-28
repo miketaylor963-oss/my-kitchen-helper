@@ -1,0 +1,46 @@
+{
+  "_fixture_notes": "Case 10: Classification fields at boundaries. cuisine: null (null boundary). dietary_category: null (null boundary). dietary_restrictions: [] (empty array boundary). nutritional_tags: ['omega3_strong'] (single-item boundary). meal_types: ['lunch'] (single-item boundary). meal_formats: [] (empty array boundary). Tests how queries handle classifications-with-nulls and how UI badges render when only a subset of fields have values.",
+
+  "import_type": "recipe",
+  "external_ref": "classification-boundaries",
+  "name": "Walnut & Linseed Porridge Topping",
+  "description": "Classification boundary fixture — all classification fields at different boundary states.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": null,
+  "dietary_category": null,
+  "dietary_restrictions": [],
+  "nutritional_tags": ["omega3_strong"],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["lunch"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "walnuts, roughly chopped", "amount": 80, "unit": "g", "group": null, "notes": null },
+    { "id": "0002", "name": "ground linseed", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0003", "name": "chia seeds", "amount": 1, "unit": "tbsp", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Combine",
+      "content": "Mix {0001}, {0002} and {0003} in a sealed jar. Use a tablespoon per portion as a porridge topping.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Keeps in an airtight jar for two weeks.",
+
+  "derived_components": []
+}

@@ -1,0 +1,90 @@
+{
+  "_fixture_notes": "Case 6: Derived component covers the full ingredient list and full step range of the parent. ingredient_ids covers every parent ingredient and step_indices covers every parent step index. Tests whether the validator flags 'derived component is identical to parent' as redundant or accepts it. Realistic case: a sauce recipe where the entire thing also stands as a standalone component.",
+
+  "import_type": "recipe",
+  "external_ref": "derived-covers-full-recipe",
+  "name": "Salsa Verde",
+  "description": "Italian herb-and-caper sauce. The recipe stands alone but the entire preparation is also a reusable finisher component.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 6,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "flat-leaf parsley, finely chopped", "amount": 40, "unit": "g", "group": null, "notes": "leaves only" },
+    { "id": "0002", "name": "capers, rinsed and chopped", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0003", "name": "cornichons, finely chopped", "amount": 4, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "garlic clove, minced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0005", "name": "dijon mustard", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0006", "name": "red wine vinegar", "amount": 1, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0007", "name": "extra virgin olive oil", "amount": 6, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0008", "name": "salt and black pepper", "amount": null, "unit": null, "group": null, "notes": "to taste" }
+  ],
+
+  "steps": [
+    {
+      "title": "Combine the solids",
+      "content": "In a bowl, combine {0001}, {0002}, {0003} and {0004}. Mix well.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Add the liquid base",
+      "content": "Stir in {0005} and {0006}, then slowly whisk in {0007} until you have a loose, spoonable sauce.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Season and rest",
+      "content": "Season with {0008}, taste and adjust. Leave to stand for 10 minutes so the flavours meld before serving.",
+      "timer_seconds": 600,
+      "group": null
+    }
+  ],
+
+  "notes": "Keeps for 3 days in the fridge. Loosen with a little more oil if it sets up.",
+
+  "derived_components": [
+    {
+      "external_ref": "salsa-verde-finisher",
+      "name": "Salsa Verde (Finisher)",
+      "description": "Reusable herb-and-caper sauce for dressing grilled vegetables, poached fish, or roast potatoes.",
+      "notes": "Same recipe, registered as a finisher component for the dinner framework.",
+
+      "component_layers": [
+        { "framework": "component_dinner", "layer": "finisher", "family": null }
+      ],
+
+      "cuisine": "british",
+      "dietary_category": "vegan",
+      "dietary_restrictions": [],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 6,
+      "prep_time_minutes": 10,
+      "cook_time_minutes": null,
+
+      "ingredient_ids": ["0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008"],
+      "step_indices": [0, 1, 2]
+    }
+  ]
+}

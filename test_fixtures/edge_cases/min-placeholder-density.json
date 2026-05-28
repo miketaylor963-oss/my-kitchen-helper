@@ -1,0 +1,62 @@
+{
+  "_fixture_notes": "Case 4: Minimum placeholder density. Recipe has 7 ingredients but step content uses NO {NNNN} placeholders — steps describe the cooking entirely in prose. Tests whether the validator requires any minimum placeholder coverage and whether the cooking-mode UI handles steps with zero linked ingredients gracefully. Violates the conversion convention ('use {NNNN} placeholders for every ingredient referenced in a step') but does not violate any stated validator rule.",
+
+  "import_type": "recipe",
+  "external_ref": "min-placeholder-density",
+  "name": "Lemon-Roasted Cauliflower",
+  "description": "Cauliflower roasted with lemon, capers and pine nuts. Fixture exercising zero-placeholder step content.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side", "dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": 35,
+
+  "ingredients": [
+    { "id": "0001", "name": "cauliflower, broken into florets", "amount": 1, "unit": null, "group": null, "notes": "1 medium head" },
+    { "id": "0002", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0003", "name": "lemon, sliced into rounds", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "capers, rinsed", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0005", "name": "pine nuts", "amount": 30, "unit": "g", "group": null, "notes": null },
+    { "id": "0006", "name": "flat-leaf parsley, chopped", "amount": 10, "unit": "g", "group": null, "notes": "to finish" },
+    { "id": "0007", "name": "sea salt flakes", "amount": null, "unit": null, "group": null, "notes": "to taste" }
+  ],
+
+  "steps": [
+    {
+      "title": "Prepare and season",
+      "content": "Heat the oven to 220°C. Toss the cauliflower florets in olive oil on a large tray, season generously with sea salt, and arrange in a single layer with the lemon slices tucked between.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Roast",
+      "content": "Roast for 25 minutes until the cauliflower is charred at the edges and the lemon slices have caramelised. Scatter over the capers and pine nuts and return to the oven for a further 5 minutes until the nuts are golden.",
+      "timer_seconds": 1800,
+      "group": null
+    },
+    {
+      "title": "Finish",
+      "content": "Transfer to a serving platter and scatter generously with chopped parsley. Serve warm or at room temperature.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Pair with grain bowls or as a side to roast chicken or fish.",
+
+  "derived_components": []
+}

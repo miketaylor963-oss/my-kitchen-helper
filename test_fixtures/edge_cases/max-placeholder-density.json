@@ -1,0 +1,87 @@
+{
+  "_fixture_notes": "Case 3: Maximum placeholder density. 18 ingredients, 5 steps, 32 total placeholder instances. Step 1 alone contains 18 placeholders (9 ingredients each referenced twice in alternative-method clauses). Several ingredients referenced 3+ times across the recipe. Tests placeholder parser robustness, ingredient-ref deduplication, and whether the validator chokes on repeated references within a single step.",
+
+  "import_type": "recipe",
+  "external_ref": "max-placeholder-density",
+  "name": "Spiced Vegetable Curry with Pounded Paste",
+  "description": "A paste-from-scratch vegetable curry. Fixture exercising high placeholder density across all steps.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": ["microwave"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 30,
+  "cook_time_minutes": 35,
+
+  "ingredients": [
+    { "id": "0001", "name": "dried red chillies, soaked and drained", "amount": 6, "unit": null, "group": "paste", "notes": null },
+    { "id": "0002", "name": "lemongrass stalks, finely sliced", "amount": 2, "unit": null, "group": "paste", "notes": null },
+    { "id": "0003", "name": "galangal, peeled and sliced", "amount": 30, "unit": "g", "group": "paste", "notes": null },
+    { "id": "0004", "name": "garlic cloves", "amount": 4, "unit": null, "group": "paste", "notes": null },
+    { "id": "0005", "name": "shallots, peeled", "amount": 4, "unit": null, "group": "paste", "notes": null },
+    { "id": "0006", "name": "coriander roots, scrubbed", "amount": 2, "unit": null, "group": "paste", "notes": null },
+    { "id": "0007", "name": "kaffir lime leaves, central rib removed", "amount": 4, "unit": null, "group": "paste", "notes": null },
+    { "id": "0008", "name": "white peppercorns", "amount": 1, "unit": "tsp", "group": "paste", "notes": null },
+    { "id": "0009", "name": "fermented bean paste", "amount": 1, "unit": "tbsp", "group": "paste", "notes": null },
+
+    { "id": "0010", "name": "vegetable oil", "amount": 2, "unit": "tbsp", "group": "curry", "notes": null },
+    { "id": "0011", "name": "tinned coconut milk", "amount": 400, "unit": "ml", "group": "curry", "notes": "1 × 400ml tin, full-fat" },
+    { "id": "0012", "name": "vegetable stock", "amount": 200, "unit": "ml", "group": "curry", "notes": null },
+    { "id": "0013", "name": "firm tofu, cubed", "amount": 300, "unit": "g", "group": "curry", "notes": null },
+    { "id": "0014", "name": "aubergine, cubed", "amount": 1, "unit": null, "group": "curry", "notes": null },
+    { "id": "0015", "name": "bamboo shoots, drained", "amount": 225, "unit": "g", "group": "curry", "notes": "1 tin" },
+
+    { "id": "0016", "name": "thai basil leaves", "amount": 30, "unit": "g", "group": "finish", "notes": null },
+    { "id": "0017", "name": "lime, juiced", "amount": 1, "unit": null, "group": "finish", "notes": null },
+    { "id": "0018", "name": "palm sugar, grated", "amount": 1, "unit": "tbsp", "group": "finish", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Pound the curry paste",
+      "content": "Pound {0001}, {0002}, {0003}, {0004}, {0005}, {0006}, {0007} and {0008} to a coarse paste in a mortar and pestle, working through the ingredients in order from hardest to softest. Add {0009} and continue pounding until smooth and homogeneous. Alternatively, blitz {0001}, {0002}, {0003}, {0004}, {0005}, {0006}, {0007}, {0008} and {0009} in a small food processor with a splash of water — scrape down the sides several times.",
+      "timer_seconds": 600,
+      "group": "paste"
+    },
+    {
+      "title": "Fry the paste",
+      "content": "Heat {0010} in a heavy-based pan over medium heat. Add the curry paste and fry for 3-4 minutes until deeply fragrant, then stir in half of {0011}. Cook, stirring frequently, until the oil splits from the coconut cream — this stage is essential for flavour depth.",
+      "timer_seconds": 480,
+      "group": "curry"
+    },
+    {
+      "title": "Build the curry body",
+      "content": "Add the remaining {0011} and {0012}. Stir in {0013}, {0014} and {0015}. Bring to a gentle simmer.",
+      "timer_seconds": null,
+      "group": "curry"
+    },
+    {
+      "title": "Simmer until tender",
+      "content": "Simmer uncovered for 15-18 minutes until {0014} is completely tender and {0013} has taken on the curry colour. The sauce should reduce slightly and thicken to coat a spoon.",
+      "timer_seconds": 1080,
+      "group": "curry"
+    },
+    {
+      "title": "Season and finish",
+      "content": "Stir in {0017} and {0018}, then taste. Adjust with more {0017} for acidity or more {0018} for sweetness — the balance should be slightly sweet, slightly sour, salty and spicy. Tear in {0016} just before serving.",
+      "timer_seconds": null,
+      "group": "finish"
+    }
+  ],
+
+  "notes": "Paste keeps for a week in the fridge or freezes well in tablespoon portions. Swap aubergine for whatever firm vegetable is to hand — sweet potato, pumpkin or green beans all work.",
+
+  "derived_components": []
+}

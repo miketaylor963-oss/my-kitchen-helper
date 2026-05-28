@@ -1,0 +1,99 @@
+{
+  "_fixture_notes": "Case 16: Derived component with non-sorted AND duplicated step_indices. Parent has 5 steps (indices 0-4). Derived component step_indices: [3, 1, 1, 2] — out of order, and index 1 appears twice. Spec requires valid 0-based indices but is silent on ordering and uniqueness. Tests validator strictness on array contents and importer behaviour on duplicate step copying.",
+
+  "import_type": "recipe",
+  "external_ref": "derived-unsorted-duplicated-step-indices",
+  "name": "Pickled Cucumber Side",
+  "description": "Quick cucumber pickle with a derived component referencing out-of-order, duplicated step indices.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "japanese",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "cucumber, sliced", "amount": 1, "unit": null, "group": "pickle", "notes": null },
+    { "id": "0002", "name": "rice vinegar", "amount": 3, "unit": "tbsp", "group": "pickle", "notes": null },
+    { "id": "0003", "name": "caster sugar", "amount": 1, "unit": "tsp", "group": "pickle", "notes": null },
+    { "id": "0004", "name": "soy sauce", "amount": 1, "unit": "tsp", "group": "pickle", "notes": null },
+    { "id": "0005", "name": "sesame seeds, toasted", "amount": 1, "unit": "tsp", "group": "pickle", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Salt the cucumber",
+      "content": "Toss {0001} with a pinch of salt and leave to draw out moisture for 10 minutes.",
+      "timer_seconds": 600,
+      "group": "pickle"
+    },
+    {
+      "title": "Make the dressing",
+      "content": "Whisk {0002}, {0003} and {0004} until the sugar dissolves.",
+      "timer_seconds": null,
+      "group": "pickle"
+    },
+    {
+      "title": "Drain the cucumber",
+      "content": "Squeeze {0001} gently to remove the drawn-out moisture.",
+      "timer_seconds": null,
+      "group": "pickle"
+    },
+    {
+      "title": "Combine and rest",
+      "content": "Toss the cucumber with the dressing and rest for 5 minutes.",
+      "timer_seconds": 300,
+      "group": "pickle"
+    },
+    {
+      "title": "Finish",
+      "content": "Scatter with {0005} and serve.",
+      "timer_seconds": null,
+      "group": "pickle"
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": [
+    {
+      "external_ref": "pickled-cucumber-component",
+      "name": "Pickled Cucumber (Component)",
+      "description": "Standalone pickled cucumber for use as a side or topping.",
+      "notes": "step_indices [3, 1, 1, 2] is intentionally non-sorted and contains a duplicate.",
+
+      "component_layers": [
+        { "framework": "mezze", "layer": "extras", "family": null }
+      ],
+
+      "cuisine": "japanese",
+      "dietary_category": "vegan",
+      "dietary_restrictions": ["soy"],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 4,
+      "prep_time_minutes": 10,
+      "cook_time_minutes": null,
+
+      "ingredient_ids": ["0001", "0002", "0003", "0004", "0005"],
+      "step_indices": [3, 1, 1, 2]
+    }
+  ]
+}

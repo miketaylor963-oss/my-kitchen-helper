@@ -1,0 +1,39 @@
+{
+  "_fixture_notes": "Case 21 (spec gap): Recipe with steps: []. Spec doesn't state a minimum step count. Tests whether the validator enforces a minimum and how cooking-mode UI handles a recipe with ingredients but no method.",
+
+  "import_type": "recipe",
+  "external_ref": "empty-steps-array",
+  "name": "Raw Vegetable Crudités",
+  "description": "Just chop and serve — fixture tests zero-steps recipe.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": null,
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "carrots, cut into sticks", "amount": 4, "unit": null, "group": null, "notes": null },
+    { "id": "0002", "name": "celery sticks, cut into batons", "amount": 4, "unit": null, "group": null, "notes": null },
+    { "id": "0003", "name": "cucumber, cut into sticks", "amount": 1, "unit": null, "group": null, "notes": null }
+  ],
+
+  "steps": [],
+
+  "notes": "Serve with hummus or another dip.",
+
+  "derived_components": []
+}

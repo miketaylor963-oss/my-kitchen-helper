@@ -1,0 +1,59 @@
+{
+  "_fixture_notes": "Case 14: Placeholder parser edges. Step content includes valid {NNNN} placeholders alongside several near-miss forms: {1} (one digit), {01} (two digits), {00001} (five digits), {0001 } (trailing space inside braces), {ABCD} (non-numeric), {note} and {adjust} (literal text). Under a strict /\\{[0-9]{4}\\}/ regex none of the near-misses should resolve; under a lenient parser some may. This fixture should pass strict validation but probes parser leniency. All ingredient IDs that DO need to resolve are present (0001-0004).",
+
+  "import_type": "recipe",
+  "external_ref": "placeholder-parsing-edges",
+  "name": "Probe Recipe — Placeholder Edges",
+  "description": "Step content stress-tests the placeholder parser with near-miss forms alongside valid placeholders.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0002", "name": "garlic cloves, sliced", "amount": 3, "unit": null, "group": null, "notes": null },
+    { "id": "0003", "name": "chilli flakes", "amount": 0.5, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0004", "name": "stale sourdough, torn into pieces", "amount": 200, "unit": "g", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Warm the oil — near-miss padding",
+      "content": "Heat {0001} in a pan. Wrong-padding probes follow: a one-digit ref {1}, a two-digit ref {01}, and a five-digit ref {00001} — none should resolve under a strict parser.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Add aromatics — near-miss whitespace and non-numeric",
+      "content": "Add {0002} and {0003}. Near-miss forms in this step: a trailing-space form {0001 } (note the space inside the braces) and a non-numeric form {ABCD} — neither should resolve.",
+      "timer_seconds": 120,
+      "group": null
+    },
+    {
+      "title": "Crisp the bread — literal-text braces",
+      "content": "Add {0004} and toss to coat. Watch carefully {note: heat varies} and {adjust} as needed — the words 'note' and 'adjust' inside braces are deliberately literal text, not placeholders.",
+      "timer_seconds": 360,
+      "group": null
+    }
+  ],
+
+  "notes": "Edge-case probe — not intended to be cooked.",
+
+  "derived_components": []
+}

@@ -1,0 +1,63 @@
+{
+  "_fixture_notes": "Case 1: Recipe with no ingredient groups. Every ingredient has group: null and every step has group: null. Tests that ungrouped recipes pass validation without group-coordination errors and that the cooking-mode UI handles a single un-sectioned method.",
+
+  "import_type": "recipe",
+  "external_ref": "no-groups",
+  "name": "Quick Tomato & Red Lentil Soup",
+  "description": "A flat, ungrouped soup recipe used as a no-groups validation fixture.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "british",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["lunch", "dinner"],
+  "meal_formats": ["thermos"],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": 30,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0002", "name": "onion, diced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0003", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "red lentils", "amount": 200, "unit": "g", "group": null, "notes": null },
+    { "id": "0005", "name": "tinned tomatoes", "amount": 400, "unit": "g", "group": null, "notes": "1 × 400g tin" },
+    { "id": "0006", "name": "vegetable stock", "amount": 800, "unit": "ml", "group": null, "notes": null },
+    { "id": "0007", "name": "smoked paprika", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0008", "name": "salt and black pepper", "amount": null, "unit": null, "group": null, "notes": "to taste" }
+  ],
+
+  "steps": [
+    {
+      "title": "Soften the aromatics",
+      "content": "Heat {0001} in a saucepan over medium heat. Add {0002} and cook for 5 minutes until softened, then stir in {0003} and cook for another minute until fragrant.",
+      "timer_seconds": 360,
+      "group": null
+    },
+    {
+      "title": "Add lentils, tomatoes and stock",
+      "content": "Stir in {0004}, {0005}, {0006} and {0007}. Bring to a gentle simmer over medium-high heat.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Simmer until thickened",
+      "content": "Simmer uncovered for 25 minutes, stirring occasionally, until the lentils have broken down and the soup has thickened to your liking. Season with {0008} and adjust to taste before serving.",
+      "timer_seconds": 1500,
+      "group": null
+    }
+  ],
+
+  "notes": "Blend with a stick blender for a smooth finish if preferred. Keeps in the fridge for up to 3 days and freezes well in portions.",
+
+  "derived_components": []
+}

@@ -1,0 +1,53 @@
+{
+  "_fixture_notes": "Case 9: Component registering against three component_layers entries across three different seeded frameworks (smorrebrod, mezze, component_dinner). Tests whether one component can register across multiple frameworks at once. All families null — only component_dinner/topping has seeded families and none of these layers is that, so mixed-family coverage is left to a dedicated fixture if needed.",
+
+  "import_type": "component",
+  "external_ref": "component-multi-framework",
+  "name": "Whipped Butter Bean Spread",
+  "description": "A creamy butter bean spread that doubles as a dinner base, a lunch spread, or a side dip.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": 8.0,
+  "carbs_g": 18.0,
+  "gi_index": null,
+
+  "meal_types": [],
+  "meal_formats": [],
+
+  "component_layers": [
+    { "framework": "smorrebrod", "layer": "spread", "family": null },
+    { "framework": "mezze", "layer": "dip", "family": null },
+    { "framework": "component_dinner", "layer": "finisher", "family": null }
+  ],
+
+  "base_servings": 4,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "tinned butter beans, drained", "amount": 400, "unit": "g", "group": null, "notes": "1 × 400g tin" },
+    { "id": "0002", "name": "tahini", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0003", "name": "lemon, juiced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "garlic clove, minced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0005", "name": "extra virgin olive oil", "amount": 3, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0006", "name": "ground cumin", "amount": 0.5, "unit": "tsp", "group": null, "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Blend",
+      "content": "Blend {0001}, {0002}, {0003}, {0004}, {0005} and {0006} in a food processor until completely smooth. Add a splash of water if needed for consistency. Season generously.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Keeps for 4 days. Loosen with water and a glug of olive oil before serving if it firms up.",
+
+  "derived_components": []
+}

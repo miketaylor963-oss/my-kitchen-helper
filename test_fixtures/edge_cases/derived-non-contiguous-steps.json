@@ -1,0 +1,115 @@
+{
+  "_fixture_notes": "Case 7: Derived component with non-contiguous step_indices. Parent recipe has 7 steps (indices 0-6); derived component picks [0, 3, 5] — skipping steps 1, 2, 4, 6. Tests whether the importer correctly copies non-contiguous step slices, whether step ordering in the copied component preserves the original sort_order, and whether the derived component renders coherently with gaps.",
+
+  "import_type": "recipe",
+  "external_ref": "derived-non-contiguous-steps",
+  "name": "Roasted Squash Bowl with Infused Lemon Oil",
+  "description": "Roasted squash plated with an infused lemon-herb oil that's built across multiple steps. Fixture for non-contiguous derived component step ranges.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 20,
+  "cook_time_minutes": 40,
+
+  "ingredients": [
+    { "id": "0001", "name": "extra virgin olive oil", "amount": 6, "unit": "tbsp", "group": "lemon oil", "notes": null },
+    { "id": "0002", "name": "lemon, zested", "amount": 1, "unit": null, "group": "lemon oil", "notes": null },
+    { "id": "0003", "name": "garlic clove, finely grated", "amount": 1, "unit": null, "group": "lemon oil", "notes": null },
+    { "id": "0004", "name": "flat-leaf parsley, finely chopped", "amount": 10, "unit": "g", "group": "lemon oil", "notes": null },
+    { "id": "0005", "name": "butternut squash, peeled and cubed", "amount": 800, "unit": "g", "group": "squash", "notes": null },
+    { "id": "0006", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "squash", "notes": "for roasting" },
+    { "id": "0007", "name": "puy lentils", "amount": 200, "unit": "g", "group": "lentils", "notes": null },
+    { "id": "0008", "name": "vegetable stock", "amount": 500, "unit": "ml", "group": "lentils", "notes": null },
+    { "id": "0009", "name": "rocket leaves", "amount": 60, "unit": "g", "group": "assembly", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Combine the infused oil base",
+      "content": "Combine {0001}, {0002} and {0003} in a small bowl. Leave to infuse while you prepare the rest of the dish.",
+      "timer_seconds": null,
+      "group": "lemon oil"
+    },
+    {
+      "title": "Start the squash",
+      "content": "Heat oven to 220°C. Toss {0005} with {0006} on a tray and season. Roast for 30 minutes.",
+      "timer_seconds": 1800,
+      "group": "squash"
+    },
+    {
+      "title": "Cook the lentils",
+      "content": "Combine {0007} with {0008} in a saucepan. Bring to a boil, reduce to a simmer, and cook for 25 minutes until tender. Drain.",
+      "timer_seconds": 1500,
+      "group": "lentils"
+    },
+    {
+      "title": "Finish the infused oil with herbs",
+      "content": "Stir {0004} into the infused oil. Taste and season.",
+      "timer_seconds": null,
+      "group": "lemon oil"
+    },
+    {
+      "title": "Check the squash",
+      "content": "The squash should be deeply caramelised at the edges. If not, return to the oven for a further 5-10 minutes.",
+      "timer_seconds": null,
+      "group": "squash"
+    },
+    {
+      "title": "Rest the lemon oil",
+      "content": "Allow the lemon oil to stand at room temperature for at least 10 minutes for the flavours to develop.",
+      "timer_seconds": 600,
+      "group": "lemon oil"
+    },
+    {
+      "title": "Assemble",
+      "content": "Spoon lentils onto plates, top with roasted squash and {0009}, and drizzle generously with the lemon oil.",
+      "timer_seconds": null,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "The infused oil benefits from at least 30 minutes' standing time if you can spare it.",
+
+  "derived_components": [
+    {
+      "external_ref": "lemon-herb-infused-oil",
+      "name": "Lemon & Herb Infused Oil",
+      "description": "A standalone infused oil for drizzling over roast vegetables, grains or grilled fish.",
+      "notes": "Three-step preparation pulled from the parent recipe — combine (step 0), finish with herbs (step 3), rest (step 5).",
+
+      "component_layers": [
+        { "framework": "component_dinner", "layer": "finisher", "family": null }
+      ],
+
+      "cuisine": "moroccan",
+      "dietary_category": "vegan",
+      "dietary_restrictions": [],
+      "nutritional_tags": [],
+
+      "protein_g": null,
+      "carbs_g": null,
+      "gi_index": null,
+
+      "base_servings": 4,
+      "prep_time_minutes": 5,
+      "cook_time_minutes": null,
+
+      "ingredient_ids": ["0001", "0002", "0003", "0004"],
+      "step_indices": [0, 3, 5]
+    }
+  ]
+}

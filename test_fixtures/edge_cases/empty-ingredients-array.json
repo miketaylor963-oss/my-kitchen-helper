@@ -1,0 +1,42 @@
+{
+  "_fixture_notes": "Case 20 (spec gap): Recipe with ingredients: []. The spec describes 'Array of ingredient rows' without stating a minimum length. The validator rule 'every {NNNN} placeholder must resolve' is vacuously satisfied with no ingredients (no placeholders to resolve). Tests whether the validator enforces a minimum of one ingredient and how downstream features (shopping list, ingredient consistency check) behave with zero rows.",
+
+  "import_type": "recipe",
+  "external_ref": "empty-ingredients-array",
+  "name": "Pasta With Whatever You Have",
+  "description": "Zero-ingredient recipe for testing whether the validator allows an empty ingredient list.",
+  "source": "Synthesised fixture, May 2026",
+
+  "cuisine": null,
+  "dietary_category": null,
+  "dietary_restrictions": [],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [],
+
+  "steps": [
+    {
+      "title": "Improvise",
+      "content": "Cook pasta and toss with whatever sauce ingredients are on hand. Season to taste.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": null,
+
+  "derived_components": []
+}
