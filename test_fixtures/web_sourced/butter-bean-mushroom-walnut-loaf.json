@@ -20,8 +20,8 @@
   "component_layers": [],
 
   "base_servings": 6,
-  "prep_time_minutes": 35,
-  "cook_time_minutes": 70,
+  "prep_time_minutes": null,
+  "cook_time_minutes": 40,
 
   "ingredients": [
     { "id": "0001", "name": "butter beans, drained and rinsed", "amount": 800, "unit": "g", "group": null, "notes": "2 × 400g tins" },

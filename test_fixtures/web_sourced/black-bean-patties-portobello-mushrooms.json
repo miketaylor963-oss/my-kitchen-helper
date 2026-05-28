@@ -20,8 +20,8 @@
   "component_layers": [],
 
   "base_servings": 2,
-  "prep_time_minutes": 20,
-  "cook_time_minutes": 55,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
 
   "ingredients": [
     { "id": "0001", "name": "tin black beans, drained and rinsed", "amount": 1, "unit": null, "group": "patties", "notes": null },

@@ -20,8 +20,8 @@
   "component_layers": [],
 
   "base_servings": 4,
-  "prep_time_minutes": 25,
-  "cook_time_minutes": 50,
+  "prep_time_minutes": null,
+  "cook_time_minutes": 30,
 
   "ingredients": [
     { "id": "0001", "name": "floury potatoes, peeled and chunked", "amount": 500, "unit": "g", "group": "mash", "notes": "Maris Piper or King Edward" },

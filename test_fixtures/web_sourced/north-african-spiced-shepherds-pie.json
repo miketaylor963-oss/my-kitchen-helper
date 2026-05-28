@@ -20,8 +20,8 @@
   "component_layers": [],
 
   "base_servings": 4,
-  "prep_time_minutes": 25,
-  "cook_time_minutes": 70,
+  "prep_time_minutes": null,
+  "cook_time_minutes": 30,
 
   "ingredients": [
     { "id": "0001", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "filling", "notes": null },
