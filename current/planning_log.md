@@ -1088,7 +1088,7 @@ For the 2B.1 prompt itself when it's drafted:
 
 #### Carry-forward to 2B.2
 
-Before the 2B.2 prompt is drafted, run a one-pass audit of the 11 remaining `web_sourced` fixtures against the live seed — check every lookup code (cuisine, dietary_category, dietary_restrictions, nutritional_tags, meal_types, meal_formats) against the values actually in the DB. Issue 2B.1-1 showed that a fixture can pass the validator (code format correct) yet use a code that isn't seeded; that's benign for validation but could skew matching expectations if the fixture is used to calibrate 2B.2's matching output.
+Before the 2B.2 prompt is drafted, run a one-pass audit of the 11 remaining `web_sourced` fixtures against the live seed — check every lookup code (cuisine, dietary_category, dietary_restrictions, nutritional_tags, meal_types, meal_formats) against the values actually in the DB. Issue 2B.1-1 showed that a fixture can pass the validator (code format correct) yet use a code that isn't seeded; that's benign for validation but could skew matching expectations if the fixture is used to calibrate 2B.2's matching output. Update: Audit skipped by decision — the fixtures were prepped recently and the codes are believed correct. Any incorrect code surfaced during 2B.2's matching work gets fixed in the moment, same recovery shape as classic-houmous in 2B.1.
 
 For the 2B.2 prompt itself when it's drafted:
 - Diff-guard line, same wording as 2A.3 onwards.
