@@ -1085,3 +1085,15 @@ For the 2B.1 prompt itself when it's drafted:
 **Resolution:** Not fixed this slice — out of 2B.1 scope. Logged here so the next slice that touches the F2A ingredient admin owns the fix, or so a future tidy slice can pick up the cluster.
 
 **Implication:** Carry-forward to whichever slice next edits that file. The fix is likely a typed wrapper around the nested select rather than a schema change — but confirm before assuming. If no slice naturally touches the file in F2, schedule a focused tidy before F2 close-out.
+
+#### Carry-forward to 2B.2
+
+Before the 2B.2 prompt is drafted, run a one-pass audit of the 11 remaining `web_sourced` fixtures against the live seed — check every lookup code (cuisine, dietary_category, dietary_restrictions, nutritional_tags, meal_types, meal_formats) against the values actually in the DB. Issue 2B.1-1 showed that a fixture can pass the validator (code format correct) yet use a code that isn't seeded; that's benign for validation but could skew matching expectations if the fixture is used to calibrate 2B.2's matching output.
+
+For the 2B.2 prompt itself when it's drafted:
+- Diff-guard line, same wording as 2A.3 onwards.
+- Split-smoke close-out reminder (Decision 48). 2B.2's smoke surface will include unauth items (matching preview is read-only); state the auth/unauth split explicitly, same as 2B.1.
+- Build confirmation is manual. `gh` is not available (2A.5 finding). After push, stop and wait for confirmation in chat that the Cloudflare build has gone green before running smoke tests. Don't infer build state from anything else.
+- Advisory consistency check (rule 204) is owned by 2B.2 and must be implemented this slice. At close-out, reconcile the `advisory-consistency-trip` manifest row from "pass (advisory deferred to 2B.2)" back to "pass (advisory)" — this is an explicit close-out step, not a tidy-up.
+- Smoke script note: `canValidate` in the import page requires both lookups loaded AND a non-empty textarea. Any Playwright script that waits on the Validate button enabling must seed a placeholder value into the textarea first (e.g. `{}`) before the wait, otherwise the button never enables regardless of how long the script waits. Established in 2B.1's smoke run.
+- TS errors in `admin.ingredients.$id.index.tsx` (Issue 2B.1-2): 2B.2's matching UI probably won't touch this file, so the fix is unlikely to land here. Carry forward to 2B.3 or schedule a focused tidy before F2 close-out. Restating so the issue has a visible trail beyond the close-out section.
