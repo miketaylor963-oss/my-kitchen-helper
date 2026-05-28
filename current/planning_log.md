@@ -1045,3 +1045,43 @@ For the 2B.1 prompt itself when it's drafted:
 - Diff-guard line, same wording as 2A.3 onwards.
 - Sharpened split-smoke close-out reminder (Decision 48). 2B.1's smoke test is unauth-only (validation has no auth gate), so the human-auth wait is null — but the wording goes in for consistency and to keep the reflex.
 - Blocked-state delete smoke (2A.5 Finding 1, re-run on a real `meal_ingredient` reference) reserved for 2B.3, not .1 or .2. .1 and .2 don't write to `meal_ingredient`.
+
+---
+
+### 2B.1 close-out decisions and issues
+
+#### Decision 49 — Advisory consistency check deferred to 2B.2; manifest reconciled
+
+**Context:** The import spec's advisory ingredient-consistency check (rule 204) depends on knowing each ingredient's master `dietary_category_id`, which requires ingredient→master matching. Matching is 2B.2 (Decision 43). The 2B.1 prompt confirmed this deferral, and the `advisory-consistency-trip` fixture was expected to produce "pass (advisory)" per the original manifest.
+
+**Choice:** Advisory check not implemented in 2B.1. `advisory-consistency-trip` validates clean (structurally valid recipe, no advisory raised). Manifest row updated from "pass (advisory)" to "pass (advisory deferred to 2B.2)" to reflect what the validator actually does this slice.
+
+**Reasoning:** The manifest expected an advisory the 2B.1 slice boundary doesn't permit — the deferral was known going in (Decision 43), but the manifest pre-dated the decision to trace it explicitly at close-out. Updating the manifest now keeps the smoke surface honest: a future operator running the fixture loop will see the correct expected outcome, not one that implies an advisory was raised and passed.
+
+**Implication:** 2B.2 implements rule 204 and reconciles the `advisory-consistency-trip` manifest row again — from "pass (advisory deferred to 2B.2)" back to "pass (advisory)". The fixture itself is structurally valid and correct — no change needed to the JSON. This action is owned by the 2B.2 prompt's close-out steps.
+
+#### Decision 50 — Top-level external_ref DB-uniqueness check kept out of the validator; remains at the commit path
+
+**Context:** During 2B.1 prompt review, CC proposed adding a pre-commit DB-uniqueness check for the top-level `external_ref` to the validator, on the grounds that the spec (rule 187) says "unique in the database."
+
+**Choice:** Not added. The validator does within-payload derived-ref uniqueness checks (no DB needed) but does no top-level `external_ref` DB lookup. Uniqueness stays enforced at 2B.3's commit path via the Postgres `23505` catch, per Decision 47.
+
+**Reasoning:** Two grounds. First, Decision 47 already settled where uniqueness is enforced — and the spec itself says "same slug means update, not duplicate," so a duplicate isn't unambiguously a validation error. A pre-commit hard-reject would both duplicate the `23505` mechanism and pre-empt the re-import/upsert semantics F2C owns. Second, the "vacuous in 2B.1" premise CC offered didn't hold: `external_ref` uniqueness is a column constraint regardless of how rows got there, and the F1 library covers the same dishes as the `web_sourced` fixtures — a live collision would fail an expected-pass fixture in the smoke test.
+
+**Implication:** 2B.3 owns the duplicate-handling UX (catch `23505`, surface "An import with this external_ref already exists. Re-import / update lands in F2C"). If 2B.3 wants a non-blocking "this ref already exists, will be a re-import" advisory at validate time, that's a 2B.3 call alongside the commit UX — not a 2B.1 retrofit. The 2B.3 prompt should cite this decision so the deferral reasoning isn't reconstructed from scratch.
+
+#### Issue 2B.1-1 — classic-houmous fixture: cuisine code "lebanese" not seeded
+
+**Context:** The smoke test found `classic-houmous.json` failing with `cuisine — Unknown code "lebanese"`. The seeded cuisine table has `middle_eastern` but not `lebanese`. The fixture was converted from a web PDF during Pre-2B.1 and the converter used a cuisine code that isn't in the seed.
+
+**Resolution:** Fixture updated to `"cuisine": "middle_eastern"`. The validator was correct to reject `lebanese` — the seed is the authority (standing brief §1). This is a fixture-prep conversion error, not a spec gap or validator bug.
+
+**Implication:** Smoke test passes 36/36 after the fix. No DB change needed. Worth a one-pass audit of the other 11 `web_sourced` fixtures against the live seed before 2B.2 starts using them for matching — a fixture using a non-seeded but valid-format code would pass 2B.1's validator (codes are checked) but could mis-train 2B.2's matching expectations on adjacent fields. The conversion process that produces fixtures should resolve every lookup code against the seed at conversion time, not from memory.
+
+#### Issue 2B.1-2 — pre-existing TypeScript errors in admin.ingredients.$id.index.tsx
+
+**Context:** During 2B.1 the build log noted pre-existing TypeScript errors on lines 61–63 of `src/routes/admin.ingredients.$id.index.tsx` (Supabase type inference on a nested select). The errors pre-date 2B.1 and 2B.1's new files are type-clean. Flagging now so they have an owner rather than rotting as a footnote.
+
+**Resolution:** Not fixed this slice — out of 2B.1 scope. Logged here so the next slice that touches the F2A ingredient admin owns the fix, or so a future tidy slice can pick up the cluster.
+
+**Implication:** Carry-forward to whichever slice next edits that file. The fix is likely a typed wrapper around the nested select rather than a schema change — but confirm before assuming. If no slice naturally touches the file in F2, schedule a focused tidy before F2 close-out.

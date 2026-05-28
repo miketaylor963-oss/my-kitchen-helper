@@ -100,3 +100,33 @@ Verification: Playwright cold-start, 8 steps green. Production smoke test on Wor
   - [3] Signed in as writer — Delete ingredient button visible. ✓
   - [4] Referenced ingredient — not testable yet: adding ingredients to a meal or component is a future slice. Deferred; will re-run when that path exists.
   - [5] Unreferenced ingredient with aliases and without — confirmation dialog ("Aliases will be removed. This cannot be undone."), delete succeeds, redirects to ingredient list, row gone. ✓
+
+## Slice 2B.1 — Validate-only import
+
+**Status:** complete, deployed, smoke-tested 2026-05-28. Commits: `9e4f73a` (route + validator), `d145c22` (fixture fix).
+
+**Built:**
+- Validator service at `src/lib/import/validate.ts`: pure function over `(parsed JSON, LookupSets) → ValidationResult`. Covers all three import shapes (recipe, recipe+derived, component). Rules enforced: unknown top-level keys, import_type enum, required fields, external_ref regex, ingredient id regex + uniqueness, `{NNNN}` placeholder resolution (strict regex — near-miss forms are literal text), cross-shape constraints, derived-component reference checks (ingredient_ids vs parent ids, step_indices vs parent step range, within-payload ref uniqueness, parent ref collision), lookup-code resolution against live DB (cuisine, dietary_category, dietary_restrictions, nutritional_tags, meal_types, meal_formats, component_layers with relational framework/layer/family check), same classification checks applied to each derived_components[] entry. Advisory ingredient-consistency check (rule 204) deferred to 2B.2.
+- Route at `src/routes/admin.import.tsx` at `/admin/import`. Lookup sets fetched on mount via useQuery (7 parallel Supabase queries including nested framework/layer/family). Parse failure and validation failure distinguished. Valid input → annotated summary (cuisine, dietary category, restrictions, tags, ingredient/step counts, derived component list). Invalid input → per-field error list with path and message. Result clears on textarea edit.
+- No writes of any kind. Route renders for everyone (unauthenticated).
+
+**Smoke test (36 fixtures, all Playwright cold-start on production, unauth):**
+- 24 edge-case fixtures: 18 pass + 6 reject — all green.
+- 12 web-sourced fixtures: all green after one fixture fix (see below).
+- Human-auth items: null this slice (no auth-gated behaviour).
+
+**Finding: classic-houmous cuisine code bug.**
+The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`middle_eastern` is the correct seeded value). Validator correctly rejected it. Fixture updated to `middle_eastern`. This is a fixture-prep conversion error, not a validator or spec gap.
+
+**Advisory deferral reconciliation:**
+`advisory-consistency-trip` manifest row updated from "pass (advisory)" to "pass (advisory deferred to 2B.2)" — the validator doesn't implement rule 204 this slice, so no advisory is raised. The manifest now reflects what the validator actually does.
+
+**Notes:**
+- The `canValidate` guard requires both lookups loaded AND non-empty textarea. Smoke script needed a seeded `{}` in the textarea to wait for the Validate button to enable — not a bug, just a UX characteristic worth knowing for future test scripts.
+- Pre-existing TypeScript errors in `admin.ingredients.$id.index.tsx` (lines 61–63, Supabase type inference on nested select) were present before this slice. New files are type-clean.
+
+**Carry-forward to 2B.2:**
+- Ingredient matching service: exact canonical → exact alias → pg_trgm fuzzy.
+- Per-ingredient preview rows with candidate(s) and match type.
+- Advisory ingredient-consistency check (rule 204) implemented now that matching is in place.
+- Blocked-state delete smoke (2A.5 Finding 1) still reserved for 2B.3.

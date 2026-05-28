@@ -285,7 +285,7 @@ Adding any new environment (preview deploy, custom domain) means revisiting thes
 
 Top-level nav has five user-facing entries: **Home, Meals, Components, Meal Plans, Shopping Lists**. These are the things people open the app to *do*.
 
-Reference data and admin functions live under a sixth top-level entry, **Admin**. Routes are prefixed `/admin/...`. Ingredients sit at `/admin/ingredients`; future reference-data CRUD screens and Writer Management (requirements §3.9) follow the same pattern.
+Reference data and admin functions live under a sixth top-level entry, **Admin**. Routes are prefixed `/admin/...`. Ingredients sit at `/admin/ingredients`; the import tool sits at `/admin/import`; future reference-data CRUD screens and Writer Management (requirements §3.9) follow the same pattern.
 
 **Conventions:**
 - Admin pages use an "Admin / <Thing>" breadcrumb-style label above the h1.

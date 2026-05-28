@@ -21,7 +21,7 @@ Synthesised during Pre-2B.1 to exercise the import validator's edges. Each row s
 | step-group-not-in-ingredient-groups | pass | step-only groups allowed |
 | empty-string-vs-null | pass | "" coerced to null on freeform fields |
 | single-char-external-ref | pass | no minimum slug length |
-| advisory-consistency-trip | pass (advisory) | imports, but raises non-blocking consistency warning |
+| advisory-consistency-trip | pass (advisory deferred to 2B.2) | structurally valid; advisory ingredient-consistency check deferred to 2B.2 (requires ingredient matching) |
 | derived-unsorted-duplicated-step-indices | reject | duplicate step_indices (1 appears twice) |
 | nonstandard-ingredient-ids | reject | ids don't match ^[0-9]{4}$ |
 | derived-slug-collides-with-parent | reject | derived external_ref equals parent's |
