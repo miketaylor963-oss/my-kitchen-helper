@@ -79,7 +79,7 @@ Array of ingredient rows. Order matters — used as `sort_order` in the database
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `id` | string | yes | Unique within this recipe. Convention: 4-char zero-padded (`0001`, `0002`). Referenced by step placeholders and by derived components. |
+| `id` | string | yes | Must match `^[0-9]{4}$` — 4-char zero-padded numeric (`0001`, `0002`). Unique within this recipe. Referenced by step placeholders and by derived components; the placeholder format depends on this, so it's enforced, not just conventional. |
 | `name` | string | yes | Display name including any prep notes (`"red onion, finely diced"`, `"lemon, juiced"`). Master ingredient matching happens at import time, human-in-the-loop. |
 | `amount` | number \| null | no | Numeric quantity. Null for "to taste", "to serve", "for frying", and similar functional amounts. For ranges ("1–2 tbsp", "2–3 tsp"), use the lower bound and note the range. |
 | `unit` | string \| null | no | `g`, `ml`, `tbsp`, `tsp`, `cup`, etc. Null for whole/countable items — in that case fold the counting noun into `name` (`"garlic cloves"`, `"large eggs"`). |
@@ -95,9 +95,9 @@ Array of step rows. Order matters — used as `sort_order`. No step IDs needed.
 | `title` | string | yes | Short summary of the step (`"Soften the veg"`, `"Make the mash"`). Doubles as timer label in cooking-mode UI. |
 | `content` | string | yes | Full instructions. Use `{0001}` placeholders to reference ingredient IDs — these render as the scaled quantity in the UI. |
 | `timer_seconds` | integer \| null | no | Whenever the step involves waiting, cooking, baking, resting, simmering. Omit only for active hands-on steps with no waiting. |
-| `group` | string \| null | no | Free-text group label matching the ingredient group vocabulary (`"filling"`, `"mash"`, `"assembly"`). Sections the cooking-mode UI and helps the conversion prompt's derivation heuristic. Leave null for ungrouped recipes. |
+| `group` | string \| null | no | Free-text group label, typically drawn from the ingredient group vocabulary (`"filling"`, `"mash"`, `"assembly"`). Step-only groups with no matching ingredient group are fine (`"plating"`, `"resting"`). Sections the cooking-mode UI and helps the conversion prompt's derivation heuristic. Leave null for ungrouped recipes. |
 
-**Step-to-ingredient links are derived automatically** from `{NNNN}` placeholders in `content` at import time. No explicit `ingredient_refs` field needed. If an ingredient is used in a step but you don't want the quantity inline ("season to taste"), reference it as `{0018}` anyway — placeholder syntax is the canonical way to express "this step uses this ingredient".
+**Step-to-ingredient links are derived automatically** from `{NNNN}` placeholders in `content` at import time. The placeholder format is strict: exactly four digits inside braces, no whitespace, matching `\{[0-9]{4}\}`. Near-miss forms (`{1}`, `{0001 }`, `{ABCD}`, `{adjust}`) are treated as literal text, not placeholders, and do not resolve. No explicit `ingredient_refs` field needed. If an ingredient is used in a step but you don't want the quantity inline ("season to taste"), reference it as `{0018}` anyway — placeholder syntax is the canonical way to express "this step uses this ingredient".
 
 ## Conversion conventions
 
@@ -129,6 +129,21 @@ For amounts not in the table, interpolate to the nearest 5g / 25g step as the ta
 **Times not stated.** Leave `prep_time_minutes` and `cook_time_minutes` as `null`. Estimating produces dishonest data and breaks downstream "active vs total" filtering.
 
 **Long unattended time.** Overnight soaks, multi-hour chills, day-ahead marinades — don't put these in `cook_time_minutes`. Describe in `notes`.
+
+## Seeded vocabulary — frameworks, layers, families
+
+`component_layers` codes must match the seeded vocabulary. `recipe_db_install.sql` is canonical; this table is a convenience snapshot — if it drifts from the seed, the seed wins.
+
+| Framework | Layers | Families (layer → families) |
+|---|---|---|
+| `component_dinner` | `base`, `topping`, `veg`, `finisher` | `topping` → `mash`, `sliced_potato`, `grain_seed`, `pastry`, `carb_alongside` |
+| `bento` | `anchor_protein`, `carb`, `veg_salad`, `extras` | none |
+| `breakfast_bowl` | `base`, `protein`, `veg`, `extras` | none |
+| `mason_jar_salad` | `dressing`, `hardy_veg`, `grain_protein`, `leaves` | none |
+| `smorrebrod` | `bread`, `spread`, `topping`, `garnish` | none |
+| `mezze` | `dip`, `salad_veg`, `protein`, `bread`, `extras` | none |
+
+Only `component_dinner/topping` has seeded families. For every other layer, `family` must be `null`. A `family` that isn't seeded under its layer is a validation error, not a warning.
 
 ## Derived components
 
@@ -167,17 +182,23 @@ The derived component inherits ingredient `group` labels and step `group` labels
 The importer will check:
 
 - All required fields present and non-empty.
+- Unknown top-level keys are rejected, **except** keys prefixed with `_` (e.g. `_fixture_notes`), which are ignored as metadata. This catches typos like `"ingredient"` for `"ingredients"` while allowing comment keys.
 - `import_type` is `"recipe"` or `"component"`.
-- `external_ref` matches `^[a-z0-9-]+$` and is unique in the database.
-- Derived components' `external_ref`s also unique.
-- All lookup codes match seeded values: `cuisine`, `dietary_category`, items in `dietary_restrictions`, `nutritional_tags`, `meal_types`, `meal_formats`, `component_layers.framework`, `component_layers.layer`, `component_layers.family`.
+- `external_ref` matches `^[a-z0-9-]+$` and is unique in the database. No minimum length beyond the regex — single-character slugs are permitted.
+- Derived components' `external_ref`s are unique, and each must differ from the parent's `external_ref` within the same payload (caught pre-commit, not left to the database constraint).
+- All lookup codes match seeded values: `cuisine`, `dietary_category`, items in `dietary_restrictions`, `nutritional_tags`, `meal_types`, `meal_formats`, `component_layers.framework`, `component_layers.layer`, `component_layers.family`. See the Seeded vocabulary section for framework/layer/family codes.
 - `component_layers` is empty when `import_type = "recipe"`. Use `derived_components` instead.
 - `meal_types` and `meal_formats` are empty when `import_type = "component"`.
 - `derived_components` is empty when `import_type = "component"` (components don't derive further).
-- Every ingredient `id` is unique within the recipe.
-- Every `{NNNN}` placeholder in step `content` resolves to a valid local ingredient id.
-- Every `ingredient_ids` entry in a derived component resolves to a valid parent ingredient id.
-- Every `step_indices` entry is a valid 0-based index into the parent `steps` array.
+- A recipe has at least one ingredient and at least one step. A component has at least one ingredient and at least one step. Empty `ingredients` or `steps` arrays are rejected.
+- Each derived component has at least one `ingredient_ids` entry and at least one `step_indices` entry. Empty reference arrays are rejected.
+- Ingredient `id` matches `^[0-9]{4}$` and is unique within the recipe.
+- Every `{NNNN}` placeholder in step `content` resolves to a valid local ingredient id. Placeholder matching is strict (`\{[0-9]{4}\}`); near-miss forms are literal text and are not required to resolve.
+- Every `ingredient_ids` entry in a derived component resolves to a valid parent ingredient id. Entries must be unique; order is not significant (rows are copied in parent `sort_order`).
+- Every `step_indices` entry is a valid 0-based index into the parent `steps` array. Entries must be unique; order is not significant (steps are copied in parent order).
+- A derived component may cover the parent's full ingredient and step range — a recipe that is also wholly a reusable component is valid, no warning.
+- Freeform nullable string fields (`description`, `source`, top-level `notes`, `ingredient.notes`, `ingredient.unit`, `ingredient.group`, `step.group`) accept `""` and treat it as equivalent to `null`. This does not apply to lookup-code fields, where `""` is an invalid code.
+- A missing optional key is treated as `null` (or the empty array, for array-typed fields). The importer does not require every template key to be present — only the required fields. This keeps imports from unconfigured converters working.
 - `timer_seconds`, `base_servings`, `prep_time_minutes`, `cook_time_minutes`, `gi_index` are positive integers when set.
 - `protein_g`, `carbs_g` are non-negative numbers when set.
 - **Ingredient consistency check** (advisory, not blocking): if every ingredient in the recipe has a `dietary_category_id` set in the master, the importer checks that the declared `dietary_category` is consistent (i.e. not more permissive than what the ingredients allow). Operator can override.
