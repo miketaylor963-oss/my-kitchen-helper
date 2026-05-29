@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,6 +20,7 @@ const mobileIndentInactive = "block w-full rounded-md py-2 pl-7 pr-3 text-sm tex
 export function GlobalNav() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const close = () => setSheetOpen(false);
+  const navigate = useNavigate();
 
   return (
     <header className="border-b bg-background">
@@ -71,8 +72,12 @@ export function GlobalNav() {
             </div>
             <DropdownMenuContent align="end">
               {adminSections.map((s) => (
-                <DropdownMenuItem key={s.to} asChild>
-                  <Link to={s.to}>{s.title}</Link>
+                <DropdownMenuItem
+                  key={s.to}
+                  onSelect={() => navigate({ to: s.to })}
+                  className="cursor-pointer"
+                >
+                  {s.title}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
