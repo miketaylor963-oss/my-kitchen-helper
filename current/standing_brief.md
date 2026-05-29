@@ -292,6 +292,8 @@ Reference data and admin functions live under a sixth top-level entry, **Admin**
 - The Admin section appears in nav regardless of auth state — read access is public per RLS (§5). Write affordances (edit/add/delete buttons) appear only for users with an `app_writer` row.
 - New reference-data tables that gain a CRUD UI go under `/admin`. Don't add them to the top-level nav.
 
+**Global nav (added in 2B.1.1):** The top-level navigation is a `GlobalNav` component rendered in `__root.tsx` between `<AuthStrip />` and `<Outlet />`, so it appears on every route. Nav data lives in `src/lib/nav.ts` — add new admin tools to `adminSections` there and both the `/admin` landing card grid and the nav flyout/drawer pick them up automatically. Desktop uses a click-to-open `DropdownMenu` flyout for Admin (chevron toggle, `modal={false}`); mobile uses a Sheet drawer with Admin as a clickable section header and sub-items indented, no nested collapse. Active-state convention: `text-foreground font-medium` (active), `text-muted-foreground hover:text-foreground` (inactive), via TanStack Router `activeProps`/`inactiveProps`. Home uses `activeOptions={{ exact: true }}`; the Admin parent uses the default prefix-match so any `/admin/*` route lights it up. For flyout item navigation use `onSelect + useNavigate()`, not `DropdownMenuItem asChild + <Link>` (see planning log Issue 2B.1-3).
+
 ---
 
 15. TanStack Router file layout

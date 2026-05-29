@@ -1086,6 +1086,22 @@ For the 2B.1 prompt itself when it's drafted:
 
 **Implication:** Carry-forward to whichever slice next edits that file. The fix is likely a typed wrapper around the nested select rather than a schema change — but confirm before assuming. If no slice naturally touches the file in F2, schedule a focused tidy before F2 close-out.
 
+#### Issue 2B.1-3 — Admin nav gap: no route into /admin/import from the top nav
+
+**Context:** 2B.1 closed with the import route reachable only by typing the URL directly. Post-close-out review confirmed the gap: `index.tsx`'s sections array pointed Admin to `/admin/ingredients`, no `/admin` landing existed, and every non-home route was nav-less (the `<header>` only rendered inside the home page component). Resolved in slice 2B.1.1 before 2B.2 starts.
+
+**Four pieces of work:**
+- `src/lib/nav.ts` — shared nav data module exporting `mainSections` (Meals, Components, Meal Plans, Shopping Lists) and `adminSections` (Ingredients, Import). Home page, admin landing, and global nav all import from here.
+- `src/routes/admin.index.tsx` — `/admin/` landing route: h1 "Admin", short description, card grid of `adminSections`. Same card-grid pattern as the home page. `/admin` previously 404'd.
+- `src/components/global-nav.tsx` — global nav rendered in `__root.tsx` after `<AuthStrip />`, before `<Outlet />`. Desktop (≥ md): brand left, nav links right (Home + mainSections + Admin▾). Admin label is a `Link to="/admin"` with prefix-match active state; chevron is a `DropdownMenuTrigger` (shadcn DropdownMenu, click-to-open, `modal={false}`). Mobile (< md): brand left, hamburger right; Sheet drawer (shadcn) with vertical list — main sections, then Admin as a clickable section header (navigates to `/admin`), Ingredients and Import indented below (`pl-7` vs `pl-3`), no nested collapse.
+- `src/routes/__root.tsx` and `src/routes/index.tsx` — home-page-local `<header>` stripped (replaced by GlobalNav); local `sections` const replaced with `mainSections` from nav.ts; Admin card now points to `/admin`; `<h2>Welcome</h2>` promoted to `<h1>`.
+
+**Flag resolutions (pre-decided in slice brief, confirmed on delivery):** click-to-open flyout; `md` (768px) breakpoint; inactive = `text-muted-foreground hover:text-foreground`, active = `text-foreground font-medium`; exact-match for Home, prefix-match for Admin parent; `AuthStrip` unchanged; brand and Home both kept.
+
+**Finding — `DropdownMenuItem asChild + Link` does not reliably close the flyout:** During Playwright verification the flyout navigated correctly but stayed open. The cause wasn't isolated. Replacing `asChild + Link` with `onSelect={() => navigate({ to: s.to })}` using `useNavigate()` resolved it. Use this pattern — `onSelect + navigate()` — for Radix menus paired with a client-side router; don't use `DropdownMenuItem asChild + <Link>` for navigation.
+
+**Commits:** `38ed2c2` (five-file main work), `36908a2` (flyout close fix). Smoke-tested on production 2026-05-29, 57/57 checks green.
+
 #### Carry-forward to 2B.2
 
 Before the 2B.2 prompt is drafted, run a one-pass audit of the 11 remaining `web_sourced` fixtures against the live seed — check every lookup code (cuisine, dietary_category, dietary_restrictions, nutritional_tags, meal_types, meal_formats) against the values actually in the DB. Issue 2B.1-1 showed that a fixture can pass the validator (code format correct) yet use a code that isn't seeded; that's benign for validation but could skew matching expectations if the fixture is used to calibrate 2B.2's matching output. Update: Audit skipped by decision — the fixtures were prepped recently and the codes are believed correct. Any incorrect code surfaced during 2B.2's matching work gets fixed in the moment, same recovery shape as classic-houmous in 2B.1.

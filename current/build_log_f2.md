@@ -130,3 +130,18 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 - Per-ingredient preview rows with candidate(s) and match type.
 - Advisory ingredient-consistency check (rule 204) implemented now that matching is in place.
 - Blocked-state delete smoke (2A.5 Finding 1) still reserved for 2B.3.
+
+## Slice 2B.1.1 — Admin nav restructure
+
+**Status:** complete, deployed, smoke-tested 2026-05-29. Commits: `38ed2c2` (main work), `36908a2` (flyout fix).
+
+**Built:**
+- `src/lib/nav.ts` — `mainSections` and `adminSections` arrays. Single source of truth; consumed by home page, admin landing, and GlobalNav.
+- `src/routes/admin.index.tsx` — `/admin/` landing: h1 "Admin", card grid of `adminSections`.
+- `src/components/global-nav.tsx` — global header in `__root.tsx`. Desktop ≥ md: brand left, nav links right; Admin label links to `/admin` (prefix-match active), adjacent chevron is the `DropdownMenuTrigger` (shadcn DropdownMenu, `modal={false}`). Mobile < md: hamburger opens a shadcn Sheet drawer; Admin is a clickable section header with Ingredients and Import indented below (`pl-7` vs `pl-3`), no collapse. Active-state convention: `text-foreground font-medium`; inactive: `text-muted-foreground hover:text-foreground`.
+- `__root.tsx` — `<GlobalNav />` inserted after `<AuthStrip />`.
+- `index.tsx` — local `<header>` removed; local `sections` replaced with `mainSections` import; Admin card points to `/admin`; h2 → h1.
+
+**Finding:** `DropdownMenuItem asChild + Link` navigated but left the flyout open — cause not isolated. Fixed by replacing with `onSelect={() => navigate({ to: s.to })}` using `useNavigate()`. Pattern for future: `onSelect + navigate()` for Radix menus + client-side router; not `asChild + <Link>`.
+
+**Smoke test:** 57 checks, all green, Playwright cold-start on production 2026-05-29.
