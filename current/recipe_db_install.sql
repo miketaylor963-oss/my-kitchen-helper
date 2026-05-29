@@ -1078,6 +1078,187 @@ CREATE INDEX idx_ingredient_alias_trgm
     ) sub
   $$;
 
+-- commit_import
+-- Single-transaction recipe import. Writes import_log, meal,
+-- ingredient (create_new choices), meal_ingredient, meal_step,
+-- meal_restriction, meal_nutritional_tag, meal_meal_type, meal_meal_format.
+-- Returns new meal.id.
+-- SECURITY INVOKER — runs as caller; RLS on each table is the access gate.
+CREATE OR REPLACE FUNCTION commit_import(
+  payload            JSONB,
+  ingredient_choices JSONB
+) RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  new_import_id  INTEGER;
+  new_meal_id    INTEGER;
+  new_ing_id     INTEGER;
+  cuisine_id_val INTEGER;
+  dc_id_val      INTEGER;
+  ing_el         JSONB;
+  step_el        JSONB;
+  choice         JSONB;
+  ing_id_val     INTEGER;
+  sort_idx       INTEGER;
+  rec            RECORD;
+BEGIN
+  -- 1. import_log
+  INSERT INTO import_log (external_ref, raw_json, status, imported_by_user_id)
+  VALUES (payload->>'external_ref', payload, 'success', auth.uid())
+  RETURNING id INTO new_import_id;
+
+  -- 2. Resolve cuisine_id
+  cuisine_id_val := NULL;
+  IF (payload->>'cuisine') IS NOT NULL AND (payload->>'cuisine') <> '' THEN
+    SELECT id INTO cuisine_id_val FROM cuisine WHERE code = payload->>'cuisine';
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Unknown cuisine code: %', payload->>'cuisine';
+    END IF;
+  END IF;
+
+  -- 3. Resolve dietary_category_id
+  dc_id_val := NULL;
+  IF (payload->>'dietary_category') IS NOT NULL AND (payload->>'dietary_category') <> '' THEN
+    SELECT id INTO dc_id_val FROM dietary_category WHERE code = payload->>'dietary_category';
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Unknown dietary_category code: %', payload->>'dietary_category';
+    END IF;
+  END IF;
+
+  -- 4. Insert meal
+  INSERT INTO meal (
+    external_ref, name, status, description,
+    cuisine_id, dietary_category_id,
+    prep_time_minutes, cook_time_minutes, serves,
+    protein_g, carbs_g, gi_index,
+    notes, source, import_id
+  ) VALUES (
+    payload->>'external_ref',
+    payload->>'name',
+    'recipe',
+    NULLIF(payload->>'description', ''),
+    cuisine_id_val,
+    dc_id_val,
+    (payload->>'prep_time_minutes')::INTEGER,
+    (payload->>'cook_time_minutes')::INTEGER,
+    (payload->>'base_servings')::INTEGER,
+    (payload->>'protein_g')::REAL,
+    (payload->>'carbs_g')::REAL,
+    (payload->>'gi_index')::INTEGER,
+    NULLIF(payload->>'notes', ''),
+    NULLIF(payload->>'source', ''),
+    new_import_id
+  )
+  RETURNING id INTO new_meal_id;
+
+  -- 5. Ingredients (preserves JSON array order as sort_order)
+  sort_idx := 0;
+  FOR ing_el IN SELECT value FROM jsonb_array_elements(payload->'ingredients') AS t(value)
+  LOOP
+    choice := ingredient_choices->(ing_el->>'id');
+    IF choice IS NULL THEN
+      RAISE EXCEPTION 'Missing ingredient choice for id: %', ing_el->>'id';
+    END IF;
+
+    IF choice->>'action' = 'create_new' THEN
+      INSERT INTO ingredient (canonical_name, default_unit, category_id, dietary_category_id)
+      VALUES (
+        choice->>'canonical_name',
+        NULLIF(choice->>'default_unit', ''),
+        (choice->>'category_id')::INTEGER,
+        (choice->>'dietary_category_id')::INTEGER
+      )
+      RETURNING id INTO new_ing_id;
+      ing_id_val := new_ing_id;
+    ELSIF choice->>'action' IN ('accept', 'override') THEN
+      ing_id_val := (choice->>'ingredient_id')::INTEGER;
+    ELSE
+      RAISE EXCEPTION 'Unknown ingredient choice action: % for id: %',
+        choice->>'action', ing_el->>'id';
+    END IF;
+
+    INSERT INTO meal_ingredient (
+      meal_id, ingredient_id, ingredient_name,
+      quantity, unit, group_name, notes, sort_order
+    ) VALUES (
+      new_meal_id,
+      ing_id_val,
+      ing_el->>'name',
+      (ing_el->>'amount')::REAL,
+      NULLIF(ing_el->>'unit', ''),
+      NULLIF(ing_el->>'group', ''),
+      NULLIF(ing_el->>'notes', ''),
+      sort_idx
+    );
+    sort_idx := sort_idx + 1;
+  END LOOP;
+
+  -- 6. Steps
+  sort_idx := 0;
+  FOR step_el IN SELECT value FROM jsonb_array_elements(payload->'steps') AS t(value)
+  LOOP
+    INSERT INTO meal_step (meal_id, sort_order, title, content, timer_seconds, group_name)
+    VALUES (
+      new_meal_id,
+      sort_idx,
+      NULLIF(step_el->>'title', ''),
+      step_el->>'content',
+      (step_el->>'timer_seconds')::INTEGER,
+      NULLIF(step_el->>'group', '')
+    );
+    sort_idx := sort_idx + 1;
+  END LOOP;
+
+  -- 7. Dietary restrictions
+  FOR rec IN
+    SELECT dr.id FROM dietary_restriction dr
+    WHERE dr.code IN (
+      SELECT jsonb_array_elements_text(COALESCE(payload->'dietary_restrictions', '[]'::JSONB))
+    )
+  LOOP
+    INSERT INTO meal_restriction (meal_id, restriction_id)
+    VALUES (new_meal_id, rec.id) ON CONFLICT DO NOTHING;
+  END LOOP;
+
+  -- 8. Nutritional tags
+  FOR rec IN
+    SELECT nt.id FROM nutritional_tag nt
+    WHERE nt.code IN (
+      SELECT jsonb_array_elements_text(COALESCE(payload->'nutritional_tags', '[]'::JSONB))
+    )
+  LOOP
+    INSERT INTO meal_nutritional_tag (meal_id, nutritional_tag_id)
+    VALUES (new_meal_id, rec.id) ON CONFLICT DO NOTHING;
+  END LOOP;
+
+  -- 9. Meal types
+  FOR rec IN
+    SELECT mt.id FROM meal_type mt
+    WHERE mt.code IN (
+      SELECT jsonb_array_elements_text(COALESCE(payload->'meal_types', '[]'::JSONB))
+    )
+  LOOP
+    INSERT INTO meal_meal_type (meal_id, meal_type_id)
+    VALUES (new_meal_id, rec.id) ON CONFLICT DO NOTHING;
+  END LOOP;
+
+  -- 10. Meal formats
+  FOR rec IN
+    SELECT mf.id FROM meal_format mf
+    WHERE mf.code IN (
+      SELECT jsonb_array_elements_text(COALESCE(payload->'meal_formats', '[]'::JSONB))
+    )
+  LOOP
+    INSERT INTO meal_meal_format (meal_id, meal_format_id)
+    VALUES (new_meal_id, rec.id) ON CONFLICT DO NOTHING;
+  END LOOP;
+
+  RETURN new_meal_id;
+END;
+$$;
+
+
 -- =====================================================================
 -- SECTION 12 — Seeds
 -- =====================================================================

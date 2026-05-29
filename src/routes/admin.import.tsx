@@ -1,9 +1,27 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { validate, type LookupSets, type ValidationResult } from "@/lib/import/validate";
 import {
   matchIngredients,
@@ -14,10 +32,27 @@ import {
   type IngredientMatch,
   type Candidate,
 } from "@/lib/import/matching";
+import {
+  commitImport,
+  type IngredientChoice,
+  type CommitOutcome,
+} from "@/lib/import/commit";
+import { useIsWriter } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/import")({
   component: Page,
 });
+
+const NONE = "__none__";
+
+// UI-side choice state — widens IngredientChoice with partial states so
+// the radio stays selected before the inner value is fully populated.
+type ChoiceState =
+  | "unresolved"
+  | { action: "accept";    ingredient_id: number }
+  | { action: "override";  ingredient_id: number | null }
+  | { action: "create_new"; canonical_name: string; default_unit: string | null;
+      category_id: number | null; dietary_category_id: number | null };
 
 type FrameworkRow = {
   code: string;
@@ -28,15 +63,34 @@ type ImportLookupsData = {
   sets: LookupSets;
   dietaryCategoryRanks: Map<string, number>;
   dietaryCategoryCodeById: Map<number, string>;
+  ingredientCategories: { id: number; name: string }[];
+  dietaryCategoryOptions: { id: number; name: string }[];
+};
+
+type LookupLists = {
+  ingredientCategories: { id: number; name: string }[];
+  dietaryCategoryOptions: { id: number; name: string }[];
+};
+
+type CreateNewValues = {
+  canonical_name: string;
+  default_unit: string | null;
+  category_id: number | null;
+  dietary_category_id: number | null;
 };
 
 function Page() {
+  const nav = useNavigate();
+  const { user, isWriter } = useIsWriter();
   const [text, setText] = useState("");
   const [parsedData, setParsedData] = useState<unknown>(null);
   const [outcome, setOutcome] = useState<ValidationResult | "parse-error" | null>(null);
   const [parseError, setParseError] = useState("");
   const [matchingOutcome, setMatchingOutcome] = useState<MatchingResult | { error: string } | null>(null);
   const [isMatching, setIsMatching] = useState(false);
+  const [choices, setChoices] = useState<Record<string, ChoiceState>>({});
+  const [isCommitting, setIsCommitting] = useState(false);
+  const [commitOutcome, setCommitOutcome] = useState<CommitOutcome | null>(null);
 
   const lookups = useQuery({
     queryKey: ["import-lookups"],
@@ -44,14 +98,16 @@ function Page() {
       const [
         cuisineRes, dietaryCategoryRes, dietaryRestrictionRes,
         nutritionalTagRes, mealTypeRes, mealFormatRes, frameworkRes,
+        ingredientCategoryRes,
       ] = await Promise.all([
         supabase.from("cuisine").select("code"),
-        supabase.from("dietary_category").select("id, code, rank"),
+        supabase.from("dietary_category").select("id, code, rank, name"),
         supabase.from("dietary_restriction").select("code"),
         supabase.from("nutritional_tag").select("code"),
         supabase.from("meal_type").select("code"),
         supabase.from("meal_format").select("code"),
         supabase.from("framework").select("code, framework_layer(code, component_family(code))"),
+        supabase.from("ingredient_category").select("id, name").order("sort_order"),
       ]);
 
       if (cuisineRes.error) throw cuisineRes.error;
@@ -61,6 +117,7 @@ function Page() {
       if (mealTypeRes.error) throw mealTypeRes.error;
       if (mealFormatRes.error) throw mealFormatRes.error;
       if (frameworkRes.error) throw frameworkRes.error;
+      if (ingredientCategoryRes.error) throw ingredientCategoryRes.error;
 
       const frameworkLayers = new Map<string, Map<string, Set<string>>>();
       for (const fw of (frameworkRes.data ?? []) as unknown as FrameworkRow[]) {
@@ -70,7 +127,7 @@ function Page() {
         frameworkLayers.set(fw.code, layerMap);
       }
 
-      const dcRows = (dietaryCategoryRes.data ?? []) as { id: number; code: string; rank: number }[];
+      const dcRows = (dietaryCategoryRes.data ?? []) as { id: number; code: string; rank: number; name: string }[];
       const dietaryCategoryRanks = new Map<string, number>(dcRows.map((r) => [r.code, r.rank]));
       const dietaryCategoryCodeById = new Map<number, string>(dcRows.map((r) => [r.id, r.code]));
 
@@ -86,7 +143,21 @@ function Page() {
         },
         dietaryCategoryRanks,
         dietaryCategoryCodeById,
+        ingredientCategories: (ingredientCategoryRes.data ?? []) as { id: number; name: string }[],
+        dietaryCategoryOptions: dcRows.map((r) => ({ id: r.id, name: r.name })),
       };
+    },
+  });
+
+  const ingredientsQuery = useQuery({
+    queryKey: ["admin-ingredients-for-import"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ingredient")
+        .select("id, canonical_name")
+        .order("canonical_name");
+      if (error) throw error;
+      return (data ?? []) as { id: number; canonical_name: string }[];
     },
   });
 
@@ -114,20 +185,59 @@ function Page() {
     setParseError("");
     setParsedData(null);
     setMatchingOutcome(null);
+    setChoices({});
+    setIsCommitting(false);
+    setCommitOutcome(null);
   }
 
   async function handleMatch() {
     if (!parsedData) return;
     setIsMatching(true);
     setMatchingOutcome(null);
+    setCommitOutcome(null);
     try {
       const result = await matchIngredients(parsedData);
       setMatchingOutcome(result);
+      const initial: Record<string, ChoiceState> = {};
+      for (const row of result.rows) {
+        initial[row.row_id] =
+          row.outcome.kind === "exact"
+            ? { action: "accept", ingredient_id: row.outcome.candidate.ingredient_id }
+            : "unresolved";
+      }
+      setChoices(initial);
     } catch (e) {
       setMatchingOutcome({ error: (e as Error).message });
+      setChoices({});
     } finally {
       setIsMatching(false);
     }
+  }
+
+  async function handleCommit() {
+    if (!parsedData || !matchingResult) return;
+    const ingredientChoices: Record<string, IngredientChoice> = {};
+    for (const [rowId, choice] of Object.entries(choices)) {
+      if (choice === "unresolved") return;
+      if (choice.action === "override" && choice.ingredient_id === null) return;
+      if (choice.action === "create_new" && !choice.canonical_name.trim()) return;
+      ingredientChoices[rowId] = choice as IngredientChoice;
+    }
+    setIsCommitting(true);
+    setCommitOutcome(null);
+    try {
+      const result = await commitImport(parsedData, ingredientChoices);
+      setCommitOutcome(result);
+      if (result.kind === "success") {
+        nav({ to: "/meals/$mealId", params: { mealId: String(result.meal_id) } });
+      }
+    } finally {
+      setIsCommitting(false);
+    }
+  }
+
+  function setChoice(rowId: string, choice: ChoiceState) {
+    setChoices((prev) => ({ ...prev, [rowId]: choice }));
   }
 
   const canValidate = !!lookups.data && text.trim().length > 0;
@@ -145,6 +255,24 @@ function Page() {
           lookups.data.dietaryCategoryCodeById,
         )
       : null;
+
+  const allResolved =
+    matchingResult !== null &&
+    Object.values(choices).every((c) => {
+      if (c === "unresolved") return false;
+      if (c.action === "override") return c.ingredient_id !== null;
+      if (c.action === "create_new") return c.canonical_name.trim().length > 0;
+      return true;
+    });
+
+  const lookupLists: LookupLists | null = lookups.data
+    ? {
+        ingredientCategories: lookups.data.ingredientCategories,
+        dietaryCategoryOptions: lookups.data.dietaryCategoryOptions,
+      }
+    : null;
+
+  const allIngredients = ingredientsQuery.data ?? [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -214,17 +342,35 @@ function Page() {
           </div>
         )}
 
-        {advisory?.kind === "fires" && (
-          <AdvisoryBanner advisory={advisory} />
+        {advisory?.kind === "fires" && <AdvisoryBanner advisory={advisory} />}
+
+        {matchingResult && lookupLists && (
+          <MatchingPanel
+            result={matchingResult}
+            choices={choices}
+            onChoice={setChoice}
+            allIngredients={allIngredients}
+            lookupLists={lookupLists}
+          />
         )}
 
         {matchingResult && (
-          <MatchingPanel result={matchingResult} />
+          <CommitArea
+            parsedData={parsedData}
+            allResolved={allResolved}
+            isCommitting={isCommitting}
+            commitOutcome={commitOutcome}
+            user={user}
+            isWriter={isWriter}
+            onCommit={handleCommit}
+          />
         )}
       </div>
     </div>
   );
 }
+
+// ── static display components ─────────────────────────────────────────────────
 
 function ResultPanel({
   outcome,
@@ -336,20 +482,53 @@ function AdvisoryBanner({ advisory }: { advisory: Extract<AdvisoryResult, { kind
   );
 }
 
-function MatchingPanel({ result }: { result: MatchingResult }) {
+// ── interactive matching panel ────────────────────────────────────────────────
+
+function MatchingPanel({
+  result,
+  choices,
+  onChoice,
+  allIngredients,
+  lookupLists,
+}: {
+  result: MatchingResult;
+  choices: Record<string, ChoiceState>;
+  onChoice: (rowId: string, choice: ChoiceState) => void;
+  allIngredients: { id: number; canonical_name: string }[];
+  lookupLists: LookupLists;
+}) {
   return (
     <div className="mt-6">
-      <p className="mb-2 text-sm font-medium">Ingredient matching preview</p>
+      <p className="mb-2 text-sm font-medium">Ingredient matching</p>
       <div className="divide-y rounded-md border">
         {result.rows.map((match) => (
-          <MatchRow key={match.row_id} match={match} />
+          <MatchRow
+            key={match.row_id}
+            match={match}
+            choice={choices[match.row_id] ?? "unresolved"}
+            onChoice={(c) => onChoice(match.row_id, c)}
+            allIngredients={allIngredients}
+            lookupLists={lookupLists}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function MatchRow({ match }: { match: IngredientMatch }) {
+function MatchRow({
+  match,
+  choice,
+  onChoice,
+  allIngredients,
+  lookupLists,
+}: {
+  match: IngredientMatch;
+  choice: ChoiceState;
+  onChoice: (choice: ChoiceState) => void;
+  allIngredients: { id: number; canonical_name: string }[];
+  lookupLists: LookupLists;
+}) {
   const { row_id, row_name, outcome } = match;
 
   return (
@@ -358,11 +537,42 @@ function MatchRow({ match }: { match: IngredientMatch }) {
         <span className="mt-0.5 shrink-0 font-mono text-xs text-muted-foreground">{`{${row_id}}`}</span>
         <div className="min-w-0 flex-1">
           <span className="font-medium">{row_name}</span>
-          <div className="mt-1">
-            {outcome.kind === "exact" && <ExactRow candidate={outcome.candidate} />}
-            {outcome.kind === "ambiguous" && <AmbiguousRow candidates={outcome.candidates} />}
-            {outcome.kind === "fuzzy" && <FuzzyRow candidates={outcome.candidates} />}
-            {outcome.kind === "none" && <NoneRow />}
+          <div className="mt-1.5">
+            {outcome.kind === "exact" && (
+              <ExactRow
+                candidate={outcome.candidate}
+                choice={choice}
+                onChoice={onChoice}
+                allIngredients={allIngredients}
+                rowName={row_name}
+              />
+            )}
+            {outcome.kind === "ambiguous" && (
+              <AmbiguousRow
+                candidates={outcome.candidates}
+                choice={choice}
+                onChoice={onChoice}
+              />
+            )}
+            {outcome.kind === "fuzzy" && (
+              <FuzzyRow
+                candidates={outcome.candidates}
+                choice={choice}
+                onChoice={onChoice}
+                allIngredients={allIngredients}
+                lookupLists={lookupLists}
+                rowName={row_name}
+              />
+            )}
+            {outcome.kind === "none" && (
+              <NoneRow
+                choice={choice}
+                onChoice={onChoice}
+                allIngredients={allIngredients}
+                lookupLists={lookupLists}
+                rowName={row_name}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -370,63 +580,501 @@ function MatchRow({ match }: { match: IngredientMatch }) {
   );
 }
 
-function ExactRow({ candidate }: { candidate: Candidate }) {
-  return (
-    <div className="flex items-center gap-1.5 text-green-700 dark:text-green-400">
-      <span className="text-xs">✓</span>
-      <span className="text-xs">
-        {candidate.canonical_name}
-        {candidate.match_type === "exact_alias" && (
-          <span className="ml-1 text-muted-foreground">
-            (via alias &ldquo;{candidate.matched_text}&rdquo;)
-          </span>
-        )}
-      </span>
-    </div>
-  );
-}
+// ── ExactRow ──────────────────────────────────────────────────────────────────
 
-function AmbiguousRow({ candidates }: { candidates: Candidate[] }) {
+function ExactRow({
+  candidate,
+  choice,
+  onChoice,
+  allIngredients,
+  rowName: _rowName,
+}: {
+  candidate: Candidate;
+  choice: ChoiceState;
+  onChoice: (c: ChoiceState) => void;
+  allIngredients: { id: number; canonical_name: string }[];
+  rowName: string;
+}) {
+  const [overrideOpen, setOverrideOpen] = useState(false);
+  const isOverride = choice !== "unresolved" && choice.action === "override";
+  const overrideId = isOverride
+    ? (choice as { action: "override"; ingredient_id: number | null }).ingredient_id
+    : null;
+  const displayName =
+    isOverride && overrideId != null
+      ? (allIngredients.find((i) => i.id === overrideId)?.canonical_name ?? candidate.canonical_name)
+      : candidate.canonical_name;
+
   return (
     <div>
-      <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
-        Multiple exact matches — needs disambiguation (2B.3)
-      </p>
-      <ul className="mt-1 space-y-0.5">
-        {candidates.map((c) => (
-          <li key={c.ingredient_id} className="text-xs text-muted-foreground">
-            {c.canonical_name}
-            {c.match_type === "exact_alias" && (
-              <span className="ml-1">(via alias &ldquo;{c.matched_text}&rdquo;)</span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function FuzzyRow({ candidates }: { candidates: Candidate[] }) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
-        Fuzzy match — no exact hit
-      </p>
-      <ul className="mt-1 space-y-0.5">
-        {candidates.map((c) => (
-          <li key={c.ingredient_id} className="text-xs text-muted-foreground">
-            {c.canonical_name}{" "}
-            <span className="tabular-nums">({c.similarity_score.toFixed(1)})</span>{" "}
-            <span className="opacity-60">
-              {c.match_type === "fuzzy_alias" ? `alias: ${c.matched_text}` : "canonical"}
+      <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+        <span className="text-xs">✓</span>
+        <span className="text-xs">
+          {displayName}
+          {!isOverride && candidate.match_type === "exact_alias" && (
+            <span className="ml-1 text-muted-foreground">
+              (via alias &ldquo;{candidate.matched_text}&rdquo;)
             </span>
-          </li>
-        ))}
-      </ul>
+          )}
+        </span>
+        <button
+          className="ml-1 text-xs text-muted-foreground underline hover:text-foreground"
+          onClick={() => setOverrideOpen((v) => !v)}
+        >
+          {overrideOpen ? "Cancel" : "Override"}
+        </button>
+      </div>
+      {overrideOpen && (
+        <div className="mt-2 ml-4 space-y-1">
+          <p className="text-xs text-muted-foreground">Choose a different ingredient:</p>
+          <IngredientCombobox
+            allIngredients={allIngredients}
+            selectedId={overrideId}
+            onSelect={(id) => {
+              onChoice({ action: "override", ingredient_id: id });
+              setOverrideOpen(false);
+            }}
+          />
+          {isOverride && (
+            <button
+              className="text-xs text-muted-foreground underline"
+              onClick={() => {
+                onChoice({ action: "accept", ingredient_id: candidate.ingredient_id });
+                setOverrideOpen(false);
+              }}
+            >
+              Revert to auto-match
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function NoneRow() {
-  return <p className="text-xs text-destructive/80">No match found — create new in 2B.3</p>;
+// ── AmbiguousRow ──────────────────────────────────────────────────────────────
+
+function AmbiguousRow({
+  candidates,
+  choice,
+  onChoice,
+}: {
+  candidates: Candidate[];
+  choice: ChoiceState;
+  onChoice: (c: ChoiceState) => void;
+}) {
+  const selectedId =
+    choice !== "unresolved" && (choice.action === "accept" || choice.action === "override")
+      ? String(choice.ingredient_id)
+      : "";
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">
+        Multiple exact matches — pick one:
+      </p>
+      <RadioGroup
+        value={selectedId}
+        onValueChange={(v) => onChoice({ action: "accept", ingredient_id: Number(v) })}
+        className="space-y-1"
+      >
+        {candidates.map((c) => (
+          <div key={c.ingredient_id} className="flex items-center gap-2">
+            <RadioGroupItem value={String(c.ingredient_id)} id={`amb-${c.ingredient_id}`} />
+            <Label htmlFor={`amb-${c.ingredient_id}`} className="text-xs font-normal cursor-pointer">
+              {c.canonical_name}
+              {c.match_type === "exact_alias" && (
+                <span className="ml-1 text-muted-foreground">(via alias &ldquo;{c.matched_text}&rdquo;)</span>
+              )}
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
+// ── FuzzyRow ──────────────────────────────────────────────────────────────────
+
+function FuzzyRow({
+  candidates,
+  choice,
+  onChoice,
+  allIngredients,
+  lookupLists,
+  rowName,
+}: {
+  candidates: Candidate[];
+  choice: ChoiceState;
+  onChoice: (c: ChoiceState) => void;
+  allIngredients: { id: number; canonical_name: string }[];
+  lookupLists: LookupLists;
+  rowName: string;
+}) {
+  const radioValue =
+    choice === "unresolved"
+      ? ""
+      : choice.action === "accept"
+      ? String(choice.ingredient_id)
+      : choice.action; // "override" or "create_new"
+
+  function handleRadio(v: string) {
+    if (v === "override") {
+      onChoice({ action: "override", ingredient_id: null });
+    } else if (v === "create_new") {
+      onChoice({ action: "create_new", canonical_name: rowName, default_unit: null, category_id: null, dietary_category_id: null });
+    } else {
+      onChoice({ action: "accept", ingredient_id: Number(v) });
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">
+        Fuzzy match — pick one:
+      </p>
+      <RadioGroup value={radioValue} onValueChange={handleRadio} className="space-y-1.5">
+        {candidates.map((c) => (
+          <div key={c.ingredient_id} className="flex items-center gap-2">
+            <RadioGroupItem value={String(c.ingredient_id)} id={`fz-${c.ingredient_id}`} />
+            <Label htmlFor={`fz-${c.ingredient_id}`} className="text-xs font-normal cursor-pointer">
+              {c.canonical_name}{" "}
+              <span className="tabular-nums text-muted-foreground">({c.similarity_score.toFixed(2)})</span>
+              {c.match_type === "fuzzy_alias" && (
+                <span className="ml-1 text-muted-foreground opacity-70">alias: {c.matched_text}</span>
+              )}
+            </Label>
+          </div>
+        ))}
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="override" id="fz-override" />
+            <Label htmlFor="fz-override" className="text-xs font-normal cursor-pointer">
+              Choose a different existing ingredient
+            </Label>
+          </div>
+          {radioValue === "override" && choice !== "unresolved" && choice.action === "override" && (
+            <div className="ml-6">
+              <IngredientCombobox
+                allIngredients={allIngredients}
+                selectedId={choice.ingredient_id}
+                onSelect={(id) => onChoice({ action: "override", ingredient_id: id })}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="create_new" id="fz-create" />
+            <Label htmlFor="fz-create" className="text-xs font-normal cursor-pointer">
+              Create new ingredient
+            </Label>
+          </div>
+          {radioValue === "create_new" && choice !== "unresolved" && choice.action === "create_new" && (
+            <div className="ml-6">
+              <CreateNewForm
+                value={{ canonical_name: choice.canonical_name, default_unit: choice.default_unit, category_id: choice.category_id, dietary_category_id: choice.dietary_category_id }}
+                lookupLists={lookupLists}
+                onChange={(v) => onChoice({ action: "create_new", ...v })}
+              />
+            </div>
+          )}
+        </div>
+      </RadioGroup>
+    </div>
+  );
+}
+
+// ── NoneRow ───────────────────────────────────────────────────────────────────
+
+function NoneRow({
+  choice,
+  onChoice,
+  allIngredients,
+  lookupLists,
+  rowName,
+}: {
+  choice: ChoiceState;
+  onChoice: (c: ChoiceState) => void;
+  allIngredients: { id: number; canonical_name: string }[];
+  lookupLists: LookupLists;
+  rowName: string;
+}) {
+  const radioValue =
+    choice === "unresolved"
+      ? ""
+      : choice.action === "override"
+      ? "override"
+      : "create_new";
+
+  function handleRadio(v: string) {
+    if (v === "override") {
+      onChoice({ action: "override", ingredient_id: null });
+    } else {
+      onChoice({ action: "create_new", canonical_name: rowName, default_unit: null, category_id: null, dietary_category_id: null });
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs text-destructive/80 mb-1.5">No match — choose or create:</p>
+      <RadioGroup value={radioValue} onValueChange={handleRadio} className="space-y-1.5">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="override" id="none-override" />
+            <Label htmlFor="none-override" className="text-xs font-normal cursor-pointer">
+              Choose an existing ingredient
+            </Label>
+          </div>
+          {radioValue === "override" && choice !== "unresolved" && choice.action === "override" && (
+            <div className="ml-6">
+              <IngredientCombobox
+                allIngredients={allIngredients}
+                selectedId={choice.ingredient_id}
+                onSelect={(id) => onChoice({ action: "override", ingredient_id: id })}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <RadioGroupItem value="create_new" id="none-create" />
+            <Label htmlFor="none-create" className="text-xs font-normal cursor-pointer">
+              Create new ingredient
+            </Label>
+          </div>
+          {radioValue === "create_new" && choice !== "unresolved" && choice.action === "create_new" && (
+            <div className="ml-6">
+              <CreateNewForm
+                value={{ canonical_name: choice.canonical_name, default_unit: choice.default_unit, category_id: choice.category_id, dietary_category_id: choice.dietary_category_id }}
+                lookupLists={lookupLists}
+                onChange={(v) => onChoice({ action: "create_new", ...v })}
+              />
+            </div>
+          )}
+        </div>
+      </RadioGroup>
+    </div>
+  );
+}
+
+// ── IngredientCombobox ────────────────────────────────────────────────────────
+
+function IngredientCombobox({
+  allIngredients,
+  selectedId,
+  onSelect,
+}: {
+  allIngredients: { id: number; canonical_name: string }[];
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const filtered = allIngredients
+    .filter((i) => i.canonical_name.toLowerCase().includes(search.toLowerCase()))
+    .slice(0, 60);
+  const selected = selectedId != null ? allIngredients.find((i) => i.id === selectedId) : null;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="rounded border px-2 py-1 text-xs text-left hover:bg-muted w-52 truncate">
+          {selected ? selected.canonical_name : "Choose ingredient…"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0">
+        <Command>
+          <CommandInput
+            placeholder="Search…"
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            <CommandEmpty>No match.</CommandEmpty>
+            {filtered.map((i) => (
+              <CommandItem
+                key={i.id}
+                value={i.canonical_name}
+                onSelect={() => {
+                  onSelect(i.id);
+                  setSearch("");
+                  setOpen(false);
+                }}
+              >
+                {i.canonical_name}
+              </CommandItem>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ── CreateNewForm (controlled) ────────────────────────────────────────────────
+
+function CreateNewForm({
+  value,
+  lookupLists,
+  onChange,
+}: {
+  value: CreateNewValues;
+  lookupLists: LookupLists;
+  onChange: (v: CreateNewValues) => void;
+}) {
+  function update<K extends keyof CreateNewValues>(key: K, val: CreateNewValues[K]) {
+    onChange({ ...value, [key]: val });
+  }
+
+  return (
+    <div className="space-y-2 rounded border p-2.5 bg-muted/30 text-xs">
+      <div>
+        <Label className="text-xs mb-0.5 block">Name *</Label>
+        <Input
+          value={value.canonical_name}
+          onChange={(e) => update("canonical_name", e.target.value)}
+          className="h-7 text-xs"
+        />
+      </div>
+      <div>
+        <Label className="text-xs mb-0.5 block">Default unit</Label>
+        <Input
+          value={value.default_unit ?? ""}
+          onChange={(e) => update("default_unit", e.target.value || null)}
+          className="h-7 text-xs"
+          placeholder="g, ml, tbsp…"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label className="text-xs mb-0.5 block">Category</Label>
+          <Select
+            value={value.category_id != null ? String(value.category_id) : NONE}
+            onValueChange={(v) => update("category_id", v === NONE ? null : Number(v))}
+          >
+            <SelectTrigger className="h-7 text-xs">
+              <SelectValue placeholder="—" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>—</SelectItem>
+              {lookupLists.ingredientCategories.map((c) => (
+                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs mb-0.5 block">Dietary</Label>
+          <Select
+            value={value.dietary_category_id != null ? String(value.dietary_category_id) : NONE}
+            onValueChange={(v) => update("dietary_category_id", v === NONE ? null : Number(v))}
+          >
+            <SelectTrigger className="h-7 text-xs">
+              <SelectValue placeholder="—" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>—</SelectItem>
+              {lookupLists.dietaryCategoryOptions.map((d) => (
+                <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CommitArea ────────────────────────────────────────────────────────────────
+
+function CommitArea({
+  parsedData,
+  allResolved,
+  isCommitting,
+  commitOutcome,
+  user,
+  isWriter,
+  onCommit,
+}: {
+  parsedData: unknown;
+  allResolved: boolean;
+  isCommitting: boolean;
+  commitOutcome: CommitOutcome | null;
+  user: { id: string } | null;
+  isWriter: boolean;
+  onCommit: () => void;
+}) {
+  const doc = parsedData as { import_type?: string; derived_components?: unknown[] } | null;
+  const importType = doc?.import_type;
+  const hasDerivedComponents =
+    Array.isArray(doc?.derived_components) && doc.derived_components.length > 0;
+
+  if (importType !== "recipe") {
+    return (
+      <div className="mt-6 rounded-md border border-border bg-muted/40 p-4">
+        <p className="text-sm font-medium">Component import lands in F3</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          This slice ships recipe-only. No Commit button until F3.
+        </p>
+      </div>
+    );
+  }
+
+  if (hasDerivedComponents) {
+    return (
+      <div className="mt-6 rounded-md border border-border bg-muted/40 p-4">
+        <p className="text-sm font-medium">Derived component import lands in F2C</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Strip the <span className="font-mono">derived_components</span> array and re-import to land the parent recipe.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 space-y-3">
+      {commitOutcome && commitOutcome.kind !== "success" && (
+        <CommitErrorPanel outcome={commitOutcome} />
+      )}
+
+      {!user ? (
+        <div className="rounded-md border border-border bg-muted/40 p-4">
+          <p className="text-sm">
+            <Link to="/login" className="underline hover:text-foreground">Sign in</Link>
+            {" "}to commit imports.
+          </p>
+        </div>
+      ) : !isWriter ? (
+        <div className="rounded-md border border-border bg-muted/40 p-4">
+          <p className="text-sm text-muted-foreground">
+            You don&apos;t have writer access on this household.
+          </p>
+        </div>
+      ) : (
+        <Button onClick={onCommit} disabled={!allResolved || isCommitting}>
+          {isCommitting ? "Committing…" : allResolved ? "Commit" : "Commit (resolve all rows first)"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function CommitErrorPanel({ outcome }: { outcome: Exclude<CommitOutcome, { kind: "success" }> }) {
+  let message: string;
+  if (outcome.kind === "duplicate_external_ref") {
+    message = "An import with this external_ref already exists. Re-import / update lands in F2C.";
+  } else if (outcome.kind === "duplicate_ingredient_name") {
+    message = `An ingredient called "${outcome.name}" already exists. Choose it from the existing-ingredient picker instead.`;
+  } else {
+    message = outcome.message;
+  }
+  return (
+    <div className="rounded-md border border-destructive/50 bg-destructive/5 p-4">
+      <p className="text-sm text-destructive">{message}</p>
+    </div>
+  );
 }
