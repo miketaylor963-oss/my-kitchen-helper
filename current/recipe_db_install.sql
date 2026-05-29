@@ -981,7 +981,102 @@ CREATE INDEX idx_ingredient_canonical_name_trgm
 CREATE INDEX idx_ingredient_alias_trgm
     ON ingredient_alias USING gin (alias gin_trgm_ops);
 
+-- match_ingredient: per-ingredient fuzzy lookup for the recipe importer.
+-- FUZZY_THRESHOLD = 0.3 hardcoded in this slice; 2B.3 may lift to a
+-- configurable setting once real fixture runs have informed the value.
+  CREATE OR REPLACE FUNCTION match_ingredient(query_name text)
+  RETURNS TABLE (
+    ingredient_id        integer,
+    canonical_name       text,
+    match_type           text,
+    matched_text         text,
+    similarity_score     real,
+    category_id          integer,
+    dietary_category_id  integer
+  )
+  LANGUAGE sql STABLE AS $$
+    -- Exact canonical
+    SELECT
+      i.id                    AS ingredient_id,
+      i.canonical_name        AS canonical_name,
+      'exact_canonical'::text AS match_type,
+      i.canonical_name        AS matched_text,
+      1.0::real               AS similarity_score,
+      i.category_id           AS category_id,
+      i.dietary_category_id   AS dietary_category_id
+    FROM ingredient i
+    WHERE lower(i.canonical_name) = lower(trim(query_name))
 
+    UNION ALL
+
+    -- Exact alias
+    SELECT
+      i.id                    AS ingredient_id,
+      i.canonical_name        AS canonical_name,
+      'exact_alias'::text     AS match_type,
+      ia.alias                AS matched_text,
+      1.0::real               AS similarity_score,
+      i.category_id           AS category_id,
+      i.dietary_category_id   AS dietary_category_id
+    FROM ingredient_alias ia
+    JOIN ingredient i ON i.id = ia.ingredient_id
+    WHERE lower(ia.alias) = lower(trim(query_name))
+
+    UNION ALL
+
+    -- Fuzzy canonical: top 5, threshold 0.3, excludes exact canonical match
+    SELECT
+      sub.ingredient_id,
+      sub.canonical_name,
+      sub.match_type,
+      sub.matched_text,
+      sub.similarity_score,
+      sub.category_id,
+      sub.dietary_category_id
+    FROM (
+      SELECT
+        i.id                        AS ingredient_id,
+        i.canonical_name            AS canonical_name,
+        'fuzzy_canonical'::text     AS match_type,
+        i.canonical_name            AS matched_text,
+        similarity(lower(i.canonical_name), lower(trim(query_name)))::real AS similarity_score,
+        i.category_id               AS category_id,
+        i.dietary_category_id       AS dietary_category_id
+      FROM ingredient i
+      WHERE lower(i.canonical_name) <> lower(trim(query_name))
+        AND similarity(lower(i.canonical_name), lower(trim(query_name))) >= 0.3
+      ORDER BY similarity_score DESC
+      LIMIT 5
+    ) sub
+
+    UNION ALL
+
+    -- Fuzzy alias: top 5, threshold 0.3, excludes exact alias match
+    SELECT
+      sub.ingredient_id,
+      sub.canonical_name,
+      sub.match_type,
+      sub.matched_text,
+      sub.similarity_score,
+      sub.category_id,
+      sub.dietary_category_id
+    FROM (
+      SELECT
+        i.id                    AS ingredient_id,
+        i.canonical_name        AS canonical_name,
+        'fuzzy_alias'::text     AS match_type,
+        ia.alias                AS matched_text,
+        similarity(lower(ia.alias), lower(trim(query_name)))::real AS similarity_score,
+        i.category_id           AS category_id,
+        i.dietary_category_id   AS dietary_category_id
+      FROM ingredient_alias ia
+      JOIN ingredient i ON i.id = ia.ingredient_id
+      WHERE lower(ia.alias) <> lower(trim(query_name))
+        AND similarity(lower(ia.alias), lower(trim(query_name))) >= 0.3
+      ORDER BY similarity_score DESC
+      LIMIT 5
+    ) sub
+  $$;
 
 -- =====================================================================
 -- SECTION 12 — Seeds

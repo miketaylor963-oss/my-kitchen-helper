@@ -5,6 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { validate, type LookupSets, type ValidationResult } from "@/lib/import/validate";
+import {
+  matchIngredients,
+  evaluateConsistencyAdvisory,
+  type MatchingResult,
+  type AdvisoryResult,
+  type ParsedRecipe,
+  type IngredientMatch,
+  type Candidate,
+} from "@/lib/import/matching";
 
 export const Route = createFileRoute("/admin/import")({
   component: Page,
@@ -15,20 +24,29 @@ type FrameworkRow = {
   framework_layer: { code: string; component_family: { code: string }[] }[];
 };
 
+type ImportLookupsData = {
+  sets: LookupSets;
+  dietaryCategoryRanks: Map<string, number>;
+  dietaryCategoryCodeById: Map<number, string>;
+};
+
 function Page() {
   const [text, setText] = useState("");
+  const [parsedData, setParsedData] = useState<unknown>(null);
   const [outcome, setOutcome] = useState<ValidationResult | "parse-error" | null>(null);
   const [parseError, setParseError] = useState("");
+  const [matchingOutcome, setMatchingOutcome] = useState<MatchingResult | { error: string } | null>(null);
+  const [isMatching, setIsMatching] = useState(false);
 
   const lookups = useQuery({
     queryKey: ["import-lookups"],
-    queryFn: async (): Promise<LookupSets> => {
+    queryFn: async (): Promise<ImportLookupsData> => {
       const [
         cuisineRes, dietaryCategoryRes, dietaryRestrictionRes,
         nutritionalTagRes, mealTypeRes, mealFormatRes, frameworkRes,
       ] = await Promise.all([
         supabase.from("cuisine").select("code"),
-        supabase.from("dietary_category").select("code"),
+        supabase.from("dietary_category").select("id, code, rank"),
         supabase.from("dietary_restriction").select("code"),
         supabase.from("nutritional_tag").select("code"),
         supabase.from("meal_type").select("code"),
@@ -52,14 +70,22 @@ function Page() {
         frameworkLayers.set(fw.code, layerMap);
       }
 
+      const dcRows = (dietaryCategoryRes.data ?? []) as { id: number; code: string; rank: number }[];
+      const dietaryCategoryRanks = new Map<string, number>(dcRows.map((r) => [r.code, r.rank]));
+      const dietaryCategoryCodeById = new Map<number, string>(dcRows.map((r) => [r.id, r.code]));
+
       return {
-        cuisineCodes: new Set((cuisineRes.data ?? []).map((r) => r.code)),
-        dietaryCategoryCodes: new Set((dietaryCategoryRes.data ?? []).map((r) => r.code)),
-        dietaryRestrictionCodes: new Set((dietaryRestrictionRes.data ?? []).map((r) => r.code)),
-        nutritionalTagCodes: new Set((nutritionalTagRes.data ?? []).map((r) => r.code)),
-        mealTypeCodes: new Set((mealTypeRes.data ?? []).map((r) => r.code)),
-        mealFormatCodes: new Set((mealFormatRes.data ?? []).map((r) => r.code)),
-        frameworkLayers,
+        sets: {
+          cuisineCodes: new Set((cuisineRes.data ?? []).map((r) => r.code)),
+          dietaryCategoryCodes: new Set(dcRows.map((r) => r.code)),
+          dietaryRestrictionCodes: new Set((dietaryRestrictionRes.data ?? []).map((r) => r.code)),
+          nutritionalTagCodes: new Set((nutritionalTagRes.data ?? []).map((r) => r.code)),
+          mealTypeCodes: new Set((mealTypeRes.data ?? []).map((r) => r.code)),
+          mealFormatCodes: new Set((mealFormatRes.data ?? []).map((r) => r.code)),
+          frameworkLayers,
+        },
+        dietaryCategoryRanks,
+        dietaryCategoryCodeById,
       };
     },
   });
@@ -72,19 +98,53 @@ function Page() {
     } catch (e) {
       setParseError((e as Error).message);
       setOutcome("parse-error");
+      setParsedData(null);
+      setMatchingOutcome(null);
       return;
     }
     setParseError("");
-    setOutcome(validate(parsed, lookups.data));
+    setParsedData(parsed);
+    setMatchingOutcome(null);
+    setOutcome(validate(parsed, lookups.data.sets));
   }
 
   function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setText(e.target.value);
     setOutcome(null);
     setParseError("");
+    setParsedData(null);
+    setMatchingOutcome(null);
+  }
+
+  async function handleMatch() {
+    if (!parsedData) return;
+    setIsMatching(true);
+    setMatchingOutcome(null);
+    try {
+      const result = await matchIngredients(parsedData);
+      setMatchingOutcome(result);
+    } catch (e) {
+      setMatchingOutcome({ error: (e as Error).message });
+    } finally {
+      setIsMatching(false);
+    }
   }
 
   const canValidate = !!lookups.data && text.trim().length > 0;
+  const validationSuccess = outcome !== null && outcome !== "parse-error" && outcome.ok;
+
+  const matchingResult: MatchingResult | null =
+    matchingOutcome && !("error" in matchingOutcome) ? matchingOutcome : null;
+
+  const advisory: AdvisoryResult | null =
+    matchingResult && lookups.data && parsedData
+      ? evaluateConsistencyAdvisory(
+          parsedData as ParsedRecipe,
+          matchingResult,
+          lookups.data.dietaryCategoryRanks,
+          lookups.data.dietaryCategoryCodeById,
+        )
+      : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -130,6 +190,36 @@ function Page() {
           <div className="mt-6">
             <ResultPanel outcome={outcome} parseError={parseError} />
           </div>
+        )}
+
+        {/* Match button appears only after a successful validation.
+            Smoke scripts: seed textarea, click Validate, wait for green panel,
+            then wait for this button before clicking Match. */}
+        {validationSuccess && (
+          <div className="mt-4 flex items-center gap-3">
+            <Button onClick={handleMatch} disabled={isMatching}>
+              Match ingredients
+            </Button>
+            {isMatching && (
+              <span className="text-xs text-muted-foreground">Matching…</span>
+            )}
+          </div>
+        )}
+
+        {matchingOutcome && "error" in matchingOutcome && (
+          <div className="mt-6 rounded-md border border-destructive/50 bg-destructive/5 p-4">
+            <p className="text-sm font-medium text-destructive">
+              Matching failed: {matchingOutcome.error}
+            </p>
+          </div>
+        )}
+
+        {advisory?.kind === "fires" && (
+          <AdvisoryBanner advisory={advisory} />
+        )}
+
+        {matchingResult && (
+          <MatchingPanel result={matchingResult} />
         )}
       </div>
     </div>
@@ -226,4 +316,117 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
       <dd className="font-medium">{value}</dd>
     </div>
   );
+}
+
+function AdvisoryBanner({ advisory }: { advisory: Extract<AdvisoryResult, { kind: "fires" }> }) {
+  return (
+    <div className="mt-6 rounded-md border border-amber-500/40 bg-amber-50/50 p-4 dark:border-amber-400/30 dark:bg-amber-950/20">
+      <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+        Advisory: dietary classification may be too permissive
+      </p>
+      <p className="mt-1.5 text-sm text-amber-700/90 dark:text-amber-400/90">
+        The recipe declares{" "}
+        <span className="font-mono">{advisory.declared}</span> as its dietary category. The
+        strictest matched ingredient is{" "}
+        <span className="font-medium">{advisory.strictest_ingredient_name}</span> (
+        <span className="font-mono">{advisory.strictest_category}</span>). The declared category
+        is less restrictive than the ingredients allow.
+      </p>
+    </div>
+  );
+}
+
+function MatchingPanel({ result }: { result: MatchingResult }) {
+  return (
+    <div className="mt-6">
+      <p className="mb-2 text-sm font-medium">Ingredient matching preview</p>
+      <div className="divide-y rounded-md border">
+        {result.rows.map((match) => (
+          <MatchRow key={match.row_id} match={match} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MatchRow({ match }: { match: IngredientMatch }) {
+  const { row_id, row_name, outcome } = match;
+
+  return (
+    <div className="px-3 py-3 text-sm">
+      <div className="flex items-start gap-2">
+        <span className="mt-0.5 shrink-0 font-mono text-xs text-muted-foreground">{`{${row_id}}`}</span>
+        <div className="min-w-0 flex-1">
+          <span className="font-medium">{row_name}</span>
+          <div className="mt-1">
+            {outcome.kind === "exact" && <ExactRow candidate={outcome.candidate} />}
+            {outcome.kind === "ambiguous" && <AmbiguousRow candidates={outcome.candidates} />}
+            {outcome.kind === "fuzzy" && <FuzzyRow candidates={outcome.candidates} />}
+            {outcome.kind === "none" && <NoneRow />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExactRow({ candidate }: { candidate: Candidate }) {
+  return (
+    <div className="flex items-center gap-1.5 text-green-700 dark:text-green-400">
+      <span className="text-xs">✓</span>
+      <span className="text-xs">
+        {candidate.canonical_name}
+        {candidate.match_type === "exact_alias" && (
+          <span className="ml-1 text-muted-foreground">
+            (via alias &ldquo;{candidate.matched_text}&rdquo;)
+          </span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+function AmbiguousRow({ candidates }: { candidates: Candidate[] }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+        Multiple exact matches — needs disambiguation (2B.3)
+      </p>
+      <ul className="mt-1 space-y-0.5">
+        {candidates.map((c) => (
+          <li key={c.ingredient_id} className="text-xs text-muted-foreground">
+            {c.canonical_name}
+            {c.match_type === "exact_alias" && (
+              <span className="ml-1">(via alias &ldquo;{c.matched_text}&rdquo;)</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function FuzzyRow({ candidates }: { candidates: Candidate[] }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+        Fuzzy match — no exact hit
+      </p>
+      <ul className="mt-1 space-y-0.5">
+        {candidates.map((c) => (
+          <li key={c.ingredient_id} className="text-xs text-muted-foreground">
+            {c.canonical_name}{" "}
+            <span className="tabular-nums">({c.similarity_score.toFixed(1)})</span>{" "}
+            <span className="opacity-60">
+              {c.match_type === "fuzzy_alias" ? `alias: ${c.matched_text}` : "canonical"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function NoneRow() {
+  return <p className="text-xs text-destructive/80">No match found — create new in 2B.3</p>;
 }
