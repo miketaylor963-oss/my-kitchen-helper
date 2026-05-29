@@ -1,0 +1,70 @@
+{
+  "_fixture_notes": "Case 19 (companion to advisory-consistency-trip): advisory firing path. Every ingredient string exact-matches the live seed (canonicals confirmed at fixture-prep time). dietary_category is declared 'vegan' but the recipe contains 'butter' and 'double cream' (both seeded as vegetarian). Tests whether the importer's advisory consistency check correctly fires when (a) every ingredient is unambiguously matched and (b) the declared category is more permissive than the strictest matched ingredient. Companion fixture advisory-consistency-trip (without -fires) covers the silent path where matching is incomplete and the advisory's preconditions aren't met.",
+
+  "import_type": "recipe",
+  "external_ref": "advisory-consistency-trip-fires",
+  "name": "Mushroom Cream Spaghetti (Mis-classified)",
+  "description": "Deliberately mis-classified — dietary_category 'vegan' contradicted by butter and double cream. Companion fixture to advisory-consistency-trip, designed so every ingredient exact-matches the seeded master vocabulary.",
+  "source": "Synthesised fixture, 2026-05-29",
+
+  "cuisine": "italian",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["dairy", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 5,
+  "cook_time_minutes": 15,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil",          "amount": 1,   "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0002", "name": "butter",             "amount": 20,  "unit": "g",    "group": null, "notes": null },
+    { "id": "0003", "name": "chestnut mushrooms", "amount": 250, "unit": "g",    "group": null, "notes": null },
+    { "id": "0004", "name": "garlic clove",       "amount": 2,   "unit": null,   "group": null, "notes": null },
+    { "id": "0005", "name": "double cream",       "amount": 150, "unit": "ml",   "group": null, "notes": null },
+    { "id": "0006", "name": "spaghetti",          "amount": 180, "unit": "g",    "group": null, "notes": null },
+    { "id": "0007", "name": "fresh parsley",      "amount": 1,   "unit": "tbsp", "group": null, "notes": "chopped, to finish" },
+    { "id": "0008", "name": "fine salt",          "amount": null,"unit": null,   "group": null, "notes": "to taste" },
+    { "id": "0009", "name": "black pepper",       "amount": null,"unit": null,   "group": null, "notes": "to taste" }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook the pasta",
+      "content": "Bring a large pan of salted water to the boil, season with {0008}, then add {0006} and cook until al dente per the packet.",
+      "timer_seconds": 600,
+      "group": null
+    },
+    {
+      "title": "Soften the mushrooms",
+      "content": "While the pasta cooks, heat {0001} and {0002} in a wide frying pan over medium-high heat. Add {0003} in a single layer and cook for 6-7 minutes until browned. Add {0004}, minced, and cook for a further minute.",
+      "timer_seconds": 480,
+      "group": null
+    },
+    {
+      "title": "Make the cream sauce",
+      "content": "Pour in {0005} and let it bubble for 1-2 minutes until slightly thickened. Season with {0008} and {0009}.",
+      "timer_seconds": 120,
+      "group": null
+    },
+    {
+      "title": "Combine and finish",
+      "content": "Drain the pasta, reserving a splash of the cooking water. Add the pasta to the sauce, toss to coat, loosening with the cooking water if needed. Finish with {0007} and serve.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Dietary classification is intentionally wrong. The advisory should fire on import: declared dietary_category 'vegan' (rank 1) is less restrictive than the strictest matched ingredient (butter or double cream, both rank 2 vegetarian).",
+
+  "derived_components": []
+}
