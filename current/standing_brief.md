@@ -124,6 +124,7 @@ Tables grouped by area. Refer to `current/recipe_db_install.sql` for full column
 - `ingredient_category` — aisle-ordered, flat, 14 seeded categories.
 - `ingredient` — canonical master vocabulary. `canonical_name` UNIQUE. Has `default_unit`, `category_id`, `dietary_category_id`. NOT household-scoped.
 - `ingredient_alias` — alternative names for the same canonical ingredient. `alias` globally UNIQUE.
+- `match_ingredient(query_name text)` — Postgres function (§11, added 2B.2). Returns exact canonical + alias matches and fuzzy matches (pg_trgm, threshold 0.3, top 5 per source). Used by the importer's matching service via `supabase.rpc()`.
 
 ### Components (Section 5)
 - `component` — reusable building block. `status` IN ('idea','detailed'). Has macros (protein_g, carbs_g, gi_index) and `external_ref` slug.

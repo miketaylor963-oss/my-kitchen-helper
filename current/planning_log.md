@@ -1113,3 +1113,35 @@ For the 2B.2 prompt itself when it's drafted:
 - Advisory consistency check (rule 204) is owned by 2B.2 and must be implemented this slice. At close-out, reconcile the `advisory-consistency-trip` manifest row from "pass (advisory deferred to 2B.2)" back to "pass (advisory)" — this is an explicit close-out step, not a tidy-up.
 - Smoke script note: `canValidate` in the import page requires both lookups loaded AND a non-empty textarea. Any Playwright script that waits on the Validate button enabling must seed a placeholder value into the textarea first (e.g. `{}`) before the wait, otherwise the button never enables regardless of how long the script waits. Established in 2B.1's smoke run.
 - TS errors in `admin.ingredients.$id.index.tsx` (Issue 2B.1-2): 2B.2's matching UI probably won't touch this file, so the fix is unlikely to land here. Carry forward to 2B.3 or schedule a focused tidy before F2 close-out. Restating so the issue has a visible trail beyond the close-out section.
+
+---
+
+### 2B.2 close-out decisions and issues
+
+#### Decision 51 — Advisory function takes two maps, not one
+
+**Context:** The `evaluateConsistencyAdvisory` spec showed a single `dietaryCategoryRanks: Map<string, number>` (code → rank) parameter. But the `match_ingredient` RPC returns `dietary_category_id` (integer), not the code string. Comparing against the declared `dietary_category` (a code) requires bridging from id → code.
+
+**Choice:** Advisory function takes a fourth parameter: `dietaryCategoryCodeById: Map<number, string>` (id → code). The route builds both maps from the extended dietary_category query (`select("id, code, rank")`).
+
+**Reasoning:** Adding the code to the RPC return shape would duplicate data the route already loads in the dietary_category lookup. The two-map approach keeps the SQL function lean (one less column) and puts the id↔code translation in the layer that already has the lookup in memory.
+
+**Implication:** `evaluateConsistencyAdvisory` signature deviates from the spec's three-parameter shorthand. The deviation is documented here. 2B.3 should treat the four-parameter signature as the settled convention.
+
+#### Finding — `advisory-consistency-trip` manifest reconciliation: no change needed
+
+The close-out step required verifying both advisory fixtures against the live implementation. Outcome: `advisory-consistency-trip` produced advisory silent (not_all_resolved — prep-noted ingredient names don't all exact-match the live seed). `advisory-consistency-trip-fires` produced the advisory banner as expected. Both outcomes matched their manifest rows exactly. No edit was needed.
+
+#### Finding — `ice-cold water` produces no match; first threshold datum
+
+The `classic-houmous` fixture's ingredient `"ice-cold water"` returned no match from the live `match_ingredient` RPC — pg_trgm similarity between "ice-cold water" and "water" (the nearest candidate) falls below the 0.3 threshold. This is correct behaviour and served as the Item 6 "no match" smoke test case. Worth noting so 2B.3's "create new ingredient" branch handles this gracefully.
+
+This is also the first real-fixture datum on the 0.3 fuzzy threshold's behaviour. The threshold favours precision over recall — close-but-not-quite matches like ice-cold water → water don't surface. 2B.3 should accumulate more fixture observations before deciding whether to lift the threshold or leave it.
+
+#### Carry-forward to 2B.3
+
+- **Fuzzy threshold** lives as a hardcoded `0.3` in the `match_ingredient` function body. If real fixture runs in 2B.3 suggest a different value, it's a one-line change to the function and a re-run of the SQL installer.
+- **TS errors in `admin.ingredients.$id.index.tsx`** (Issue 2B.1-2): 2B.2 did not touch this file. Carry to 2B.3 or a focused tidy before F2 close-out.
+- **Blocked-state delete smoke** (2A.5 Finding 1): still owed for 2B.3 against a real `meal_ingredient` reference.
+- **`ice-cold water` no-match**: 2B.3's "create new ingredient" inline flow will need to handle this case. The ingredient is in the houmous fixture — it will appear as a `kind: 'none'` row needing a new ingredient created.
+- **Close-out step language**: the 2B.2 manifest-reconciliation step was framed as work-to-be-done ("reconcile the row"), which led CC to rewrite a row that didn't need changing. Future close-out steps that verify documentation against reality should explicitly say "if it matches, change nothing; only edit on a real discrepancy". Flagged for the next pass over the project instructions.

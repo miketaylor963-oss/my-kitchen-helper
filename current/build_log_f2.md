@@ -145,3 +145,24 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 **Finding:** `DropdownMenuItem asChild + Link` navigated but left the flyout open — cause not isolated. Fixed by replacing with `onSelect={() => navigate({ to: s.to })}` using `useNavigate()`. Pattern for future: `onSelect + navigate()` for Radix menus + client-side router; not `asChild + <Link>`.
 
 **Smoke test:** 57 checks, all green, Playwright cold-start on production 2026-05-29.
+
+## Slice 2B.2 — Ingredient matching, read-only
+
+**Status:** complete, deployed, smoke-tested 2026-05-29. Commit: `ea8d79a`.
+
+**Built:**
+- `src/lib/import/matching.ts` — service: `matchIngredients(data)` makes parallel `supabase.rpc('match_ingredient')` calls over the parsed JSON's ingredient rows, applies per-row deduplication (exact wins over fuzzy on same ingredient_id; highest-precedence match kept per ingredient), resolves to `exact / ambiguous / fuzzy / none` outcomes.
+- `src/lib/import/matching.ts` — advisory: `evaluateConsistencyAdvisory()` implements rule 204; fires when declared `dietary_category` rank < max ingredient rank across all exact-matched rows. Takes two maps (see Decision 51).
+- `src/routes/admin.import.tsx` — dietary_category query extended to `select("id, code, rank")`; two new maps built (`dietaryCategoryRanks`, `dietaryCategoryCodeById`); three new state vars (`parsedData`, `matchingOutcome`, `isMatching`); "Match ingredients" button after green validation panel; per-ingredient preview panel (`exact` / `ambiguous` / `fuzzy` / `none` rows); amber advisory banner above the panel when rule 204 fires.
+- `current/recipe_db_install.sql` §11 — `match_ingredient` Postgres function: exact canonical + alias, fuzzy canonical + alias (top 5 each, threshold 0.3, `LANGUAGE sql STABLE`).
+
+**Smoke (unauthenticated, 15/15 green):** validate → Match button appears; match runs and renders per-ingredient rows with row ids; exact canonical names visible (`extra virgin olive oil`, `ground cumin`, etc. from the houmous fixture); fuzzy scores visible for prep-noted ingredients (`lemon, juiced`, `garlic clove, peeled`); no-match confirmed for the houmous fixture's `"ice-cold water"` ingredient (similarity to `"water"` falls below 0.3); advisory banner fires for `advisory-consistency-trip-fires` (declared `vegan`, strictest ingredient `vegetarian` shown); textarea edit clears panel and banner; re-validate clears matching.
+
+**Human auth:** null this slice. Matching preview is read-only; route is unauthenticated.
+
+**Key decisions and findings:**
+- Decision 51: advisory function takes two maps (`dietaryCategoryRanks` code→rank, `dietaryCategoryCodeById` id→code). Adding the code column to the RPC return would duplicate data already in the dietary_category lookup — two-map approach keeps the SQL function lean.
+- `"ice-cold water"` from the houmous fixture produces no match — first real-fixture datum on the threshold's precision-over-recall behaviour. 2B.3 to accumulate more observations before tuning.
+- Manifest reconciliation (advisory fixtures): both rows matched reality exactly, no edit needed.
+
+**Carry-forward to 2B.3:** see planning log 2B.2 carry-forward block.
