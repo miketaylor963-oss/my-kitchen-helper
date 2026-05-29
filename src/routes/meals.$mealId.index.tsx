@@ -182,7 +182,7 @@ function MealBody({ meal, isWriter, mealId }: { meal: MealDetail; isWriter: bool
       {meal.status === "recipe" && (
         <>
           <Ingredients items={meal.meal_ingredient} />
-          <Steps items={meal.meal_step} />
+          <Steps items={meal.meal_step} ingredients={meal.meal_ingredient} />
         </>
       )}
 
@@ -264,7 +264,22 @@ function Ingredients({ items }: { items: MealDetail["meal_ingredient"] }) {
   );
 }
 
-function Steps({ items }: { items: MealDetail["meal_step"] }) {
+function formatIngredient(ing: { quantity: number | null; unit: string | null; ingredient_name: string }): string {
+  const parts: string[] = [];
+  if (ing.quantity != null) parts.push(String(ing.quantity));
+  if (ing.unit) parts.push(ing.unit);
+  parts.push(ing.ingredient_name);
+  return parts.join(" ");
+}
+
+function resolvePlaceholders(content: string, ingredients: MealDetail["meal_ingredient"]): string {
+  return content.replace(/\{(\d+)\}/g, (match, idStr) => {
+    const ing = ingredients.find((i) => String(i.id) === idStr);
+    return ing ? formatIngredient(ing) : match;
+  });
+}
+
+function Steps({ items, ingredients }: { items: MealDetail["meal_step"]; ingredients: MealDetail["meal_ingredient"] }) {
   if (items.length === 0) {
     return (
       <section>
@@ -295,7 +310,7 @@ function Steps({ items }: { items: MealDetail["meal_step"] }) {
                   </span>
                   <div>
                     {s.title && <div className="font-medium">{s.title}</div>}
-                    <div className="whitespace-pre-wrap">{s.content}</div>
+                    <div className="whitespace-pre-wrap">{resolvePlaceholders(s.content, ingredients)}</div>
                   </div>
                 </li>
               ))}

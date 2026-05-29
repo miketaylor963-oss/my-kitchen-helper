@@ -1102,6 +1102,11 @@ DECLARE
   ing_id_val     INTEGER;
   sort_idx       INTEGER;
   rec            RECORD;
+  id_map            JSONB := '{}'::JSONB;
+  new_mi_id         INTEGER;
+  rewritten_content TEXT;
+  map_key           TEXT;
+  map_val           TEXT;
 BEGIN
   -- 1. import_log
   INSERT INTO import_log (external_ref, raw_json, status, imported_by_user_id)
@@ -1190,7 +1195,9 @@ BEGIN
       NULLIF(ing_el->>'group', ''),
       NULLIF(ing_el->>'notes', ''),
       sort_idx
-    );
+    )
+    RETURNING id INTO new_mi_id;
+    id_map := id_map || jsonb_build_object(ing_el->>'id', new_mi_id);
     sort_idx := sort_idx + 1;
   END LOOP;
 
@@ -1198,12 +1205,16 @@ BEGIN
   sort_idx := 0;
   FOR step_el IN SELECT value FROM jsonb_array_elements(payload->'steps') AS t(value)
   LOOP
+    rewritten_content := step_el->>'content';
+    FOR map_key, map_val IN SELECT key, value::TEXT FROM jsonb_each_text(id_map) LOOP
+      rewritten_content := replace(rewritten_content, '{' || map_key || '}', '{' || map_val || '}');
+    END LOOP;
     INSERT INTO meal_step (meal_id, sort_order, title, content, timer_seconds, group_name)
     VALUES (
       new_meal_id,
       sort_idx,
       NULLIF(step_el->>'title', ''),
-      step_el->>'content',
+      rewritten_content,
       (step_el->>'timer_seconds')::INTEGER,
       NULLIF(step_el->>'group', '')
     );
