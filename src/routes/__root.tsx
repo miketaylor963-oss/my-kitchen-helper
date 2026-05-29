@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/auth";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { GlobalNav } from "@/components/global-nav";
 
 function NotFoundComponent() {
   return (
@@ -118,6 +119,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthStrip />
+      <GlobalNav />
       <Outlet />
     </QueryClientProvider>
   );

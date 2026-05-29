@@ -1,26 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { mainSections } from "@/lib/nav";
+import { adminSections } from "@/lib/nav";
 
-export const Route = createFileRoute("/")({
-  component: Index,
+export const Route = createFileRoute("/admin/")({
+  component: AdminIndex,
 });
 
-const adminCard = {
-  to: "/admin" as const,
-  title: "Admin",
-  description: "Manage ingredients, run imports, and other reference data.",
-};
-
-function Index() {
+function AdminIndex() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-5xl px-6 py-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          A recipe and meal planning app for your household. Pick a section to get started.
+          Manage ingredients, run imports, and other reference data.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {[...mainSections, adminCard].map((s) => (
+          {adminSections.map((s) => (
             <Link
               key={s.to}
               to={s.to}
