@@ -218,7 +218,14 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 
 **Smoke:**
 - Unauth (3/3, Playwright, production, 2026-05-30): all green. Items 1–3 per slice prompt.
-- Auth (Mike, browser, production, 2026-05-30): items 4–9 all passed. No regressions observed.
+- Auth (Mike, browser, production, 2026-05-30): all green.
+
+  4. Signed in as writer. Visit `/admin`. Expected: Import link visible in the card grid and in the GlobalNav.
+  5. Click Import. Expected: route loads normally, no auth-gate code paths visible on the page (no "Sign in to commit imports" panel anywhere).
+  6. Validate → Match → Commit a recipe-only fixture. Expected: same behaviour as 2B.3, no regression. *Fixture used: `bread-pudding.json` — imported end-to-end, second recipe-shape fixture to land after `classic-houmous`.*
+  7. Sign out, then type `/admin/import` directly. Expected: same redirect as item 1 (lands on `/admin`).
+  8. Click the back-link on `/admin/import`. Expected: lands on `/admin`.
+  9. Click the back-link on `/admin/ingredients`. Expected: lands on `/admin`.
 
 **Findings:**
 - Two pre-existing TS errors in `src/lib/import/matching.ts` (lines 122, 128) surfaced during bucket 1 verification — Supabase type-generation issues against the `match_ingredient` RPC. Not part of Issue 2B.1-2. Left unchanged; carry forward to F2 close-out proper. See planning log tidy slice finding.
