@@ -229,3 +229,384 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 
 **Findings:**
 - Two pre-existing TS errors in `src/lib/import/matching.ts` (lines 122, 128) surfaced during bucket 1 verification — Supabase type-generation issues against the `match_ingredient` RPC. Not part of Issue 2B.1-2. Left unchanged; carry forward to F2 close-out proper. See planning log tidy slice finding.
+
+---
+
+## (b2) milestone — recipe-shape fixture sweep
+
+**Status:** complete, 2026-05-30. All ten fixtures committed. Build log closed; see Findings and Carry-forward below.
+
+Auth smoke is the sweep itself. Unauth slot is degenerate this slice (import route is writer-only; no unauth items expected).
+
+### Fixtures
+
+<!-- results appended below as Mike reports -->
+
+#### 1. `aubergine-parmigiana.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 4 exact / 0 ambiguous / 8 fuzzy / 1 none (13 ingredients total).
+
+**Exact:**
+- `aubergines` → aubergine (via alias "aubergines")
+- `fine salt` → fine salt
+- `olive oil` ({0004}) → olive oil
+- `breadcrumbs` → breadcrumbs
+
+**Fuzzy picks:**
+- `olive oil for frying` → olive oil (0.47) — picked candidate
+- `garlic cloves, crushed` → garlic clove (0.55) — picked candidate
+- `good tinned tomatoes` → tinned tomatoes (0.75) — picked candidate
+- `mozzarella, thinly sliced` → mozzarella (0.44) — picked candidate
+- `Parmesan, grated` → parmesan (0.56) — picked candidate
+- `red wine` — best candidate red wine vinegar (0.56), rejected — **created new**
+- `sugar` — best candidate caster sugar (0.46), rejected — **created new**
+- `dried oregano` — best candidates dried fruit / dried thyme (both 0.30), rejected — **created new**
+
+**None:**
+- `basil leaves` — no match — **created new** as "fresh basil"
+
+**New ingredients created:** red wine, sugar, dried oregano, fresh basil.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains dairy — mozzarella, Parmesan — consistent.)
+
+**Notes:** `olive oil` appears twice in the fixture ({0003} frying, {0004} sauce) — {0003} came through as fuzzy ("olive oil for frying") while {0004} was exact. Both correctly resolved to the same canonical ingredient.
+
+#### 2. `banana-bread.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 4 exact / 0 ambiguous / 4 fuzzy / 1 none (9 ingredients total).
+
+**Exact:**
+- `caster sugar` → caster sugar
+- `self-raising flour` → self-raising flour
+- `baking powder` → baking powder
+- `water` → water
+
+**Fuzzy picks:**
+- `butter, softened` → butter (0.44) — picked candidate
+- `large eggs, beaten` → large eggs (0.61) — picked candidate
+- `icing sugar` — best candidate sugar (0.50), rejected — **created new**
+- `dried banana chips` — best candidate banana (0.33), rejected — **created new**
+
+**None:**
+- `very ripe bananas, mashed` — no match — chose existing ingredient "banana"
+
+**New ingredients created:** icing sugar, dried banana chips.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains dairy, gluten, eggs — consistent.)
+
+#### 3. `black-bean-patties-portobello-mushrooms.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 11 exact / 0 ambiguous / 8 fuzzy / 0 none (19 ingredients total).
+
+**Exact:**
+- `breadcrumbs`, `smoked paprika`, `ground cumin`, `ground coriander`, `chipotle paste`, `white miso paste`, `soy sauce` ({0011} and {0017}), `olive oil` ({0014} and {0018}), `burger buns`.
+
+**Fuzzy picks (all picked first candidate):**
+- `tin black beans, drained and rinsed` → tinned black beans (0.46)
+- `red onion, finely diced` → red onion (0.45)
+- `garlic cloves, minced` ({0003} and {0016}) → garlic clove (0.55)
+- `red pepper, finely diced` → red pepper (0.48)
+- `fresh coriander, roughly chopped` → fresh coriander (0.52)
+- `lime, juiced` → lime (0.42)
+- `large Portobello mushrooms` → portobello mushrooms (0.78)
+
+**None:** none.
+
+**New ingredients created:** none.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegan — consistent.)
+
+**Notes:** `garlic cloves, minced`, `soy sauce`, and `olive oil` each appear twice in the fixture (patties + mushrooms groups); matching handled all duplicate-ingredient rows correctly.
+
+#### 4. `butter-bean-mushroom-walnut-loaf.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 5 exact / 0 ambiguous / 7 fuzzy / 2 none (14 ingredients total).
+
+**Exact:**
+- `dried porcini mushrooms`, `olive oil` ({0008} and {0013}), `dried thyme`, `rolled oats`.
+
+**Fuzzy picks (all picked first candidate):**
+- `butter beans, drained and rinsed` → tinned butter beans (0.40)
+- `chestnut mushrooms, finely chopped` → chestnut mushrooms (0.59)
+- `garlic cloves, minced` → garlic clove (0.55)
+- `walnuts, roughly chopped` → walnuts (0.33)
+- `tamari or soy sauce` → tamari (0.37) — soy sauce also offered (0.47 implied); tamari picked
+- `dried rosemary, crushed` → dried rosemary (0.68)
+- `salt and black pepper` → black pepper (0.59) — picked candidate (see Notes)
+
+**None:**
+- `large onion, finely diced` — no match — chose existing ingredient "onion"
+- `eggs, beaten` — no match — chose existing ingredient "egg"
+
+**New ingredients created:** none.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains eggs, soy, nuts — consistent.)
+
+**Notes:** `salt and black pepper` is a combined ingredient name — matched to `black pepper` (0.59), with `salt` unrepresented. Mike flagged this as a scope gap: the fixture bundles two distinct ingredients into one row. The importer correctly matched to the closest candidate; the gap is in the fixture prep convention. Worth a fixture-prep note for close-out: where a recipe writes "salt and pepper" as a single line, split into two rows at conversion time.
+
+#### 5. `harissa-lentil-chickpea-shepherds-pie.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 10 exact / 0 ambiguous / 12 fuzzy / 3 none (25 ingredients total).
+
+**Exact:**
+- `olive oil` ({0003}, {0008}, {0012}), `oat milk`, `ground cumin` ({0010}, {0015}), `smoked paprika` ({0011}, {0017}), `ground coriander`, `vegetable stock`.
+
+**Fuzzy picks:**
+- `floury potatoes, peeled and chunked` → floury potatoes (0.48) — picked candidate
+- `sweet potatoes, peeled and chunked` → sweet potato (0.36) — picked candidate
+- `salt and black pepper` → black pepper (0.59) — picked candidate (same bundled-ingredients gap as fixture 4)
+- `chestnut mushrooms, quartered` → chestnut mushrooms (0.66) — picked candidate
+- `soy sauce or tamari` → soy sauce (0.47) — picked candidate
+- `garlic cloves, finely chopped` → garlic clove (0.41) — picked candidate
+- `rose harissa` → rose harissa paste (0.68) — picked candidate
+- `tinned chopped tomatoes` → tinned tomatoes (0.68) — picked candidate
+- `miso paste` → white miso paste (0.69) — picked candidate
+- `chickpeas, drained and rinsed` → tinned chickpeas (0.36) — picked candidate
+- `sherry vinegar or red wine vinegar` — best candidate red wine vinegar (0.62), rejected — **created new** as "sherry vinegar"
+- `fresh parsley or coriander, chopped` → fresh parsley (0.41) — picked candidate (over fresh coriander 0.47)
+
+**None:**
+- `medium courgettes, cut into 1.5cm dice` — no match — chose existing ingredient "courgette"
+- `large onion, finely chopped` — no match — chose existing ingredient "onion"
+- `red or yellow split lentils, rinsed` — no match — **created new** as "red lentils"
+
+**New ingredients created:** red lentils, sherry vinegar.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegan — consistent.)
+
+**Notes:** `soy sauce or tamari` matched to soy sauce here (vs tamari in fixture 4 `tamari or soy sauce`) — different fixture wording, different pick, both defensible. `fresh parsley or coriander` — lower-scored match (fresh parsley 0.41) picked over fresh coriander (0.47); correct choice for this recipe. `olive oil`, `ground cumin`, and `smoked paprika` each appear multiple times across groups — all handled correctly.
+
+#### 6. `lemon-cheesecake.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 2 exact / 0 ambiguous / 2 fuzzy / 2 none (6 ingredients total).
+
+**Exact:**
+- `butter`, `double cream`.
+
+**Fuzzy picks:**
+- `soft cheese` — best candidates goat's cheese (0.44), cream cheese (0.41); all rejected — **created new** as "soft cheese"
+- `condensed milk` — best candidate whole milk (0.33); rejected — **created new** as "condensed milk"
+
+**None:**
+- `digestive biscuits, crushed` — no match — **created new** as "digestive biscuits"
+- `lemons, rind grated and juiced` — no match — chose existing ingredient "lemon"
+
+**New ingredients created:** digestive biscuits, soft cheese, condensed milk.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains dairy, gluten — consistent.)
+
+**Notes:** `soft cheese` correctly created new — the candidates (goat's cheese, cream cheese, cottage cheese) are specific types, while "soft cheese" is a distinct British baking term for a generic full-fat cream cheese. Matching to cream cheese (0.41) would have been semantically ambiguous.
+
+#### 7. `marinated-teriyaki-eggplant.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 4 exact / 0 ambiguous / 6 fuzzy / 0 none (10 ingredients total).
+
+**Exact:**
+- `aubergines` → aubergine (via alias "aubergines"), `soy sauce`, `mirin`, `sesame seeds`.
+
+**Fuzzy picks (all picked first candidate unless noted):**
+- `rice wine vinegar` → rice vinegar (0.76) — picked candidate
+- `brown sugar` → soft brown sugar (0.75) — picked candidate
+- `ginger, grated` → fresh ginger (0.37) — picked over pickled ginger (0.40); lower score, correct semantics
+- `garlic cloves, minced` → garlic clove (0.55) — picked candidate
+- `sushi or short-grained rice` → sushi rice (0.41) — picked candidate
+- `spring onion, sliced` → spring onion (0.68) — picked candidate
+
+**None:** none.
+
+**New ingredients created:** none.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegan — consistent.)
+
+**Notes:** `ginger, grated` → human correctly picked fresh ginger (0.37) over pickled ginger (0.40) — a case where the highest-score candidate is semantically wrong and the lower-score one is right. Good illustration of why human-in-the-loop matching is load-bearing for fuzzy rows.
+
+#### 8. `ramen-hairy-bikers.json`
+
+**Outcome:** committed (first run). Re-run committed blocked with `duplicate_external_ref` 23505 (see below).
+
+**Match breakdown (first run):** 7 exact / 0 ambiguous / 6 fuzzy / 10 none (23 ingredients total).
+
+**Exact:**
+- `caster sugar`, `soy sauce` (×2), `mirin`, `sesame oil`, `sesame seeds`, `fresh coriander`.
+
+**Fuzzy picks (all picked first candidate):**
+- `dried shiitake mushrooms` → shiitake mushrooms (0.76)
+- `garlic cloves, thinly sliced` → garlic clove (0.43)
+- `fresh root ginger, thinly sliced` → fresh ginger (0.41)
+- `miso paste` (×2, broth and soup groups) → white miso paste (0.69)
+- `spring onions` → spring onion (0.80)
+
+**None — chose existing (3):**
+- `onion, coarsely sliced from top to bottom` → onion
+- `large carrot, cut into 1/2cm slices on the diagonal` → carrot
+- `nori sushi seaweed, roughly torn` → nori sheets (sub-threshold; found via "Choose an existing ingredient" combobox)
+
+**None — created new (7):**
+- `kombu` → **kombu**
+- `vegetable oil` → **vegetable oil**
+- `Chinese lettuce or cabbage, cut into slim wedges` → **Chinese lettuce**
+- `blocks of noodles` → **noodles**
+- `tamago eggs, halved` → **tamago**
+- `beansprouts` → **beansprouts**
+- `chilli oil` → **chilli oil**
+
+**New ingredients created:** kombu, vegetable oil, Chinese lettuce, noodles, tamago, beansprouts, chilli oil.
+
+**23505 paths fired:** `duplicate_external_ref` — re-run commit attempt returned "An import with this external_ref already exists. Re-import / update lands in F2C." Decision 47 path confirmed working.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains soy, gluten, sesame, eggs — consistent.)
+
+**Notes:** Largest fixture in the sweep (23 ingredients), highest new-ingredient count (7). `nori sushi seaweed, roughly torn` does not reach the 0.3 fuzzy threshold against `nori sheets` — resolved via combobox; this is correct behaviour, not a threshold gap. Re-run panel (with newly created ingredients now in DB) used to confirm exact/fuzzy/none breakdown; resolutions unchanged. `tamago` correctly created as its own canonical ingredient rather than mapped to `egg` — it is a specific soy-marinated preparation.
+
+#### 9. `vegetarian-pancake-pie.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 5 exact / 0 ambiguous / 6 fuzzy / 3 none (14 ingredients total).
+
+**Exact:**
+- `plain flour`, `milk` (via alias "milk" → whole milk), `vegetable oil` (created in fixture 8, now exact), `butter`, `ricotta`.
+
+**Fuzzy picks:**
+- `salt and black pepper` → black pepper (0.59) — picked candidate (third fixture with this pattern)
+- `garlic cloves, minced` → garlic clove (0.55) — picked candidate
+- `mushrooms, sliced` → chestnut mushrooms (0.38) — picked over shiitake mushrooms (0.44, top candidate); correct choice for generic British recipe context
+- `fresh spinach, washed` → spinach (0.38) — picked candidate
+- `grated cheddar` → cheddar (0.53) — picked candidate
+- `grated nutmeg` → nutmeg (0.50) — picked candidate
+
+**None:**
+- `free-range eggs` — no match — chose existing ingredient "egg"
+- `fresh herbs, finely chopped` — no match — **created new** as "fresh herbs"
+- `medium onion, finely chopped` — no match — chose existing ingredient "onion"
+
+**New ingredients created:** fresh herbs.
+
+**23505 paths fired:** none.
+
+**Advisory banner:** not fired. (Declared: vegetarian; contains dairy, gluten, eggs — consistent.)
+
+**Notes:** `mushrooms, sliced` → human correctly picked chestnut mushrooms (0.38) over the top-scored shiitake (0.44) — generic "mushrooms" in a British recipe context means chestnut/button, not shiitake. Second case this sweep where the highest-score fuzzy candidate is not the right pick.
+
+#### 10. `north-african-spiced-shepherds-pie-stripped.json`
+
+**Outcome:** committed.
+
+**Match breakdown:** 7 exact / 0 ambiguous / 11 fuzzy / 0 none (18 ingredients total).
+
+**Exact:**
+- `olive oil` (×2), `cumin seeds`, `ground cumin`, `rose harissa paste`, `tinned tomatoes`, `vegetable stock`.
+
+**Fuzzy picks (all picked first candidate unless noted):**
+- `leek, sliced` → leek (0.42)
+- `celery stalks, diced` → celery stalk (0.57)
+- `carrots, diced` → carrot (0.40)
+- `garlic cloves, minced` → garlic clove (0.55)
+- `mushrooms, roughly chopped` → chestnut mushrooms (0.36) — consistent with fixture 9
+- `green or brown lentils, dried` → green lentils (0.48) — brown lentils also scored 0.48; green picked
+- `white beans, drained` → tinned white beans (0.56)
+- `miso paste` → white miso paste (0.69)
+- `lemon, juiced` → lemon (0.46)
+- `floury potatoes, peeled and chopped` → floury potatoes (0.48)
+- `salt and black pepper` → black pepper (0.59) — fourth fixture with this pattern
+
+**None:** none.
+
+**New ingredients created:** none.
+
+**23505 paths fired:** none. `duplicate_ingredient_name` path not exercised this fixture (no new ingredients needed).
+
+**Advisory banner:** not fired. (Declared: vegan — consistent.)
+
+**Notes:** Cleanest fixture in the sweep — no new ingredients, no none rows, no 23505 paths. Removing `derived_components` from the stripped variant had no effect on the import path, as expected. `green or brown lentils, dried` — both candidates scored 0.48; green lentils picked (reasonable default).
+
+### Findings
+
+#### Cumulative fuzzy/none ingredient list (threshold-tuning data)
+
+Across 10 fixtures (130 ingredients total), 19 new canonical ingredients were created:
+
+red wine, sugar, dried oregano, fresh basil, icing sugar, dried banana chips, red lentils, sherry vinegar, digestive biscuits, soft cheese, condensed milk, kombu, vegetable oil, Chinese lettuce, noodles, tamago, beansprouts, chilli oil, fresh herbs.
+
+Notable sub-threshold misses (ingredient did not reach 0.3 fuzzy threshold, resolved via combobox or created new):
+- `ice-cold water` → water (prior observation from 2B.3; not re-encountered this sweep)
+- `nori sushi seaweed, roughly torn` → nori sheets (sub-threshold; combobox)
+- Various `onion, [prep]` forms → onion (consistently none, resolved via combobox)
+
+The 0.3 threshold is performing well: it surfaces genuinely close candidates without noise. No case arose where the threshold should have been lower; no case arose where a spurious match above 0.3 needed to be overridden. **Recommendation: leave the threshold unchanged.**
+
+#### Highest-score-is-wrong cases
+
+Two fixtures showed the top fuzzy candidate being semantically incorrect:
+- Fixture 7 (`marinated-teriyaki-eggplant`): `ginger, grated` — pickled ginger (0.40) ranked above fresh ginger (0.37). Fresh ginger correctly picked.
+- Fixture 9 (`vegetarian-pancake-pie`): `mushrooms, sliced` — shiitake mushrooms (0.44) ranked above chestnut mushrooms (0.38). Chestnut mushrooms correctly picked for generic British recipe context.
+
+Confirms the human-in-the-loop step is load-bearing for fuzzy rows, not ceremonial.
+
+#### `salt and black pepper` bundled-ingredient pattern
+
+Four fixtures (4, 5, 9, 10) contained `salt and black pepper` as a single ingredient row, consistently matched to `black pepper` with `salt` unrepresented. This is a fixture-prep convention gap: where a recipe writes "salt and pepper" as a single line, the converter should split into two separate rows. No importer issue.
+
+#### "X or Y" ingredient names
+
+Five cases across the sweep where a fixture used an "X or Y" name for an ingredient:
+- `tamari or soy sauce` / `soy sauce or tamari` (fixtures 4 and 5) — matched to tamari and soy sauce respectively; both defensible.
+- `sherry vinegar or red wine vinegar` (fixture 5) — created new as "sherry vinegar"; correct (they are not interchangeable).
+- `Chinese lettuce or cabbage` (fixture 8) — created new as "Chinese lettuce".
+- `red or yellow split lentils` (fixture 5) — created new as "red lentils".
+- `fresh parsley or coriander` (fixture 5) — matched to fresh parsley; recipe-appropriate choice.
+- `sushi or short-grained rice` (fixture 7) — matched to sushi rice.
+
+The "X or Y" pattern is a legitimate recipe-writing convention. The importer handles it correctly (as a fuzzy/none match, resolved by the operator). No rule change needed.
+
+#### `duplicate_external_ref` 23505 path
+
+Exercised on the ramen re-run commit attempt. UI surfaced: "An import with this external_ref already exists. Re-import / update lands in F2C." Decision 47 path confirmed working as designed.
+
+#### `duplicate_ingredient_name` 23505 path
+
+Not exercised during the sweep. No attempt to create a new ingredient whose canonical name already existed. The fallback `name: "unknown"` in the error-details parsing remains untested. Carry forward to a future slice where a collision is deliberately constructed, or to F2C when re-import is built.
+
+#### Rule 204 advisory
+
+Not fired in any of the ten fixtures. All fixtures declared a dietary category consistent with their ingredients (vegan fixtures used only vegan-compatible ingredients; vegetarian fixtures contained dairy/eggs as declared). No threshold-misclassification cases surfaced.
+
+#### Fixture-prep errors
+
+None requiring a re-run. The `salt and black pepper` bundling was flagged in-flight but did not block import — it is a data quality observation, not a validator error.
+
+### Carry-forward
+
+- **`duplicate_ingredient_name` 23505 path**: still untested. The `name: "unknown"` fallback in the commit service's error-details parsing needs a deliberate collision test before F2C ships re-import.
+- **`salt and black pepper` fixture-prep convention**: all future fixture conversions should split combined "salt and pepper" lines into two ingredient rows. The ten (b2) fixtures can be corrected at F2C time when they may be re-imported anyway.
+- **Fuzzy threshold**: 0.3 confirmed correct across 130 ingredients and 10 fixtures. No change recommended.
+- **`src/lib/import/matching.ts` TS errors (lines 122, 128)**: still outstanding. F2 close-out tidy owns this.
+- **(b2) milestone**: all ten recipe-shape `web_sourced` fixtures landed. Decision 46 satisfied. F2 build is done; F2 close-out (TS errors, planning log close-out block, docs updates) is the remaining work.

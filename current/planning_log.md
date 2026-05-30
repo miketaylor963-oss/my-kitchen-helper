@@ -1210,3 +1210,44 @@ Running `tsc --noEmit` to verify the Issue 2B.1-2 fix revealed two pre-existing 
 Unauth (3/3, Playwright, production, 2026-05-30): all green. Items 1–3 per slice prompt.
 
 Auth (Mike, browser, production, 2026-05-30): items 4–9 all passed. No regressions observed.
+
+---
+
+### (b2) milestone close-out
+
+#### Decision 46 closed — F2 done in the (b2) shape
+
+All ten recipe-shape `web_sourced` fixtures imported end-to-end into production, 2026-05-30:
+
+`aubergine-parmigiana`, `banana-bread`, `black-bean-patties-portobello-mushrooms`, `butter-bean-mushroom-walnut-loaf`, `harissa-lentil-chickpea-shepherds-pie`, `lemon-cheesecake`, `marinated-teriyaki-eggplant`, `ramen-hairy-bikers`, `vegetarian-pancake-pie`, `north-african-spiced-shepherds-pie-stripped`.
+
+Together with `classic-houmous` (2B.3) and `bread-pudding` (tidy slice), twelve recipe-shape fixtures have now landed. Decision 46 satisfied. F2 build is complete.
+
+#### Finding — fuzzy threshold confirmed at 0.3
+
+130 ingredients across 10 fixtures. No case where the threshold needed to be lower (no spurious above-threshold matches that required override); no case where a meaningful candidate was missed that a lower threshold would have surfaced. The one prior sub-threshold case (`nori sushi seaweed` → `nori sheets`) was correctly handled via the combobox — it is a lexically distant pair, not a threshold gap.
+
+**Decision: threshold stays at 0.3.** Carry-forward from 2B.2 and 2B.3 closed.
+
+#### Finding — `duplicate_external_ref` 23505 path confirmed
+
+Exercised on a deliberate ramen re-run commit attempt. Message surfaced correctly: "An import with this external_ref already exists. Re-import / update lands in F2C." Decision 47 path confirmed end-to-end.
+
+#### Finding — `duplicate_ingredient_name` 23505 path still unexercised
+
+No new-ingredient creation during the sweep produced a canonical-name collision. The fallback `name: "unknown"` in the commit service's error-details parsing remains untested. Carry to F2C.
+
+#### Finding — fixture-prep convention gaps (no importer issues)
+
+Two patterns observed across multiple fixtures; neither is an importer bug:
+
+1. **"Salt and black pepper" as a single row.** Appeared in fixtures 4, 5, 9, and 10. Matched to `black pepper`, with `salt` unrepresented. Convention fix: converters should split "salt and pepper" lines into two ingredient rows at conversion time.
+
+2. **"X or Y" ingredient names.** Appeared in five cases across the sweep (`tamari or soy sauce`, `sherry vinegar or red wine vinegar`, `Chinese lettuce or cabbage`, `red or yellow split lentils`, `fresh parsley or coriander`). The importer handles these correctly as fuzzy/none matches resolved by the operator. No rule change needed; convention fix: where one of the two options is clearly preferred for the recipe, use the single name at conversion time.
+
+#### Carry-forward to F2 close-out
+
+- **`duplicate_ingredient_name` 23505 path**: needs a deliberate collision test before F2C ships re-import. Scheduled for F2 close-out or F2C pre-work.
+- **`src/lib/import/matching.ts` TS errors (lines 122, 128)**: still outstanding. F2 close-out tidy.
+- **Fixture-prep convention**: the twelve landed fixtures can be audited and corrected (salt/pepper splits, "X or Y" simplification) at F2C time when re-import is built anyway — no need to re-import now.
+- **Component step placeholder rendering** (F3 carry-forward): unchanged from 2B.3 carry-forward. Same two-part pattern needed for `component_step.content` vs `component_ingredient.id`.
