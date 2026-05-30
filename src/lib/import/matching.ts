@@ -119,7 +119,9 @@ export async function matchIngredients(data: unknown): Promise<MatchingResult> {
       const row_id = ing.id as string;
       const row_name = ing.name as string;
 
-      const { data: rawRows, error } = await supabase.rpc("match_ingredient", {
+      // supabase.rpc types only include generated functions; match_ingredient is custom
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: rawRows, error } = await (supabase.rpc as any)("match_ingredient", {
         query_name: row_name,
       });
 

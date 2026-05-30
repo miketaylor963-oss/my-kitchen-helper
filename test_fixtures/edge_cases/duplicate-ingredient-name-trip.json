@@ -1,0 +1,25 @@
+{
+  "_fixture_notes": "Tests the `duplicate_ingredient_name` 23505 error path in `src/lib/import/commit.ts`. The single ingredient is deliberately a name that won't seed-match, forcing the matching panel to show a `none` row with a Create New form. To trigger the 23505: when Create New opens, type a `canonical_name` that already exists in the master (e.g. `olive oil` or any other seeded ingredient name) and submit. The commit_import RPC will attempt the INSERT, Postgres will return 23505 on `ingredient_canonical_name_key`, and commit.ts's error-details parsing path runs against a real error payload. The commit transaction rolls back — no meal, ingredient, or import_log row is created. Re-run the fixture by reloading the import page; no DB cleanup needed.",
+
+  "import_type": "recipe",
+  "external_ref": "duplicate-ingredient-name-trip",
+  "name": "Dupe-Name Trip Recipe",
+
+  "meal_types": [],
+  "meal_formats": [],
+  "component_layers": [],
+  "derived_components": [],
+
+  "base_servings": 1,
+
+  "ingredients": [
+    { "id": "0001", "name": "made-up unique ingredient zxq" }
+  ],
+
+  "steps": [
+    {
+      "title": "Combine",
+      "content": "Combine {0001} and serve."
+    }
+  ]
+}
