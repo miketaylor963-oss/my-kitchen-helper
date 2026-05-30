@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ type CreateNewValues = {
 
 function Page() {
   const nav = useNavigate();
-  const { user, isWriter } = useIsWriter();
+  const { isWriter, loading } = useIsWriter();
   const [text, setText] = useState("");
   const [parsedData, setParsedData] = useState<unknown>(null);
   const [outcome, setOutcome] = useState<ValidationResult | "parse-error" | null>(null);
@@ -160,6 +160,12 @@ function Page() {
       return (data ?? []) as { id: number; canonical_name: string }[];
     },
   });
+
+  useEffect(() => {
+    if (!loading && !isWriter) {
+      nav({ to: "/admin", replace: true });
+    }
+  }, [loading, isWriter, nav]);
 
   function handleValidate() {
     if (!lookups.data) return;
@@ -274,11 +280,13 @@ function Page() {
 
   const allIngredients = ingredientsQuery.data ?? [];
 
+  if (loading || !isWriter) return null;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <Link to="/admin/ingredients" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Back to ingredients
+        <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
+          ← Admin
         </Link>
 
         <div className="mt-4">
@@ -360,8 +368,6 @@ function Page() {
             allResolved={allResolved}
             isCommitting={isCommitting}
             commitOutcome={commitOutcome}
-            user={user}
-            isWriter={isWriter}
             onCommit={handleCommit}
           />
         )}
@@ -996,16 +1002,12 @@ function CommitArea({
   allResolved,
   isCommitting,
   commitOutcome,
-  user,
-  isWriter,
   onCommit,
 }: {
   parsedData: unknown;
   allResolved: boolean;
   isCommitting: boolean;
   commitOutcome: CommitOutcome | null;
-  user: { id: string } | null;
-  isWriter: boolean;
   onCommit: () => void;
 }) {
   const doc = parsedData as { import_type?: string; derived_components?: unknown[] } | null;
@@ -1040,25 +1042,9 @@ function CommitArea({
       {commitOutcome && commitOutcome.kind !== "success" && (
         <CommitErrorPanel outcome={commitOutcome} />
       )}
-
-      {!user ? (
-        <div className="rounded-md border border-border bg-muted/40 p-4">
-          <p className="text-sm">
-            <Link to="/login" className="underline hover:text-foreground">Sign in</Link>
-            {" "}to commit imports.
-          </p>
-        </div>
-      ) : !isWriter ? (
-        <div className="rounded-md border border-border bg-muted/40 p-4">
-          <p className="text-sm text-muted-foreground">
-            You don&apos;t have writer access on this household.
-          </p>
-        </div>
-      ) : (
-        <Button onClick={onCommit} disabled={!allResolved || isCommitting}>
-          {isCommitting ? "Committing…" : allResolved ? "Commit" : "Commit (resolve all rows first)"}
-        </Button>
-      )}
+      <Button onClick={onCommit} disabled={!allResolved || isCommitting}>
+        {isCommitting ? "Committing…" : allResolved ? "Commit" : "Commit (resolve all rows first)"}
+      </Button>
     </div>
   );
 }

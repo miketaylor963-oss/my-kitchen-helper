@@ -101,6 +101,12 @@ Every writable content/state table has a `household_id` column (DEFAULT 1). v1 h
 
 - Auth URLs are configured per-environment in Supabase dashboard. See section 13 for the production/local-dev URL configuration.
 
+**Writer-gating classes.** Two patterns, chosen by whether non-writers have a meaningful reason to be on the page:
+- **Mixed-access** — public read, restricted write. The page renders for everyone; `useIsWriter()` runs inside the component; non-writers see an AccessPanel where the write surface would render. F2A's ingredient edit and new follow this.
+- **Writer-only** — no public read surface. Non-writers are redirected to `/admin` (client-side, via `useEffect` + `useNavigate`), and the route is hidden from the admin menu. `/admin/import` follows this.
+
+Default to mixed-access; pick writer-only only when there's no public read worth showing.
+
 ---
 
 ## 8. Condensed schema map
@@ -295,6 +301,8 @@ Reference data and admin functions live under a sixth top-level entry, **Admin**
 
 **Global nav (added in 2B.1.1):** The top-level navigation is a `GlobalNav` component rendered in `__root.tsx` between `<AuthStrip />` and `<Outlet />`, so it appears on every route. Nav data lives in `src/lib/nav.ts` — add new admin tools to `adminSections` there and both the `/admin` landing card grid and the nav flyout/drawer pick them up automatically. Desktop uses a click-to-open `DropdownMenu` flyout for Admin (chevron toggle, `modal={false}`); mobile uses a Sheet drawer with Admin as a clickable section header and sub-items indented, no nested collapse. Active-state convention: `text-foreground font-medium` (active), `text-muted-foreground hover:text-foreground` (inactive), via TanStack Router `activeProps`/`inactiveProps`. Home uses `activeOptions={{ exact: true }}`; the Admin parent uses the default prefix-match so any `/admin/*` route lights it up. For flyout item navigation use `onSelect + useNavigate()`, not `DropdownMenuItem asChild + <Link>` (see planning log Issue 2B.1-3).
 
+Each admin-section page back-links to its structural parent. /admin/foo's parent is /admin; /admin/foo/bar's parent is /admin/foo; /admin's parent is /.
+
 ---
 
 15. TanStack Router file layout
@@ -327,7 +335,7 @@ F1's meals routes use a two-file pattern (`meals.index.tsx` + `meals.$mealId.*`)
 
 F1's meals routes still use a `useEffect`-based redirect to `/login` rather than the UI-only panel. To be reconciled when meals routes are next substantially touched — don't refactor speculatively.
 
-Moving auth gating to `beforeLoad` (TanStack Router's server-side loader hook) would give cleaner loading states and allow server-side redirects. Deferred: it requires touching every write route and possibly the auth hook, and is a cross-cutting change that should land as its own slice. Raise before doing it.
+Moving auth gating to `beforeLoad` (TanStack Router's server-side loader hook) would give cleaner loading states for both writer-gating classes and allow server-side redirects for the writer-only class. Deferred: it requires touching every write route and possibly the auth hook, and is a cross-cutting change that should land as its own slice. Raise before doing it. In the meantime, mixed-access uses the UI-only panel inside the component; writer-only uses a client-side `useEffect` redirect. Both are deliberate — the F1 `useEffect` critique applies to pages with a public read view (where redirecting hides content the user is entitled to see), not to writer-only pages.
 
 ---
 

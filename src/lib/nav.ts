@@ -5,7 +5,12 @@ export const mainSections = [
   { to: "/shopping-lists" as const, title: "Shopping Lists", description: "Generate shopping lists from a plan." },
 ];
 
-export const adminSections = [
-  { to: "/admin/ingredients" as const, title: "Ingredients", description: "Manage the ingredient master and reference data." },
-  { to: "/admin/import" as const, title: "Import", description: "Validate and import recipe and component JSON." },
+export const adminSections: {
+  to: "/admin/ingredients" | "/admin/import";
+  title: string;
+  description: string;
+  writerOnly?: boolean;
+}[] = [
+  { to: "/admin/ingredients", title: "Ingredients", description: "Manage the ingredient master and reference data." },
+  { to: "/admin/import", title: "Import", description: "Validate and import recipe and component JSON.", writerOnly: true },
 ];

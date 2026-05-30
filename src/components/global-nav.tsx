@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { mainSections, adminSections } from "@/lib/nav";
+import { useIsWriter } from "@/lib/auth";
 
 const deskActive = "px-3 py-1.5 rounded-md text-sm text-foreground font-medium";
 const deskInactive = "px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors";
@@ -21,6 +22,8 @@ export function GlobalNav() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const close = () => setSheetOpen(false);
   const navigate = useNavigate();
+  const { isWriter, loading } = useIsWriter();
+  const visibleAdminSections = adminSections.filter((s) => !s.writerOnly || (!loading && isWriter));
 
   return (
     <header className="border-b bg-background">
@@ -71,7 +74,7 @@ export function GlobalNav() {
               </DropdownMenuTrigger>
             </div>
             <DropdownMenuContent align="end">
-              {adminSections.map((s) => (
+              {visibleAdminSections.map((s) => (
                 <DropdownMenuItem
                   key={s.to}
                   onSelect={() => navigate({ to: s.to })}
@@ -126,7 +129,7 @@ export function GlobalNav() {
                 >
                   Admin
                 </Link>
-                {adminSections.map((s) => (
+                {visibleAdminSections.map((s) => (
                   <Link
                     key={s.to}
                     to={s.to}

@@ -1198,3 +1198,9 @@ Provenance: Mike observed all three during 2B.3 smoke runs. Items 1 and 2 notice
 - **(b2) milestone**: `classic-houmous.json` imported end-to-end. To reach (b2) done: import the remaining recipe-shape `web_sourced` fixtures and confirm the stripped shepherd's pie lands cleanly.
 - **Component step placeholder rendering** (F3 carry-forward): same two-part pattern needed for `component_step.content` against `component_ingredient.id`.
 - **Navigation tidy** (see Finding): fix the two admin-area back-links and the magic-link return path (which also needs to preserve form state on the import page). Candidates for the tidy slice between F2 build and F2 close-out, alongside the TS errors. Issue 3 is structurally bigger than 1 and 2 — may not all fit in one slice; the planned "tidy" may need splitting into quick fixes (TS errors + back-links) and a separate auth-return slice.
+
+### Tidy slice close-out decisions and issues
+
+#### Finding — `src/lib/import/matching.ts` TS errors (new, found during bucket 1)
+
+Running `tsc --noEmit` to verify the Issue 2B.1-2 fix revealed two pre-existing errors in `src/lib/import/matching.ts` not previously logged: `TS2345` on line 122 (`'match_ingredient'` not assignable to `'show_limit' | 'show_trgm'` — Supabase RPC function name not in the generated types) and `TS2352` on line 128 (RPC return type inferred as `string[]`, not `RawMatchRow[]`). Both are Supabase type-generation issues against the `match_ingredient` RPC call in the matching service. No behavioural impact — the RPC works at runtime; the types are just not reflected in the generated schema. Left unchanged this slice (out of scope). Carry forward to F2 close-out proper, not (b2).

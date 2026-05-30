@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { adminSections } from "@/lib/nav";
+import { useIsWriter } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminIndex,
 });
 
 function AdminIndex() {
+  const { isWriter, loading } = useIsWriter();
+  const visibleSections = adminSections.filter((s) => !s.writerOnly || (!loading && isWriter));
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto max-w-5xl px-6 py-12">
@@ -14,7 +18,7 @@ function AdminIndex() {
           Manage ingredients, run imports, and other reference data.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {adminSections.map((s) => (
+          {visibleSections.map((s) => (
             <Link
               key={s.to}
               to={s.to}

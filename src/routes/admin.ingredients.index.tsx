@@ -101,10 +101,10 @@ function Page() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-6 py-10">
         <Link
-          to="/"
+          to="/admin"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          ← Home
+          ← Admin
         </Link>
         <div className="mt-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

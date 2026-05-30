@@ -57,12 +57,11 @@ function Page() {
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
+      const typed = data as unknown as IngredientDetail;
       return {
-        ...data,
-        ingredient_alias: [
-          ...(data.ingredient_alias as { id: number; alias: string }[]),
-        ].sort((a, b) => a.alias.localeCompare(b.alias)),
-      } as IngredientDetail;
+        ...typed,
+        ingredient_alias: [...typed.ingredient_alias].sort((a, b) => a.alias.localeCompare(b.alias)),
+      };
     },
   });
 

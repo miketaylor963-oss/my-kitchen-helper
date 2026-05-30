@@ -228,6 +228,8 @@ Per-table reads, locked in for v2 RLS:
 ### 6.5 Build journal
 Keep notes as you build: decisions made, what worked, what didn't, prompts that landed cleanly, prompts that produced rework. The story of building this with AI *is* the portfolio asset. Trivial to keep going; near-impossible to reconstruct after the fact. The canonical log is `current/planning_log.md`. Per-feature build logs live in `current/` while a feature is active and move to `archive/` at close-out; F1's `build_log_post_f1.md`, the `schema_build_log.md`, and `migration_log.md` are already in `archive/`.
 
+`current/enhancements.md` — deferred ideas with explicit "becomes worth fixing when" triggers. Reviewed at feature close-out.
+
 ---
 
 ## 7. Open Questions
