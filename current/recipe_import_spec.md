@@ -105,6 +105,10 @@ Conventions for converting human-written recipes into template form. None of the
 
 **Inline alternatives.** When a recipe lists alternatives inline ("tamari or soy sauce", "ricotta or cottage cheese", "kombu or seaweed flakes"), take the first-named option as the canonical ingredient. Put the alternatives in `notes`. Classification (dietary category, restrictions) follows the canonical choice. Alternative ingredients are not first-class in the spec.
 
+*The `name` field contains only the first-named option, not the "X or Y" phrase.* A recipe line "3 tbsp tamari or soy sauce" converts to `"name": "tamari", "notes": "or soy sauce"` — not `"name": "tamari or soy sauce"`. The `name` is what the importer matches against the master vocabulary; embedded alternatives push the row into fuzzy bucketing unnecessarily. This applies whether the alternatives are near-equivalent (`tamari or soy sauce`, `fresh parsley or coriander`) or genuinely different ingredients the recipe writer offers as substitutions (`sherry vinegar or red wine vinegar`, `Chinese lettuce or cabbage`) — pick one, note the other.
+
+**Combined seasonings.** Recipe writers commonly write `salt and black pepper` (or `salt and pepper`) as a single ingredient line. Split these into two rows at conversion time — one for salt, one for black pepper — each with its own quantity (`"to taste"` is fine: `"amount": null` with `"notes": "to taste"`). A single combined row matches only one of the two ingredients in the importer and leaves the other unrepresented in the shopping list.
+
 **Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
 
 **Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`).

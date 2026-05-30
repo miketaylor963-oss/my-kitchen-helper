@@ -55,3 +55,49 @@ benefit, and they ask. Currently only Mike and Jane; Jane can be
 told things directly.
 
 Originally raised: 2B.3 close-out discussion.
+
+---
+
+## Import / matching
+
+### Prep-adjective stripping in ingredient matching
+Many fuzzy matches in real fixtures are driven by prep-related modifiers
+attached to the ingredient name — `garlic cloves, minced`, `large onion,
+finely diced`, `mushrooms, roughly chopped`, `lemon, juiced`. Stripped
+of the modifier, these would land as exact matches against the existing
+master vocabulary. The (b2) sweep produced ~50–60% fuzzy bucketing across
+130 ingredients; a large fraction of that is the prep-adjective pattern.
+
+The catch: not all modifiers are strippable. `dried`, `fresh`, `tinned`,
+`ground`, `whole` are canonical name fragments in this master
+(`dried oregano`, `fresh basil`, `tinned tomatoes`, `ground cumin`,
+`whole milk`). A blunt strip-list would break those.
+
+Becomes worth building when: F2C, before re-import work. Re-import reruns
+matching, so this lands cheaply alongside it and saves disambiguation
+clicks on every re-imported fixture. Threshold tuning (Decision-46 carry-
+forward) interacts: prep-stripping moves the easy wins into the exact
+bucket, so the residual fuzzy bucket becomes the genuinely ambiguous
+cases — threshold may look different against that residual.
+
+Mechanism: in `src/lib/import/matching.ts`, generate variants of each
+ingredient name (original / strip trailing comma-clause / strip leading
+size adjective / strip both) and run `match_ingredient` against each in
+parallel. Prefer the best outcome (exact on any variant → fuzzy-high →
+fuzzy-low → none). If exact lands on a stripped variant, render the row
+in the exact bucket with an annotation showing what got stripped; the
+existing override combobox handles "this isn't right".
+
+The strip-list is a curated config — a small versioned vocabulary of
+prep verbs (`chopped`, `minced`, `sliced`, `diced`, `drained`, `rinsed`,
+`grated`, `crushed`, `juiced`, `peeled`, `halved`, `quartered`, `torn`,
+`shredded`, `mashed`, `beaten`, `softened`, `washed`), modifying adverbs
+(`finely`, `roughly`, `thinly`, `coarsely`, `lightly`), and size
+adjectives (`large`, `medium`, `small`). Lives alongside the alias table
+conceptually — both are matching-vocabulary configuration. Expected to
+evolve as new fixtures expose new modifier patterns.
+
+Worst case: variant lookups all miss and the row falls through to today's
+fuzzy bucket. No regression possible.
+
+Originally raised: (b2) milestone close-out, 2026-05-30.
