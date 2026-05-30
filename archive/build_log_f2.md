@@ -615,7 +615,7 @@ None requiring a re-run. The `salt and black pepper` bundling was flagged in-fli
 
 ## F2 close-out
 
-**Status:** in progress.
+**Status:** complete. Build confirmed green 2026-05-30.
 
 ### `duplicate_ingredient_name` 23505 path exercised
 
