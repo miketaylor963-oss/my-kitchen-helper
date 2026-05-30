@@ -193,3 +193,32 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 - Fuzzy threshold (0.3): `ice-cold water` produced no match again — second observation, same fixture. Still insufficient data to recommend a change.
 
 **(b2) milestone progress:** `classic-houmous.json` imported end-to-end — first fixture to land via the importer. Remaining recipe-shape `web_sourced` fixtures and the stripped shepherd's pie still pending before (b2) closes.
+
+---
+
+## Tidy slice
+
+**Status:** complete, deployed, smoke-tested 2026-05-30. Commit: `6695c2c`.
+
+**Built:**
+- `src/lib/nav.ts`: `writerOnly: true` on Import entry; explicit inline type with `writerOnly?: boolean`.
+- `src/routes/admin.index.tsx`: filters `visibleSections` — Import card hidden while signed out or loading.
+- `src/components/global-nav.tsx`: same filter applied to desktop dropdown and mobile sheet.
+- `src/routes/admin.import.tsx`: auth gate moved to route boundary — `useIsWriter()` + `useEffect` redirect for non-writers; early `return null` while loading or not a writer. Back-link changed to `← Admin` → `/admin`.
+- `src/routes/admin.ingredients.index.tsx`: back-link changed to `← Admin` → `/admin`.
+- `src/routes/admin.ingredients.$id.index.tsx`: fixed Supabase nested-select TS inference errors (Issue 2B.1-2) — `data as unknown as IngredientDetail`.
+- `current/enhancements.md` (new): deferred ideas with "becomes worth fixing when" triggers. Auth/navigation and user experience sections seeded.
+- `current/standing_brief.md`: §7 writer-gating classes added; §14 back-link rule added; §15 beforeLoad paragraph reworded to not contradict two-class rule.
+- `current/requirements.md`: §6.5 enhancements.md reference added.
+
+**Deleted from admin.import.tsx:**
+- `user` and `isWriter` props removed from `CommitArea` (call site, destructure, prop types).
+- Auth ternary (`!user ? … : !isWriter ? … : <Button>`) replaced with bare Commit button.
+- `useIsWriter()` destructure narrowed from `{ user, isWriter }` to `{ isWriter, loading }`.
+
+**Smoke:**
+- Unauth (3/3, Playwright, production, 2026-05-30): all green. Items 1–3 per slice prompt.
+- Auth (Mike, browser, production, 2026-05-30): items 4–9 all passed. No regressions observed.
+
+**Findings:**
+- Two pre-existing TS errors in `src/lib/import/matching.ts` (lines 122, 128) surfaced during bucket 1 verification — Supabase type-generation issues against the `match_ingredient` RPC. Not part of Issue 2B.1-2. Left unchanged; carry forward to F2 close-out proper. See planning log tidy slice finding.

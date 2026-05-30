@@ -1204,3 +1204,9 @@ Provenance: Mike observed all three during 2B.3 smoke runs. Items 1 and 2 notice
 #### Finding — `src/lib/import/matching.ts` TS errors (new, found during bucket 1)
 
 Running `tsc --noEmit` to verify the Issue 2B.1-2 fix revealed two pre-existing errors in `src/lib/import/matching.ts` not previously logged: `TS2345` on line 122 (`'match_ingredient'` not assignable to `'show_limit' | 'show_trgm'` — Supabase RPC function name not in the generated types) and `TS2352` on line 128 (RPC return type inferred as `string[]`, not `RawMatchRow[]`). Both are Supabase type-generation issues against the `match_ingredient` RPC call in the matching service. No behavioural impact — the RPC works at runtime; the types are just not reflected in the generated schema. Left unchanged this slice (out of scope). Carry forward to F2 close-out proper, not (b2).
+
+#### Smoke results
+
+Unauth (3/3, Playwright, production, 2026-05-30): all green. Items 1–3 per slice prompt.
+
+Auth (Mike, browser, production, 2026-05-30): items 4–9 all passed. No regressions observed.
