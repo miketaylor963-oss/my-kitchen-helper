@@ -1145,3 +1145,56 @@ This is also the first real-fixture datum on the 0.3 fuzzy threshold's behaviour
 - **Blocked-state delete smoke** (2A.5 Finding 1): still owed for 2B.3 against a real `meal_ingredient` reference.
 - **`ice-cold water` no-match**: 2B.3's "create new ingredient" inline flow will need to handle this case. The ingredient is in the houmous fixture — it will appear as a `kind: 'none'` row needing a new ingredient created.
 - **Close-out step language**: the 2B.2 manifest-reconciliation step was framed as work-to-be-done ("reconcile the row"), which led CC to rewrite a row that didn't need changing. Future close-out steps that verify documentation against reality should explicitly say "if it matches, change nothing; only edit on a real discrepancy". Flagged for the next pass over the project instructions.
+---
+
+### 2B.3 close-out decisions and issues
+
+#### Finding — placeholder bug: two-part root cause
+
+**Symptom:** Smoke item 6 (initial run) showed literal `{0010}` placeholders in step content on the meal detail page.
+
+**Root cause part 1 (SQL):** `commit_import` stored the JSON's local ingredient ids (4-digit strings, e.g. `"0001"`) in step content verbatim. The renderer substitutes by `meal_ingredient.id` (a Postgres serial integer). The two id spaces were never reconciled.
+
+**Fix:** During the ingredient INSERT loop, capture `RETURNING id INTO new_mi_id` and accumulate `id_map := id_map || jsonb_build_object(ing_el->>'id', new_mi_id)`. Before each step INSERT, iterate over `id_map` and `replace()` each `{local-id}` with `{meal_ingredient.id}`.
+
+**Root cause part 2 (renderer):** The `Steps` component rendered `s.content` verbatim — no placeholder substitution path existed.
+
+**Fix:** `formatIngredient` + `resolvePlaceholders` helpers added to `meals.$mealId.index.tsx`. `Steps` widened to accept `meal_ingredient` and applies `resolvePlaceholders` at render time.
+
+**Implication for F3:** Component step rendering will need the same two-part fix applied to `component_step.content` against `component_ingredient.id` when F3 ships.
+
+#### Finding — 2A.5 blocked-state delete smoke closed
+
+Item 8 passed against a real `meal_ingredient` reference from the 2B.3 import. Blocked dialog rendered, listed the meal name, showed no Delete affordance. 2A.5 Finding 1 carry-forward resolved.
+
+#### Finding — error.details shape for 23505 not directly observed
+
+The `duplicate_external_ref` path was exercised in item 7 and surfaced the correct message. The `duplicate_ingredient_name` path (regex over `error.details` to extract the name) was not exercised — the create-new ingredient in item 5 succeeded without collision. Fallback `name: "unknown"` remains untested. Note the actual `error.details` format from Supabase when this path is next exercised.
+
+#### Finding — fuzzy threshold datum
+
+`ice-cold water` produced no match at 0.3 again (second observation, same fixture). Successfully handled via the create-new flow. Insufficient data to recommend lifting the threshold — still only one ingredient across two runs.
+
+#### Finding — navigation and auth-return inconsistencies
+
+Surfaced by Mike during 2B.3 smoke. Not raised with CC during the slice — held back deliberately so CC's attention stayed on the placeholder-substitution fix (smoke item 6). Logged here so the next slice picks them up.
+
+Three separate issues, all in the admin-area navigation and auth flow:
+
+1. **Import page back-link wrong destination.** The "← Back to ingredients" link on `/admin/import` points to `/admin/ingredients`. The user's mental model is that import is a peer of ingredients under the admin section, so the back-link should point to `/admin`. Same issue surfaces if more admin-section pages are added — each will need its back-link going up one level, not sideways.
+
+2. **Ingredients page back-link skips the admin index.** The back-link on `/admin/ingredients` points to home (`/`), bypassing `/admin` entirely. Same root cause as (1): admin-section pages are linking to whatever felt natural at build time rather than to their structural parent. Consistent rule needed: admin-section pages back-link to `/admin`; `/admin` back-links to home.
+
+3. **Magic-link sign-in loses page context and form state.** Sign-in from `/admin/import` (via the "Sign in to commit imports" link) returned the user to home rather than back to `/admin/import`. Pasted JSON, validation result, matching choices — all lost. Expected behaviour: magic-link return path should respect the originating page, and where pasted/validated state exists, it should persist across the sign-in round-trip.
+
+Issues 1 and 2 are trivial link fixes (two strings). Issue 3 is genuinely structural — magic-link return paths are a Supabase auth flow concern, and surviving state across the round-trip needs either a route param, sessionStorage, or a "save draft" pattern on the import page. The three should be assessed together but may not all fit in a single tidy slice.
+
+Provenance: Mike observed all three during 2B.3 smoke runs. Items 1 and 2 noticed in passing while navigating between admin pages. Item 3 noticed when running the writer-auth smoke (item 5): validated and matched a fixture while signed out, clicked "Sign in", returned to home, had to start over.
+
+#### Carry-forward into the next slice
+
+- **TS errors in `admin.ingredients.$id.index.tsx`** (Issue 2B.1-2): still owed. F2 build slices are complete. Propose a focused tidy before F2 close-out.
+- **Fuzzy threshold**: accumulate more data points from subsequent imports before deciding to tune.
+- **(b2) milestone**: `classic-houmous.json` imported end-to-end. To reach (b2) done: import the remaining recipe-shape `web_sourced` fixtures and confirm the stripped shepherd's pie lands cleanly.
+- **Component step placeholder rendering** (F3 carry-forward): same two-part pattern needed for `component_step.content` against `component_ingredient.id`.
+- **Navigation tidy** (see Finding): fix the two admin-area back-links and the magic-link return path (which also needs to preserve form state on the import page). Candidates for the tidy slice between F2 build and F2 close-out, alongside the TS errors. Issue 3 is structurally bigger than 1 and 2 — may not all fit in one slice; the planned "tidy" may need splitting into quick fixes (TS errors + back-links) and a separate auth-return slice.

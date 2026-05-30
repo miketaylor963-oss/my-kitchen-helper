@@ -166,3 +166,30 @@ The fixture used `"cuisine": "lebanese"` which is not a seeded cuisine code (`mi
 - Manifest reconciliation (advisory fixtures): both rows matched reality exactly, no edit needed.
 
 **Carry-forward to 2B.3:** see planning log 2B.2 carry-forward block.
+
+## Slice 2B.3 — Disambiguation + commit
+
+**Status:** complete, deployed, smoke-tested 2026-05-30. Commits: `db78045` (main slice), `29eaa7c` (placeholder fix).
+
+**Built:**
+- `src/lib/import/commit.ts` (new): `commitImport()` calls `commit_import` RPC; discriminates `23505` on `meal_external_ref_key` vs `ingredient_canonical_name_key` positively; unknown `23505` falls through to `kind: "error"`.
+- `current/recipe_db_install.sql` §11: `commit_import` Postgres function — single transaction writing `import_log`, `meal`, `ingredient` (create_new choices), `meal_ingredient`, `meal_step`, `meal_restriction`, `meal_nutritional_tag`, `meal_meal_type`, `meal_meal_format`. Returns new `meal.id`. Builds `id_map` (local JSON id → `meal_ingredient.id`) and rewrites `{NNNN}` in step content before storing.
+- `src/routes/admin.import.tsx`: interactive matching panel — `ExactRow` (✓ + Override combobox, default-collapsed), `AmbiguousRow` (radio over candidates), `FuzzyRow` (radio: candidates + override combobox + create-new mini-form), `NoneRow` (override combobox or create-new mini-form). `IngredientCombobox` (Popover + Command), `CreateNewForm` (controlled, no internal state), `CommitArea` with writer gate and blocking banners. `ChoiceState` widened with partial states so radios stay selected while inner value populates.
+- `src/routes/meals.$mealId.index.tsx`: `formatIngredient` + `resolvePlaceholders` helpers; `Steps` now resolves `{meal_ingredient.id}` placeholders at render time.
+
+**Smoke:**
+- Unauth (8/8, Playwright, production, 2026-05-30): all green. Fixtures: `marinated-teriyaki-eggplant.json` (recipe-only), `north-african-spiced-shepherds-pie.json` (derived_components), `minimal-component.json` (component).
+- Auth (Mike, browser, production, 2026-05-30):
+  - Item 5: `classic-houmous.json`. Exact rows ✓, fuzzy rows disambiguated, `ice-cold water` created as new ingredient. Commit succeeded. ✓
+  - Item 6 (initial): failed — literal `{0010}` placeholders in step content. Placeholder fix applied (commit `29eaa7c`), SQL re-installed, stale meal deleted.
+  - Item 6 (re-run): step placeholders resolved correctly (e.g. "Rinse 150 g green or brown lentils, dried"). Ingredient list and group labels correct. ✓
+  - Item 7: re-import detection — "An import with this external_ref already exists. Re-import / update lands in F2C." No new meal row. ✓
+  - Item 8: blocked-delete dialog rendered for ingredient used by imported meal. Meal name listed, no Delete affordance. 2A.5 Finding 1 carry-forward closed. ✓
+
+**Findings:**
+- Placeholder bug root cause: two-part. SQL stored local ids in step content; renderer had no substitution path. Both fixed. See planning log 2B.3 finding.
+- Navigation and auth-return issues surfaced in smoke but held back from this slice (Mike, deliberate). Three issues logged in planning log: import back-link wrong destination, ingredients back-link skips admin index, magic-link loses page context and form state. Carry-forward to tidy slice.
+- `error.details` shape for `duplicate_ingredient_name` 23505 path not directly observed this slice.
+- Fuzzy threshold (0.3): `ice-cold water` produced no match again — second observation, same fixture. Still insufficient data to recommend a change.
+
+**(b2) milestone progress:** `classic-houmous.json` imported end-to-end — first fixture to land via the importer. Remaining recipe-shape `web_sourced` fixtures and the stripped shepherd's pie still pending before (b2) closes.
