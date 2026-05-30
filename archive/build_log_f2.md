@@ -610,3 +610,44 @@ None requiring a re-run. The `salt and black pepper` bundling was flagged in-fli
 - **Fuzzy threshold**: 0.3 confirmed correct across 130 ingredients and 10 fixtures. No change recommended.
 - **`src/lib/import/matching.ts` TS errors (lines 122, 128)**: still outstanding. F2 close-out tidy owns this.
 - **(b2) milestone**: all ten recipe-shape `web_sourced` fixtures landed. Decision 46 satisfied. F2 build is done; F2 close-out (TS errors, planning log close-out block, docs updates) is the remaining work.
+
+---
+
+## F2 close-out
+
+**Status:** in progress.
+
+### `duplicate_ingredient_name` 23505 path exercised
+
+**Run:** 2026-05-30. Mike, signed in as writer, production. Fixture: `duplicate-ingredient-name-trip.json`.
+
+**Procedure followed:** Validate → Match → `made-up unique ingredient zxq` shows as `none` → Create New → `canonical_name` = `olive oil` → Submit.
+
+**Raw error payload from devtools (rpc/commit_import, 409 Conflict):**
+
+```json
+{
+  "code": "23505",
+  "details": null,
+  "hint": null,
+  "message": "duplicate key value violates unique constraint \"ingredient_canonical_name_key\""
+}
+```
+
+**Finding — `error.details` is `null` for RPC 23505 errors (importer bug):**
+
+Supabase's PostgREST layer strips the Postgres `detail` field when a 23505 bubbles out of a PL/pgSQL RPC call. The constraint name IS present in `error.message` — so the `if (msg.includes("ingredient_canonical_name_key") || detail.includes("ingredient_canonical_name_key"))` branch in `commit.ts` is entered correctly. But the colliding value (`olive oil`) is in neither `message` nor `details`. The regex `/\(([^)]+)\) already exists/` runs against `detail = ""` and returns `null`. Result: `name: "unknown"` fallback.
+
+UI message shown: `An ingredient called "unknown" already exists. Choose it from the existing-ingredient picker instead.`
+
+The constraint detection works; the name extraction does not.
+
+**Transaction rollback:** confirmed. SQL checks against production, 2026-05-30:
+- `SELECT id, external_ref FROM meal WHERE external_ref = 'duplicate-ingredient-name-trip'` → 0 rows. No meal row created.
+- `SELECT id, canonical_name FROM ingredient WHERE canonical_name = 'olive oil'` → 1 row. Pre-existing master row only; no orphaned ingredient created.
+
+**Fix path (carry to F2C):** The canonical name typed by the operator is already present in the `ingredientChoices` map passed to `commitImport` — find the `create_new` choice and use its `canonical_name` as the fallback instead of running the regex. No schema change required.
+
+**Does not block F2 close-out.** Carry to F2C alongside the re-import work.
+
+Closes 2B.3 carry-forward (planning log line 1170) and (b2) carry-forward — error.details shape now observed, verbatim above.

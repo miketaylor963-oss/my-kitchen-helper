@@ -170,6 +170,7 @@ Tables grouped by area. Refer to `current/recipe_db_install.sql` for full column
 ### Imports (Section 10)
 - `import_log` — one row per JSON import event. Raw JSON kept in JSONB. `external_ref` indexed for re-import lookups.
 - `meal.import_id` and `component.import_id` back-reference the import event that created them.
+- `commit_import(payload jsonb, ingredient_choices jsonb)` — Postgres function (added 2B.3). Transactional insert of one meal + all ingredients + import_log from a validated import payload. Used by the importer's commit service via `supabase.rpc()`. Returns the created `meal.id` on success; raises 23505 for `external_ref` or `canonical_name` collisions.
 
 ---
 

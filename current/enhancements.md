@@ -101,3 +101,15 @@ Worst case: variant lookups all miss and the row falls through to today's
 fuzzy bucket. No regression possible.
 
 Originally raised: (b2) milestone close-out, 2026-05-30.
+
+---
+
+## Tooling
+
+### Supabase `gen:types` workflow
+
+Two RPC functions (`match_ingredient`, `commit_import`) are not in the generated types and are accessed via `(supabase.rpc as any)(…)` with eslint-disable directives at the call sites. The pattern works but means every new custom RPC adds another cast site. Setting up `supabase gen types typescript` as an npm script (requires the Supabase CLI as a devDependency, project ref in config) regenerates the types and removes the casts.
+
+Becomes worth building when: a third custom RPC is added (F2C re-import or F3 component import are likely candidates), or a typed RPC return surface would catch a real bug. Until then the cast pattern is the convention.
+
+Originally raised: F2 close-out, 2026-05-30.

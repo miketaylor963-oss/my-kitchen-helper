@@ -1251,3 +1251,53 @@ Two patterns observed across multiple fixtures; neither is an importer bug:
 - **`src/lib/import/matching.ts` TS errors (lines 122, 128)**: still outstanding. F2 close-out tidy.
 - **Fixture-prep convention**: the twelve landed fixtures can be audited and corrected (salt/pepper splits, "X or Y" simplification) at F2C time when re-import is built anyway — no need to re-import now.
 - **Component step placeholder rendering** (F3 carry-forward): unchanged from 2B.3 carry-forward. Same two-part pattern needed for `component_step.content` vs `component_ingredient.id`.
+
+---
+
+## F2 close-out
+
+### F2 done
+
+Decision 46 satisfied. Twelve recipe-shape fixtures landed — ten across the (b2) sweep, plus `classic-houmous` (2B.3) and `bread-pudding` (tidy slice). F2 close-out this slice resolved the two remaining carry-forward items (TS errors, 23505 dupe-name path) and archived the build log. F2 is complete.
+
+### `duplicate_ingredient_name` 23505 path — observed, bug found
+
+Exercised 2026-05-30 against production (fixture: `duplicate-ingredient-name-trip.json`). The `if` branch detecting `ingredient_canonical_name_key` in `commit.ts` is entered correctly. However, `error.details` is `null` in the RPC 409 response — Supabase's PostgREST layer strips the Postgres `detail` field when a 23505 bubbles out of a PL/pgSQL call. The colliding value is not present in either `message` or `details`.
+
+Observed error payload (verbatim):
+
+```json
+{
+  "code": "23505",
+  "details": null,
+  "hint": null,
+  "message": "duplicate key value violates unique constraint \"ingredient_canonical_name_key\""
+}
+```
+
+The regex `/\(([^)]+)\) already exists/` runs against `""` and returns `null`. UI shows `An ingredient called "unknown" already exists.` The constraint detection works; the name extraction does not. Transaction rolled back cleanly: 0 meal rows at the fixture's `external_ref`, 1 ingredient row at `olive oil` (pre-existing master only).
+
+**Fix path (carry to F2C):** use the `create_new` choice's `canonical_name` from the `ingredientChoices` map already in scope at the call site. No schema change.
+
+### `matching.ts` TS errors — cleared
+
+TS2345 (line 122) and TS2352 (line 128) cleared via `(supabase.rpc as any)` cast with eslint-disable, consistent with the existing `commit_import` call site in `commit.ts`. Full project type-clean post-fix (`tsc --noEmit` zero errors). Cast pattern is the established convention for un-typed Supabase RPCs until a `gen:types` workflow is wired up (see enhancements.md Tooling section, added this close-out).
+
+### Carry-forward to F2C
+
+- **`duplicate_ingredient_name` name extraction**: use `ingredientChoices`' `create_new.canonical_name` as fallback. No schema change.
+- **`duplicate_external_ref` upsert semantics** (Decision 47 deferral): re-import / update flow still outstanding.
+- **Prep-adjective stripping** (enhancements.md): lands cheaply alongside re-import; reviewed at F2C start.
+- **Fixture-prep convention corrections** (salt/pepper splits, "X or Y" simplification): on the twelve landed fixtures when re-importing anyway.
+
+### Carry-forward to F3
+
+- **Component step placeholder rendering**: same two-part fix as 2B.3, applied to `component_step.content` against `component_ingredient.id`.
+
+### (b2) follow-up acknowledgement
+
+Commit `168df00` landed the prep-strip enhancement entry into `enhancements.md` without a planning log block of its own, by design. Recorded here so the trail is complete.
+
+### Stage 7 carry-forwards resolved
+
+Stage 7 carry-forwards resolved: CC prompt patterns document — dropped; conventions captured in project instructions and planning log. Warm-up add-on SQL — already moved to `archive/` during GitHub setup; live DB confirmed on v3.1 state (257 ingredients, both RPCs present).
