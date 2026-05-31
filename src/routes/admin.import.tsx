@@ -551,6 +551,7 @@ function MatchRow({
                 onChoice={onChoice}
                 allIngredients={allIngredients}
                 rowName={row_name}
+                matchedVariant={match.matched_variant}
               />
             )}
             {outcome.kind === "ambiguous" && (
@@ -588,18 +589,30 @@ function MatchRow({
 
 // ── ExactRow ──────────────────────────────────────────────────────────────────
 
+function stripAnnotation(rowName: string, matchedVariant: string): string {
+  if (rowName.startsWith(matchedVariant)) {
+    return `(stripped: "${rowName.slice(matchedVariant.length).trim()}")`;
+  }
+  if (rowName.endsWith(matchedVariant)) {
+    return `(stripped: "${rowName.slice(0, rowName.length - matchedVariant.length).trim()}")`;
+  }
+  return `(matched as "${matchedVariant}")`;
+}
+
 function ExactRow({
   candidate,
   choice,
   onChoice,
   allIngredients,
-  rowName: _rowName,
+  rowName,
+  matchedVariant,
 }: {
   candidate: Candidate;
   choice: ChoiceState;
   onChoice: (c: ChoiceState) => void;
   allIngredients: { id: number; canonical_name: string }[];
   rowName: string;
+  matchedVariant?: string;
 }) {
   const [overrideOpen, setOverrideOpen] = useState(false);
   const isOverride = choice !== "unresolved" && choice.action === "override";
@@ -620,6 +633,11 @@ function ExactRow({
           {!isOverride && candidate.match_type === "exact_alias" && (
             <span className="ml-1 text-muted-foreground">
               (via alias &ldquo;{candidate.matched_text}&rdquo;)
+            </span>
+          )}
+          {!isOverride && matchedVariant && (
+            <span className="ml-1 text-muted-foreground">
+              {stripAnnotation(rowName, matchedVariant)}
             </span>
           )}
         </span>
@@ -1029,7 +1047,7 @@ function CommitArea({
   if (hasDerivedComponents) {
     return (
       <div className="mt-6 rounded-md border border-border bg-muted/40 p-4">
-        <p className="text-sm font-medium">Derived component import lands in F2C</p>
+        <p className="text-sm font-medium">Derived component import lands in F3</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Strip the <span className="font-mono">derived_components</span> array and re-import to land the parent recipe.
         </p>
@@ -1054,7 +1072,9 @@ function CommitErrorPanel({ outcome }: { outcome: Exclude<CommitOutcome, { kind:
   if (outcome.kind === "duplicate_external_ref") {
     message = "An import with this external_ref already exists. Re-import / update lands in F2C.";
   } else if (outcome.kind === "duplicate_ingredient_name") {
-    message = `An ingredient called "${outcome.name}" already exists. Choose it from the existing-ingredient picker instead.`;
+    message = outcome.name !== null
+      ? `An ingredient called "${outcome.name}" already exists. Choose it from the existing-ingredient picker instead.`
+      : "An ingredient you tried to create already exists. Choose it from the existing-ingredient picker instead.";
   } else {
     message = outcome.message;
   }

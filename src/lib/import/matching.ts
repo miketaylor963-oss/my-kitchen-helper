@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getStripList, type StripList } from "./strip_list";
 
 export type MatchType = "exact_canonical" | "exact_alias" | "fuzzy_canonical" | "fuzzy_alias";
 
@@ -22,6 +23,7 @@ export type IngredientMatch = {
   row_id: string;
   row_name: string;
   outcome: RowOutcome;
+  matched_variant?: string;
 };
 
 export type MatchingResult = {
@@ -110,25 +112,110 @@ function resolveOutcome(rawRows: RawMatchRow[]): RowOutcome {
   return { kind: "fuzzy", candidates: fuzzyRows.map(toCandidate) };
 }
 
+function generateVariants(name: string, stripList: StripList): string[] {
+  const variants: string[] = [name];
+  const allStrippable = new Set([...stripList.prep_verbs, ...stripList.modifying_adverbs]);
+
+  // Strip trailing comma-clause: "garlic cloves, minced" → "garlic cloves"
+  const commaIdx = name.indexOf(", ");
+  let strippedTrailing: string | null = null;
+  if (commaIdx !== -1) {
+    const clause = name.slice(commaIdx + 2).trim();
+    const tokens = clause.toLowerCase().split(/\s+/).filter(Boolean);
+    if (tokens.length > 0 && tokens.every((t) => allStrippable.has(t))) {
+      strippedTrailing = name.slice(0, commaIdx);
+    }
+  }
+
+  // Strip leading size adjective: "large onion" → "onion"
+  const firstSpace = name.indexOf(" ");
+  let strippedLeading: string | null = null;
+  if (firstSpace !== -1) {
+    const firstWord = name.slice(0, firstSpace).toLowerCase();
+    if (stripList.size_adjectives.includes(firstWord)) {
+      strippedLeading = name.slice(firstSpace + 1);
+    }
+  }
+
+  if (strippedTrailing !== null) variants.push(strippedTrailing);
+  if (strippedLeading !== null) variants.push(strippedLeading);
+
+  // Strip both: apply leading strip to the trailing-stripped result
+  if (strippedTrailing !== null && strippedLeading !== null) {
+    const trailingFirstSpace = strippedTrailing.indexOf(" ");
+    if (trailingFirstSpace !== -1) {
+      const trailingFirstWord = strippedTrailing.slice(0, trailingFirstSpace).toLowerCase();
+      if (stripList.size_adjectives.includes(trailingFirstWord)) {
+        variants.push(strippedTrailing.slice(trailingFirstSpace + 1));
+      }
+    }
+  }
+
+  // Deduplicate, preserving insertion order (original always first)
+  return [...new Set(variants)];
+}
+
 export async function matchIngredients(data: unknown): Promise<MatchingResult> {
   const doc = data as Record<string, unknown>;
   const ingredients = (doc.ingredients as Array<Record<string, unknown>>) ?? [];
+  const stripList = getStripList();
 
   const rows = await Promise.all(
     ingredients.map(async (ing) => {
       const row_id = ing.id as string;
       const row_name = ing.name as string;
 
-      // supabase.rpc types only include generated functions; match_ingredient is custom
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: rawRows, error } = await (supabase.rpc as any)("match_ingredient", {
-        query_name: row_name,
-      });
+      const variants = generateVariants(row_name, stripList);
 
-      if (error) throw new Error(error.message);
+      const variantResults = await Promise.all(
+        variants.map(async (variant) => {
+          // supabase.rpc types only include generated functions; match_ingredient is custom
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: rawRows, error } = await (supabase.rpc as any)("match_ingredient", {
+            query_name: variant,
+          });
+          if (error) throw new Error(error.message);
+          return { variant, outcome: resolveOutcome((rawRows ?? []) as RawMatchRow[]) };
+        }),
+      );
 
-      const outcome = resolveOutcome((rawRows ?? []) as RawMatchRow[]);
-      return { row_id, row_name, outcome } satisfies IngredientMatch;
+      // Prefer exact/ambiguous; iterate variants in order so original wins any same-bucket tie
+      let bestOutcome: RowOutcome = { kind: "none" };
+      let matchedVariant: string | undefined;
+
+      for (const { variant, outcome } of variantResults) {
+        if (outcome.kind === "exact" || outcome.kind === "ambiguous") {
+          bestOutcome = outcome;
+          if (variant !== row_name) matchedVariant = variant;
+          break;
+        }
+      }
+
+      // No exact/ambiguous: merge fuzzy candidates from all variants, dedup by ingredient_id
+      if (bestOutcome.kind !== "exact" && bestOutcome.kind !== "ambiguous") {
+        const byId = new Map<number, Candidate>();
+        for (const { outcome } of variantResults) {
+          if (outcome.kind === "fuzzy") {
+            for (const c of outcome.candidates) {
+              const existing = byId.get(c.ingredient_id);
+              if (!existing || c.similarity_score > existing.similarity_score) {
+                byId.set(c.ingredient_id, c);
+              }
+            }
+          }
+        }
+        if (byId.size > 0) {
+          const sorted = [...byId.values()].sort((a, b) => {
+            if (b.similarity_score !== a.similarity_score) return b.similarity_score - a.similarity_score;
+            return a.canonical_name.localeCompare(b.canonical_name);
+          });
+          bestOutcome = { kind: "fuzzy", candidates: sorted };
+        }
+      }
+
+      const match: IngredientMatch = { row_id, row_name, outcome: bestOutcome };
+      if (matchedVariant !== undefined) match.matched_variant = matchedVariant;
+      return match;
     }),
   );
 

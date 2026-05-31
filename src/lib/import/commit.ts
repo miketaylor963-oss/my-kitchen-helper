@@ -9,7 +9,7 @@ export type IngredientChoice =
 export type CommitOutcome =
   | { kind: "success"; meal_id: number }
   | { kind: "duplicate_external_ref" }
-  | { kind: "duplicate_ingredient_name"; name: string }
+  | { kind: "duplicate_ingredient_name"; name: string | null }
   | { kind: "error"; message: string };
 
 export async function commitImport(
@@ -34,8 +34,24 @@ export async function commitImport(
         msg.includes("ingredient_canonical_name_key") ||
         detail.includes("ingredient_canonical_name_key")
       ) {
-        const match = detail.match(/\(([^)]+)\) already exists/);
-        return { kind: "duplicate_ingredient_name", name: match ? match[1] : "unknown" };
+        const createNewEntries = Object.values(ingredientChoices).filter(
+          (c): c is Extract<IngredientChoice, { action: "create_new" }> => c.action === "create_new",
+        );
+        if (createNewEntries.length === 0) {
+          // Race condition: constraint fired with no create_new entries in choices
+          return { kind: "duplicate_ingredient_name", name: null };
+        }
+        if (createNewEntries.length === 1) {
+          return { kind: "duplicate_ingredient_name", name: createNewEntries[0].canonical_name };
+        }
+        // Multiple create_new entries: check DB to find the colliding one(s)
+        const { data: existing } = await supabase
+          .from("ingredient")
+          .select("canonical_name")
+          .in("canonical_name", createNewEntries.map((e) => e.canonical_name));
+        const collidingNames = (existing ?? []).map((r) => r.canonical_name as string);
+        const names = collidingNames.length > 0 ? collidingNames : createNewEntries.map((e) => e.canonical_name);
+        return { kind: "duplicate_ingredient_name", name: names.join(", ") };
       }
       // Unknown 23505 — surface raw, don't misclassify
     }

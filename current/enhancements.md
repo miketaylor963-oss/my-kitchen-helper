@@ -102,6 +102,10 @@ fuzzy bucket. No regression possible.
 
 Originally raised: (b2) milestone close-out, 2026-05-30.
 
+**User-editable strip-list.** Once curation rate exceeds Mike-via-PR cadence, or a non-developer wants to contribute terms, the hardcoded `getStripList()` in `src/lib/import/strip_list.ts` migrates to a DB-backed `strip_term` table (`id, term, category, household_id DEFAULT 1, created_at`) with a CRUD admin UI alongside the ingredient master. The category column makes the existing groupings (`prep_verb`, `modifying_adverb`, `size_adjective`) user-visible. `getStripList()` becomes async and groups rows on read; the consumption interface and the variant-generation algorithm are unchanged.
+
+**Becomes worth building when:** PR-based curation feels heavy, or Jane / another non-developer wants to contribute terms.
+
 ---
 
 ## Tooling
