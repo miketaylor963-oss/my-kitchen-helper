@@ -1301,3 +1301,139 @@ Commit `168df00` landed the prep-strip enhancement entry into `enhancements.md` 
 ### Stage 7 carry-forwards resolved
 
 Stage 7 carry-forwards resolved: CC prompt patterns document — dropped; conventions captured in project instructions and planning log. Warm-up add-on SQL — already moved to `archive/` during GitHub setup; live DB confirmed on v3.1 state (257 ingredients, both RPCs present).
+
+## Stage 10 — F2C planning
+
+F2 closed with the recipe importer landing twelve fixtures end-to-end (Decision 46). The carry-forwards to F2C named one substantive feature (upsert / re-import per Decision 47's deferral) and three cleanups (name-extraction fix, prep-adjective stripping, fixture-prep convention corrections). Planning resolved the upsert semantics, settled the RPC structure question, and confirmed derived-components ownership as F3.
+
+### Decision 50 — F2C scope: recipe-only; derived components are F3
+
+**Context:** 2B.3's commit path blocks `derived_components` with a "lands in F2C" message (per Decision 45's implication). The original F2/F3 boundary split puts re-import in F2C (Decision 18) and components in F3 (Decision 19). Derived components — component-creation triggered from a recipe import — sit between the two and either feature can plausibly own them.
+
+**Choice:** F2C is recipe-only. Derived components in full are F3. F2C's upsert behaviour, validator, and UI handle a recipe shape with no `derived_components` array (or an explicitly empty one); the existing "this shape isn't supported yet" block remains, with its error string updated.
+
+**Reasoning:** Two arguments. First, component-write infrastructure (`component`, `component_ingredient`, `component_step`, `component_restriction`, `component_nutritional_tag`, `component_layer`, plus the placeholder-rewrite path against `component_ingredient.id`) is F3's natural domain. Building it in F2C requires either duplicating it in F3 later or pre-empting F3's design choices in F2C. Second, F2C scope stays coherent: recipe-only upsert plus carry-forward cleanups, all touching paths F2 already shipped. Mixing in component-write would inflate scope without payoff.
+
+**Implication:** F2C's upsert RPC extension touches only `meal` and its child tables. The 2B.3 error string `"Derived component import lands in F2C; strip them and re-import to land the parent"` becomes `"...lands in F3"` as part of 2C.1. The original `north-african-spiced-shepherds-pie.json` fixture stays parked in `test_fixtures/web_sourced/` through F2C — its `derived_components` mean it can't ride along on the 2C.3 re-import sweep. F3 picks it up as part of derived-components coverage.
+
+---
+
+### Decision 51 — Upsert semantics: in-place update with child-row replacement
+
+**Context:** Spec says "same `external_ref` means update, not duplicate" without specifying mechanics. The DB has a UNIQUE constraint on `meal.external_ref` that 2B.3 catches as a `23505` and surfaces with a "lands in F2C" error.
+
+**Choice:** In-place update. UPDATE the `meal` row, preserving its `id`. DELETE the child rows from `meal_ingredient`, `meal_step`, `meal_restriction`, `meal_nutritional_tag`, `meal_meal_type`, `meal_meal_format`, then INSERT the new ones from the payload. Append a fresh `import_log` row; update `meal.import_id` to point at the newest.
+
+**Reasoning:** Hard replace (DELETE meal + cascade) would orphan or destroy any FK references to `meal.id` from other tables. Even where those references don't yet carry meaningful data, the principle holds: re-import is a content update, not an identity reset. Diff/merge (preserve in-app edits to child rows) is genuinely complex and not v1: there are no in-app edits to meal child rows possible today — meal CRUD is F1-shipped at the meal-row level only, with no per-row editing of `meal_ingredient` or `meal_step`. In-place update is the simplest mechanic that preserves FKs and produces correct end-state from the import payload, which is what the spec promises.
+
+**Implication:** `meal.id` stays stable across re-imports; any FK references to it survive. `import_log` becomes a journal of import *events*, not a current-state record — the latest event for a given `external_ref` is the one `meal.import_id` points at, but prior events remain visible for audit. No schema change required; `import_log` already supports multiple rows per `external_ref` (no UNIQUE constraint on that column).
+
+---
+
+### Decision 52 — Detection point: validate-time advisory
+
+**Context:** The current commit-time error model surfaces "this is a re-import" after the operator has done all validate and match work. With an actual update path, this becomes a poor experience: the operator finishes disambiguation, hits commit, and only then learns they were updating.
+
+**Choice:** The validator does a DB lookup against `meal.external_ref` and surfaces a non-blocking advisory ("This will update the existing recipe X") at validate time, alongside its other output. The UI shows the advisory before the matching panel renders, with a "Replace existing" or "Cancel" choice. Commit-side discriminates: if the operator confirmed replace, `commit_import` is called with the update branch enabled; if no advisory was surfaced and a `23505` still fires (race condition), the existing error path is preserved as a fallback.
+
+**Reasoning:** The validator already touches the DB for lookup-code resolution (per Decision 49's structure). Adding an `external_ref` existence check is in the same spirit and same cost class. The advisory is non-blocking because the spec defines re-import as a normal operation, not an error. Up-front disclosure means the operator's matching choices are made with awareness that they're updating, not creating — useful context, particularly if the new payload differs from the prior in ways worth noticing.
+
+**Implication:** 2C.2's UI flow gets a confirmation step between validate and match. The validator returns an extra advisory item in its output; the matching panel waits for confirmation if the advisory fires. The commit-side path adds an `on_conflict` parameter (per Decision 55) controlled by the operator's choice. The fallback path for missed advisories (race conditions, validator skipped) stays as today's `23505` catch with the message reworded to reflect that update is now available.
+
+---
+
+### Decision 53 — Matching memory: fresh match each re-import
+
+**Context:** A re-import could either run matching from scratch or recall the operator's choices from the prior import.
+
+**Choice:** Fresh match. Each re-import runs the matching service against the new payload's ingredient names as if it were a first import. Previous `ingredient_choices` payloads are not recalled.
+
+**Reasoning:** Recall requires persisting `ingredient_choices` somewhere — `import_log` stores `raw_json` (the payload) but never the choices made against it, so an extension would be needed. Recall also opens UI cases that need handling: a previously-chosen ingredient may have been edited, deleted via 2A.5's safe-delete, or renamed since the prior import; previously-fuzzy rows may now have new candidates. None of these is hard, but they're cumulative complexity for an enhancement that may not be missed in practice. Fresh match is what 2B.3 already does, produces correct results regardless of prior state, and costs only a re-disambiguation pass.
+
+**Implication:** No schema change for F2C. `import_log` stays as-is. If re-disambiguation becomes annoying in practice, recall lands as a future enhancement — entry to be added to `enhancements.md` at 2C.2 close-out with the "becomes worth building when" trigger framed as "operator reports re-disambiguation friction".
+
+---
+
+### Decision 54 — Prep-adjective stripping pulled into F2C scope
+
+**Context:** `enhancements.md` describes prep-adjective stripping (variant lookups against `match_ingredient` using a curated strip-list, prefer best outcome across variants) with the trigger "F2C, before re-import work". Re-import re-runs matching, so the saving compounds across the 2C.3 sweep.
+
+**Choice:** Pulled into F2C, scoped to slice 2C.1. The strip-list configuration (prep verbs, adverbs, size adjectives) lives in `src/lib/import/matching.ts` alongside the existing matching code. Implementation per the enhancement note: variant generation (original / strip trailing comma-clause / strip leading size adjective / strip both), parallel `match_ingredient` calls, prefer best outcome, render the originating variant in the exact bucket with an annotation when an exact match lands on a stripped variant.
+
+**Reasoning:** Worst case for the variant-lookup approach is current behaviour — all variants miss, the row falls through to today's fuzzy bucket. No regression possible. Expected case is a meaningful reduction in the fuzzy bucket on every subsequent import. Lands cheaply during 2C.1 where matching code is already being touched for the `duplicate_ingredient_name` name-extraction fix.
+
+**Implication:** The (b2) sweep's 0.3 fuzzy threshold was confirmed against the pre-stripping ingredient mix. Post-stripping, the residual fuzzy bucket changes shape — easy wins move to exact, genuinely ambiguous cases stay. 2C.3's re-import sweep produces fresh threshold-tuning data against this new residual; threshold re-evaluation becomes an F2C close-out item alongside the sweep findings. The strip-list itself is expected to evolve as new fixtures expose modifier patterns — it's curated config, not a fixed list, and additions to it during 2C.3 are a normal outcome rather than a slice violation.
+
+---
+
+### Decision 55 — Extend `commit_import` rather than ship a new RPC; `gen:types` deferred to F3
+
+**Context:** The upsert work needs to land either in the existing `commit_import` RPC (extended with an `on_conflict` parameter) or as a separate RPC (`commit_import_update`). Separately, `enhancements.md` Tooling notes that a third custom RPC would trigger the `gen:types` migration to remove the `(supabase.rpc as any)` cast pattern.
+
+**Choice:** Extend `commit_import`. Add an `on_conflict TEXT DEFAULT 'fail'` parameter; accept values `'fail'` (current behaviour) and `'update'` (in-place update branch). The function moves from one binary path to two via an IF on the meal-insert step, with parallel DELETE-before-INSERT guards on each child-row block. `gen:types` stays deferred to F3.
+
+**Reasoning:** F2C extension is a single binary branch at one point in the function, with localised guards on child-row writes — roughly 30–40 added lines on a 184-line base. The branching surface stays narrow: one condition, one shape of upsert (recipe-only per Decision 50), the existing structure preserved. plpgsql doesn't penalise function length and the `IF` evaluates once per call, so no performance cost. The F3 single-RPC argument against discriminator branching was about branching *width* — three import shapes plus a cross-cutting derived-components case writing to different tables — not line count. The cases are different enough that consistency of stance isn't load-bearing here; consistency of reasoning (branching width is the cost driver) is, and applies in opposite directions for the two features.
+
+The insert-path safety concern (upsert changes regressing first-import behaviour) is mitigated by the 2C.3 re-import sweep: the twelve fixtures already exercise the insert path on first imports of new content and the upsert path on re-runs of existing content. They function as a regression suite for both.
+
+**Implication:** Two custom RPCs remain (`match_ingredient`, `commit_import`); the `gen:types` threshold is not triggered. F3 component import becomes the next trigger candidate — see carry-forward to F3 below. The `on_conflict='fail'` default preserves existing 2B.3 call sites without code change. UI commit-site reads the operator's "Replace existing" confirmation (per Decision 52) and passes `'update'` accordingly; absent the confirmation, the default `'fail'` keeps the existing `23505` fallback path alive.
+
+---
+
+### Decision 56 — F2C sub-slice split: three slices
+
+**Context:** The F2C work decomposes naturally into cleanups, the upsert feature itself, and a content-milestone sweep.
+
+**Choice:** Three slices.
+
+- **Slice 2C.1 — Cleanups.** `duplicate_ingredient_name` name-extraction fix in `src/lib/import/commit.ts` using the `ingredientChoices` map's `create_new` entries. Update the 2B.3 stale error string from "lands in F2C" to "lands in F3". Prep-adjective stripping per Decision 54.
+- **Slice 2C.2 — Upsert RPC + UI flow.** `commit_import` extension with `on_conflict` parameter (Decision 55). Validate-time advisory for existing `external_ref` (Decision 52). Matching panel waits for replace/cancel confirmation before rendering. Fresh match on re-import (Decision 53).
+- **Slice 2C.3 — Re-import sweep.** Content milestone: re-import the twelve landed fixtures with corrected source data (salt/pepper splits, "X or Y" simplifications). No code changes expected. Mirrors (b2) in structure.
+
+**Reasoning:** 2C.1 lands quickly and clears small items from the harder slice's scope. 2C.2 is the substantive feature work and deserves uncluttered focus. 2C.3 is content-milestone work that benefits from the same framing the (b2) sweep used — outcomes tabulated per fixture, findings collected at close-out, no expectation of code changes (real importer bugs surfaced during a content milestone are their own slice, per the (b2) convention).
+
+**Implication:** Three planning-log close-out blocks at F2C build time, mirroring 2B.1/2B.2/2B.3 plus (b2). Same diff-guard, split-smoke close-out, and prompt-discipline conventions carried into each slice prompt. 2C.2's smoke surface is genuinely mixed (validator advisory is read-only and unauth-accessible; replace confirmation and commit are writer-only); 2C.3 is auth-only by construction (re-import is a write path).
+
+---
+
+### Decision 57 — F2C done definition
+
+**Context:** Mirrors Decision 20's content-milestone framing for F2.
+
+**Choice:** F2C is complete when:
+
+1. Upsert end-to-end against production: re-import a recipe with corrected source data, confirm in-place update (UPDATE on `meal`, replaced child rows, new `import_log` row, `meal.id` stable, `meal.import_id` repointed). FK preservation follows from `meal.id` stability and doesn't need separate verification.
+2. `duplicate_ingredient_name` deliberate collision: error message now names the colliding ingredient (not "unknown"), drawn from the `ingredientChoices` `create_new` payload.
+3. All twelve landed fixtures re-imported via the upsert path with source-data conventions corrected. Prep-adjective stripping observably reduces the fuzzy bucket on the sweep; threshold re-evaluation captured in close-out findings.
+
+**Reasoning:** Same content-milestone logic as Decision 20 — a technical milestone alone ("the upsert pipeline works") would let a fragile path pass. The fixture sweep forces the upsert path against real data with real disambiguation work and tests prep-adjective stripping against the residual fuzzy bucket at the same time.
+
+**Implication:** 2C.2 carries its own technical milestone (RPC extension, advisory, UI confirmation, single fixture re-imported manually as smoke); 2C.3 carries the content milestone (all twelve fixtures plus findings).
+
+---
+
+## Carry-forward into Slice 2C.1
+
+Open items going into Slice 2C.1:
+
+- Diff-guard line, same wording as 2A.3 onwards.
+- Sharpened split-smoke close-out reminder (Decision 48). 2C.1's smoke is mostly unauth (matching code change is read-only at the panel level; the name-extraction fix only fires on commit failure, so an auth smoke item is needed).
+- Schema unchanged. Strip-list config is application code; name-extraction fix is application code; stale-string update is application code. No SQL changes in 2C.1.
+
+## Carry-forward to F2C close-out
+
+Items flagged for capture when F2C is done:
+
+- **Threshold re-evaluation** against the post-stripping residual fuzzy bucket (per Decision 54). Findings block in the 2C.3 close-out.
+- **Strip-list additions** captured during 2C.3 as new modifier patterns surface (per Decision 54). Logged per-fixture as part of the sweep block.
+- **Fixture-prep convention corrections** logged per fixture during 2C.3 (mirrors (b2) findings structure).
+- **Matching-memory enhancement entry** added to `enhancements.md` at 2C.2 close-out if not already present (per Decision 53).
+
+## Carry-forward to F3
+
+Items F3 planning inherits from F2C:
+
+- **Derived components in full.** Component CRUD, component-shape import, derived-components-from-recipe-import path. Per Decision 50.
+- **Re-import of recipes with `derived_components`.** F2C ships recipe-only upsert; the upsert-meets-derived-components interaction is F3's design problem when derived-components ship. The original `north-african-spiced-shepherds-pie.json` fixture will be the first real test case.
+- **`gen:types` migration trigger.** If F3 adds a third custom RPC (likely the component import RPC), the `enhancements.md` Tooling threshold fires. Either land `gen:types` setup inside F3 or carry forward again with the trigger restated.
+- **Component step placeholder rendering.** Unchanged from F2 close-out's carry-forward to F3 (two-part fix as 2B.3 against `component_step.content` vs `component_ingredient.id`).
