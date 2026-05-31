@@ -1426,7 +1426,9 @@ Items flagged for capture when F2C is done:
 
 - **Threshold re-evaluation** against the post-stripping residual fuzzy bucket (per Decision 54). Findings block in the 2C.3 close-out.
 - **Strip-list additions** captured during 2C.3 as new modifier patterns surface (per Decision 54). Logged per-fixture as part of the sweep block.
+  - *Watch-list from 2C.1:* `mushrooms, sliced` → `mushrooms` and `ginger, grated` → `ginger` strips may produce semantically wrong canonicals depending on master state. Observe during sweep.
 - **Fixture-prep convention corrections** logged per fixture during 2C.3 (mirrors (b2) findings structure).
+  - *From 2C.1:* leading prep_verb forms (`grated nutmeg`, `chopped parsley`) should be converted to trailing-clause forms (`nutmeg, grated`, `parsley, chopped`) so the strip rule fires.
 - **Matching-memory enhancement entry** added to `enhancements.md` at 2C.2 close-out if not already present (per Decision 53).
 
 ## Carry-forward to F3
@@ -1437,3 +1439,15 @@ Items F3 planning inherits from F2C:
 - **Re-import of recipes with `derived_components`.** F2C ships recipe-only upsert; the upsert-meets-derived-components interaction is F3's design problem when derived-components ship. The original `north-african-spiced-shepherds-pie.json` fixture will be the first real test case.
 - **`gen:types` migration trigger.** If F3 adds a third custom RPC (likely the component import RPC), the `enhancements.md` Tooling threshold fires. Either land `gen:types` setup inside F3 or carry forward again with the trigger restated.
 - **Component step placeholder rendering.** Unchanged from F2 close-out's carry-forward to F3 (two-part fix as 2B.3 against `component_step.content` vs `component_ingredient.id`).
+
+---
+
+### Slice 2C.1 close-out
+
+**Status:** complete 2026-05-31. Commit `5fc6ad5`. Three items landed: name-extraction fix, stale-string update (F2C → F3 on derived_components block), prep-adjective stripping.
+
+**Strip-list collision investigation: primary safety concern not present.** The strip-list vocabulary (process verbs and adverbs, size adjectives only) does not include canonical-identity modifiers (`dried`, `fresh`, `tinned`, `ground`, `whole`). No false-match path exists for those forms. Two watch-list cases (`mushrooms, sliced` → `mushrooms`; `ginger, grated` → `ginger`) flagged for observation during 2C.3 sweep. See build log for detail.
+
+**`grated nutmeg` fixture-prep convention surfaced.** Stripping fires on trailing comma-clauses (`nutmeg, grated`) but not on leading prep_verbs (`grated nutmeg`). The leading-strip rule applies only to size adjectives, by design — leading prep_verbs are often canonical name forms (`grated parmesan`). Recipes using the leading form should be converted to trailing-clause form at re-import time. Added to Stage 10's F2C close-out carry-forward.
+
+**No standing_brief or requirements changes.** Strip-list is application code only; no new routes, schema, or architectural patterns introduced.
