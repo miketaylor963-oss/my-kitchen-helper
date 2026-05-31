@@ -19,7 +19,7 @@ export type ImportSummary = {
 };
 
 export type ValidationResult =
-  | { ok: true; summary: ImportSummary }
+  | { ok: true; summary: ImportSummary; existing_meal: { id: number; name: string } | null }
   | { ok: false; errors: ValidationError[] };
 
 // framework_code → layer_code → Set of valid family codes (empty Set = no families for this layer)
@@ -352,6 +352,7 @@ export function validate(data: unknown, lookups: LookupSets): ValidationResult {
 
   return {
     ok: true,
+    existing_meal: null,
     summary: {
       import_type: importType as "recipe" | "component",
       name: doc.name as string,

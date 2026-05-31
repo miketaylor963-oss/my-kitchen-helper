@@ -1086,7 +1086,8 @@ CREATE INDEX idx_ingredient_alias_trgm
 -- SECURITY INVOKER — runs as caller; RLS on each table is the access gate.
 CREATE OR REPLACE FUNCTION commit_import(
   payload            JSONB,
-  ingredient_choices JSONB
+  ingredient_choices JSONB,
+  on_conflict        TEXT DEFAULT 'fail'
 ) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
@@ -1131,31 +1132,62 @@ BEGIN
     END IF;
   END IF;
 
-  -- 4. Insert meal
-  INSERT INTO meal (
-    external_ref, name, status, description,
-    cuisine_id, dietary_category_id,
-    prep_time_minutes, cook_time_minutes, serves,
-    protein_g, carbs_g, gi_index,
-    notes, source, import_id
-  ) VALUES (
-    payload->>'external_ref',
-    payload->>'name',
-    'recipe',
-    NULLIF(payload->>'description', ''),
-    cuisine_id_val,
-    dc_id_val,
-    (payload->>'prep_time_minutes')::INTEGER,
-    (payload->>'cook_time_minutes')::INTEGER,
-    (payload->>'base_servings')::INTEGER,
-    (payload->>'protein_g')::REAL,
-    (payload->>'carbs_g')::REAL,
-    (payload->>'gi_index')::INTEGER,
-    NULLIF(payload->>'notes', ''),
-    NULLIF(payload->>'source', ''),
-    new_import_id
-  )
-  RETURNING id INTO new_meal_id;
+  -- 4. Insert or update meal (on_conflict = 'fail' | 'update')
+  IF on_conflict = 'fail' THEN
+    INSERT INTO meal (
+      external_ref, name, status, description,
+      cuisine_id, dietary_category_id,
+      prep_time_minutes, cook_time_minutes, serves,
+      protein_g, carbs_g, gi_index,
+      notes, source, import_id
+    ) VALUES (
+      payload->>'external_ref',
+      payload->>'name',
+      'recipe',
+      NULLIF(payload->>'description', ''),
+      cuisine_id_val,
+      dc_id_val,
+      (payload->>'prep_time_minutes')::INTEGER,
+      (payload->>'cook_time_minutes')::INTEGER,
+      (payload->>'base_servings')::INTEGER,
+      (payload->>'protein_g')::REAL,
+      (payload->>'carbs_g')::REAL,
+      (payload->>'gi_index')::INTEGER,
+      NULLIF(payload->>'notes', ''),
+      NULLIF(payload->>'source', ''),
+      new_import_id
+    )
+    RETURNING id INTO new_meal_id;
+  ELSIF on_conflict = 'update' THEN
+    SELECT id INTO new_meal_id FROM meal WHERE external_ref = payload->>'external_ref';
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'on_conflict=update: no existing meal for external_ref "%"', payload->>'external_ref';
+    END IF;
+    UPDATE meal SET
+      name                = payload->>'name',
+      status              = 'recipe',
+      description         = NULLIF(payload->>'description', ''),
+      cuisine_id          = cuisine_id_val,
+      dietary_category_id = dc_id_val,
+      prep_time_minutes   = (payload->>'prep_time_minutes')::INTEGER,
+      cook_time_minutes   = (payload->>'cook_time_minutes')::INTEGER,
+      serves              = (payload->>'base_servings')::INTEGER,
+      protein_g           = (payload->>'protein_g')::REAL,
+      carbs_g             = (payload->>'carbs_g')::REAL,
+      gi_index            = (payload->>'gi_index')::INTEGER,
+      notes               = NULLIF(payload->>'notes', ''),
+      source              = NULLIF(payload->>'source', ''),
+      import_id           = new_import_id
+    WHERE id = new_meal_id;
+    DELETE FROM meal_ingredient      WHERE meal_id = new_meal_id;
+    DELETE FROM meal_step            WHERE meal_id = new_meal_id;
+    DELETE FROM meal_restriction     WHERE meal_id = new_meal_id;
+    DELETE FROM meal_nutritional_tag WHERE meal_id = new_meal_id;
+    DELETE FROM meal_meal_type       WHERE meal_id = new_meal_id;
+    DELETE FROM meal_meal_format     WHERE meal_id = new_meal_id;
+  ELSE
+    RAISE EXCEPTION 'Unknown on_conflict value: %', on_conflict;
+  END IF;
 
   -- 5. Ingredients (preserves JSON array order as sort_order)
   sort_idx := 0;

@@ -15,12 +15,14 @@ export type CommitOutcome =
 export async function commitImport(
   payload: unknown,
   ingredientChoices: Record<string, IngredientChoice>,
+  onConflict: "fail" | "update" = "fail",
 ): Promise<CommitOutcome> {
   // supabase.rpc types only include generated functions; commit_import is custom
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("commit_import", {
     payload,
     ingredient_choices: ingredientChoices,
+    on_conflict: onConflict,
   });
 
   if (error) {

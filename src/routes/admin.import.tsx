@@ -89,6 +89,7 @@ function Page() {
   const [matchingOutcome, setMatchingOutcome] = useState<MatchingResult | { error: string } | null>(null);
   const [isMatching, setIsMatching] = useState(false);
   const [choices, setChoices] = useState<Record<string, ChoiceState>>({});
+  const [replaceConfirmed, setReplaceConfirmed] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
   const [commitOutcome, setCommitOutcome] = useState<CommitOutcome | null>(null);
 
@@ -167,7 +168,7 @@ function Page() {
     }
   }, [loading, isWriter, nav]);
 
-  function handleValidate() {
+  async function handleValidate() {
     if (!lookups.data) return;
     let parsed: unknown;
     try {
@@ -182,7 +183,21 @@ function Page() {
     setParseError("");
     setParsedData(parsed);
     setMatchingOutcome(null);
-    setOutcome(validate(parsed, lookups.data.sets));
+    const result = validate(parsed, lookups.data.sets);
+    if (result.ok) {
+      const ref = typeof (parsed as Record<string, unknown>)?.external_ref === "string"
+        ? (parsed as Record<string, unknown>).external_ref as string
+        : null;
+      if (ref) {
+        const { data: existingRow } = await supabase
+          .from("meal")
+          .select("id, name")
+          .eq("external_ref", ref)
+          .maybeSingle();
+        result.existing_meal = existingRow ? { id: existingRow.id, name: existingRow.name } : null;
+      }
+    }
+    setOutcome(result);
   }
 
   function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -192,6 +207,7 @@ function Page() {
     setParsedData(null);
     setMatchingOutcome(null);
     setChoices({});
+    setReplaceConfirmed(false);
     setIsCommitting(false);
     setCommitOutcome(null);
   }
@@ -201,6 +217,7 @@ function Page() {
     setIsMatching(true);
     setMatchingOutcome(null);
     setCommitOutcome(null);
+    setReplaceConfirmed(false);
     try {
       const result = await matchIngredients(parsedData);
       setMatchingOutcome(result);
@@ -232,7 +249,7 @@ function Page() {
     setIsCommitting(true);
     setCommitOutcome(null);
     try {
-      const result = await commitImport(parsedData, ingredientChoices);
+      const result = await commitImport(parsedData, ingredientChoices, replaceConfirmed ? "update" : "fail");
       setCommitOutcome(result);
       if (result.kind === "success") {
         nav({ to: "/meals/$mealId", params: { mealId: String(result.meal_id) } });
@@ -248,6 +265,8 @@ function Page() {
 
   const canValidate = !!lookups.data && text.trim().length > 0;
   const validationSuccess = outcome !== null && outcome !== "parse-error" && outcome.ok;
+  const existingMeal: { id: number; name: string } | null =
+    outcome !== null && outcome !== "parse-error" && outcome.ok ? outcome.existing_meal : null;
 
   const matchingResult: MatchingResult | null =
     matchingOutcome && !("error" in matchingOutcome) ? matchingOutcome : null;
@@ -350,6 +369,20 @@ function Page() {
           </div>
         )}
 
+        {existingMeal !== null && matchingResult && (
+          <UpsertAdvisoryBanner
+            existingMealName={existingMeal.name}
+            replaceConfirmed={replaceConfirmed}
+            onReplace={() => setReplaceConfirmed(true)}
+            onCancel={() => {
+              setMatchingOutcome(null);
+              setChoices({});
+              setReplaceConfirmed(false);
+              setCommitOutcome(null);
+            }}
+          />
+        )}
+
         {advisory?.kind === "fires" && <AdvisoryBanner advisory={advisory} />}
 
         {matchingResult && lookupLists && (
@@ -366,6 +399,7 @@ function Page() {
           <CommitArea
             parsedData={parsedData}
             allResolved={allResolved}
+            replaceRequired={existingMeal !== null && !replaceConfirmed}
             isCommitting={isCommitting}
             commitOutcome={commitOutcome}
             onCommit={handleCommit}
@@ -484,6 +518,40 @@ function AdvisoryBanner({ advisory }: { advisory: Extract<AdvisoryResult, { kind
         <span className="font-mono">{advisory.strictest_category}</span>). The declared category
         is less restrictive than the ingredients allow.
       </p>
+    </div>
+  );
+}
+
+function UpsertAdvisoryBanner({
+  existingMealName,
+  replaceConfirmed,
+  onReplace,
+  onCancel,
+}: {
+  existingMealName: string;
+  replaceConfirmed: boolean;
+  onReplace: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="mt-6 rounded-md border border-blue-500/40 bg-blue-50/50 p-4 dark:border-blue-400/30 dark:bg-blue-950/20">
+      <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
+        This will update the existing recipe &ldquo;{existingMealName}&rdquo;. Choose Replace to
+        overwrite, or Cancel to abandon this import.
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <Button
+          size="sm"
+          variant={replaceConfirmed ? "default" : "outline"}
+          onClick={onReplace}
+          disabled={replaceConfirmed}
+        >
+          {replaceConfirmed ? "✓ Replace confirmed" : "Replace existing"}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 }
@@ -1018,12 +1086,14 @@ function CreateNewForm({
 function CommitArea({
   parsedData,
   allResolved,
+  replaceRequired,
   isCommitting,
   commitOutcome,
   onCommit,
 }: {
   parsedData: unknown;
   allResolved: boolean;
+  replaceRequired: boolean;
   isCommitting: boolean;
   commitOutcome: CommitOutcome | null;
   onCommit: () => void;
@@ -1060,9 +1130,16 @@ function CommitArea({
       {commitOutcome && commitOutcome.kind !== "success" && (
         <CommitErrorPanel outcome={commitOutcome} />
       )}
-      <Button onClick={onCommit} disabled={!allResolved || isCommitting}>
-        {isCommitting ? "Committing…" : allResolved ? "Commit" : "Commit (resolve all rows first)"}
+      <Button onClick={onCommit} disabled={!allResolved || replaceRequired || isCommitting}>
+        {isCommitting
+          ? "Committing…"
+          : !allResolved
+          ? "Commit (resolve all rows first)"
+          : "Commit"}
       </Button>
+      {allResolved && replaceRequired && !isCommitting && (
+        <p className="text-xs text-muted-foreground">Confirm Replace above to enable commit.</p>
+      )}
     </div>
   );
 }
@@ -1070,7 +1147,7 @@ function CommitArea({
 function CommitErrorPanel({ outcome }: { outcome: Exclude<CommitOutcome, { kind: "success" }> }) {
   let message: string;
   if (outcome.kind === "duplicate_external_ref") {
-    message = "An import with this external_ref already exists. Re-import / update lands in F2C.";
+    message = "An import with this external_ref already exists. Try paste again — the recipe may have been imported by someone else just now.";
   } else if (outcome.kind === "duplicate_ingredient_name") {
     message = outcome.name !== null
       ? `An ingredient called "${outcome.name}" already exists. Choose it from the existing-ingredient picker instead.`

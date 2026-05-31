@@ -106,6 +106,12 @@ Originally raised: (b2) milestone close-out, 2026-05-30.
 
 **Becomes worth building when:** PR-based curation feels heavy, or Jane / another non-developer wants to contribute terms.
 
+### Matching memory / recall of prior ingredient choices
+
+On re-import, the matching panel currently runs from scratch — previous `ingredient_choices` are not recalled. Recall would speed up re-imports where ingredients haven't changed but requires persisting choices (extending `import_log` or a sibling table) and UI handling for cases where a previously-chosen ingredient has since been edited, deleted, or renamed.
+
+**Becomes worth building when:** operator reports re-disambiguation friction during repeated re-imports of the same recipe.
+
 ---
 
 ## Tooling
