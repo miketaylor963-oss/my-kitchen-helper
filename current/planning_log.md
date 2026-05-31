@@ -1451,3 +1451,21 @@ Items F3 planning inherits from F2C:
 **`grated nutmeg` fixture-prep convention surfaced.** Stripping fires on trailing comma-clauses (`nutmeg, grated`) but not on leading prep_verbs (`grated nutmeg`). The leading-strip rule applies only to size adjectives, by design — leading prep_verbs are often canonical name forms (`grated parmesan`). Recipes using the leading form should be converted to trailing-clause form at re-import time. Added to Stage 10's F2C close-out carry-forward.
 
 **No standing_brief or requirements changes.** Strip-list is application code only; no new routes, schema, or architectural patterns introduced.
+
+### Slice 2C.2 close-out
+
+**Status:** complete 2026-05-31. Commit `3c7e6db`.
+
+**Validate-time advisory pattern settled.** `handleValidate` in `admin.import.tsx` is now async. After the pure `validate()` call passes structural checks, a single DB lookup populates `existing_meal` on the `ValidationResult` success branch before state is set. This is the settled pattern for advisory checks that require a DB round-trip at validate time: pure validator returns null/absent for the advisory field; route handler enriches the result before storing it.
+
+**`commit_import` extension confirmed non-breaking.** The `on_conflict TEXT DEFAULT 'fail'` third parameter preserves all existing 2B.3 call sites without change. First-import regression (item 5 smoke, `min-placeholder-density.json`) confirmed the `'fail'` path is unchanged. The six unconditional child-table DELETEs in the `'update'` path confirmed working — `meal_ingredient` count for houmous post-upsert is exactly 8 (explicit SQL check), not a pile-on.
+
+**`meal.id` stability confirmed.** `id=5` unchanged across the Classic Houmous upsert. The in-place UPDATE pattern preserves parent row identity as specified by Decision 51.
+
+**`import_log` audit trail confirmed.** Two rows for `classic-houmous` (ids 4 and 21) after the 2C.2 re-import. `meal.import_id` updated to the new row; prior row preserved.
+
+**Fresh match on re-import (Decision 53) confirmed appropriate.** Chickpeas and ice-cold water were fuzzy again in the 2C.2 re-import, same as the 2C.1 smoke. The absence of recalled choices was not reported as friction for a single re-import. The matching-memory enhancement entry is in `enhancements.md` with the "operator reports re-disambiguation friction" trigger.
+
+**`duplicate_external_ref` race-condition message updated.** The 23505 fallback now reads "Try paste again — the recipe may have been imported by someone else just now." to reflect that the normal re-import path is now the upsert flow. The fallback was not exercised by smoke (expected).
+
+**standing_brief and requirements updated.** `commit_import` description in §8 and the F2 status note in requirements §3.8 updated to reflect that upsert is now operational.

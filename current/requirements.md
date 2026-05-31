@@ -107,7 +107,7 @@ The primary content-creation pathway. Three modes:
 
 **Implication for the data model:** the import schema becomes a contract. It needs to be designed alongside the DB schema, not after, so that the lookup tables (cuisines, dietary tags, etc.) are referenced consistently from both sides. The schema design will be done by analysing a couple of real recipes already developed in Claude.
 
-**Status (F2):** Recipe-shape import (modes 1 and 2) operational. JSON paste → validate → match ingredients (human-in-the-loop) → commit via `commit_import` RPC. Re-import / update (Decision 47) and in-app Claude call (mode 3) remain outstanding.
+**Status (F2C):** Recipe-shape import (modes 1 and 2) operational. JSON paste → validate (with existing-recipe advisory) → match ingredients (human-in-the-loop) → commit via `commit_import` RPC. Re-import / upsert operational as of 2C.2: `on_conflict='update'` preserves `meal.id`, replaces child rows, appends `import_log` row. In-app Claude call (mode 3) remains outstanding.
 
 ### 3.9 Writer Management (Admin)
 A minimal admin screen for managing write access. Authenticated writers only.

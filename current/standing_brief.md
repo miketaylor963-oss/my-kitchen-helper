@@ -170,7 +170,7 @@ Tables grouped by area. Refer to `current/recipe_db_install.sql` for full column
 ### Imports (Section 10)
 - `import_log` — one row per JSON import event. Raw JSON kept in JSONB. `external_ref` indexed for re-import lookups.
 - `meal.import_id` and `component.import_id` back-reference the import event that created them.
-- `commit_import(payload jsonb, ingredient_choices jsonb)` — Postgres function (added 2B.3). Transactional insert of one meal + all ingredients + import_log from a validated import payload. Used by the importer's commit service via `supabase.rpc()`. Returns the created `meal.id` on success; raises 23505 for `external_ref` or `canonical_name` collisions.
+- `commit_import(payload jsonb, ingredient_choices jsonb, on_conflict text DEFAULT 'fail')` — Postgres function (added 2B.3, extended 2C.2). Transactional insert or in-place update of one meal + all ingredients + import_log. `on_conflict='fail'` (default): existing INSERT path, raises 23505 on `external_ref` collision. `on_conflict='update'`: SELECTs existing `meal.id`, UPDATEs the meal row, DELETEs and re-populates all six child tables (`meal_ingredient`, `meal_step`, `meal_restriction`, `meal_nutritional_tag`, `meal_meal_type`, `meal_meal_format`); `meal.id` is preserved; prior `import_log` rows are not deleted. Used by the importer's commit service via `supabase.rpc()`. Returns `meal.id` on success; raises 23505 for `external_ref` (fail mode only) or `canonical_name` collisions.
 
 ---
 

@@ -63,3 +63,64 @@ The (b2) cumulative ingredient list was reviewed against strip-list variants to 
 - `ginger, grated` → strips to `ginger`. If the master has `ginger` as a canonical alongside `fresh ginger` and `pickled ginger`, the strip could match the wrong canonical. Same caveat — observation only.
 
 This finding closes out the close-out prompt's strip-list collision item. No further carry-forward to the F2C close-out is needed beyond watching these two cases during the 2C.3 sweep.
+
+---
+
+## Slice 2C.2 — Upsert RPC + UI flow
+
+**Status:** complete. Build confirmed green 2026-05-31. Commit: `3c7e6db`.
+
+### Built
+
+- **`current/recipe_db_install.sql` §11 — `commit_import` extended.** Added `on_conflict TEXT DEFAULT 'fail'` as third parameter. Block 4 (meal insert) now branches: `'fail'` path is the existing INSERT unchanged; `'update'` path SELECTs the existing `meal.id`, UPDATEs the meal row in place, DELETEs from all six child tables (`meal_ingredient`, `meal_step`, `meal_restriction`, `meal_nutritional_tag`, `meal_meal_type`, `meal_meal_format`), then falls through to the existing blocks 5–10 which re-populate from scratch. `import_log` rows are not deleted — prior rows remain as audit trail. Unknown `on_conflict` value raises EXCEPTION. `CREATE OR REPLACE` applied to live Supabase by Mike post-push.
+
+- **`src/lib/import/validate.ts` — `ValidationResult` extended.** Success branch gains `existing_meal: { id: number; name: string } | null`. The pure `validate()` function returns `existing_meal: null` (no DB access). DB lookup deferred to the route handler.
+
+- **`src/routes/admin.import.tsx` — async `handleValidate` + upsert advisory UI.** `handleValidate` made async. After structural validation passes, a single `supabase.from("meal").select("id, name").eq("external_ref", ref).maybeSingle()` lookup populates `result.existing_meal` before `setOutcome`. Added `replaceConfirmed` state (default `false`), reset in `handleTextChange` and `handleMatch`. New `UpsertAdvisoryBanner` component renders at the top of the matching section when `existingMeal !== null && matchingResult` — blue/informational tone, two buttons: **Replace existing** (sets `replaceConfirmed = true`, button toggles to "✓ Replace confirmed") and **Cancel** (clears `matchingOutcome`, `choices`, `replaceConfirmed`, `commitOutcome`). `CommitArea` gains `replaceRequired` prop; Commit disabled when `replaceRequired` is true; inline "Confirm Replace above to enable commit." message below the button when blocked by advisory. `duplicate_external_ref` fallback message reworded to race-condition framing.
+
+- **`src/lib/import/commit.ts` — `onConflict` parameter.** `commitImport` gains `onConflict: "fail" | "update" = "fail"`. Passed as `on_conflict` in the RPC call. Route passes `replaceConfirmed ? "update" : "fail"`.
+
+- **`current/enhancements.md` — matching memory entry.** Appended under Import / matching with "becomes worth building when" trigger per Decision 53.
+
+### Smoke
+
+**Unauth (Playwright, production, 2026-05-31):**
+- `/admin/import` while signed out → redirect to `/admin`. Pass.
+
+**Auth (Mike, browser, production, 2026-05-31):**
+
+1. Classic Houmous validate: advisory banner renders at top of matching section — "This will update the existing recipe 'Classic Houmous'. Choose Replace to overwrite, or Cancel to abandon this import." Matching rows below (6 exact, 2 fuzzy: chickpeas, ice-cold water), strip annotations intact. Commit disabled. Pass.
+2. Cancel: matching state cleared, returns to green validation panel with "Match ingredients" button active, JSON still populated. Pass.
+3. Re-validate → advisory → Replace existing (toggles to "✓ Replace confirmed") → resolve chickpeas and ice-cold water → Commit: success, navigates to meal detail. Pass.
+4. SQL checks (production):
+   - `meal` row: `id=5`, `external_ref='classic-houmous'`, `name='Classic Houmous'`, `import_id=21`. `id=5` stable (unchanged from original import). Pass.
+   - `import_log` rows for `classic-houmous`: ids 4 and 21 — audit trail preserved across upsert. Pass.
+   - `meal_ingredient` count: `SELECT COUNT(*) FROM meal_ingredient WHERE meal_id = 5` → **8**. DELETEs fired cleanly; re-INSERT produced exactly the expected rows, not a pile-on. Pass.
+5. First-import regression (`min-placeholder-density.json`, Lemon-Roasted Cauliflower, 7 ingredients, 3 steps): no advisory banner (first-import path). `on_conflict='fail'` default active. New strip observed: `capers, rinsed` → `capers (stripped: ", rinsed")`. Manual choices: `cauliflower, broken into florets` → cauliflower (fuzzy); `lemon, sliced into rounds` → lemon (no match, override); `flat-leaf parsley, chopped` → fresh parsley (fuzzy); `sea salt flakes` → flaky sea salt (fuzzy, 0.71). Commit succeeded, meal detail accessible. Pass.
+6. `duplicate-ingredient-name-trip.json`: Create New → `canonical_name = onion` → Commit → error "An ingredient called 'onion' already exists." Pass. Note: Mike used `onion` as the collision canonical rather than `olive oil` from the 2C.1 smoke — both are valid pre-existing canonicals and the collision fires either way, but the regression trail now references two different collision targets for this fixture. Not a problem; noted for consistency.
+
+### Findings
+
+#### `meal.id` stability confirmed
+
+`id=5` unchanged across the upsert. The UPDATE + child-DELETE + re-INSERT path in `commit_import` preserves the parent row identity. Any FK references to `meal.id` (e.g. `meal_cooked_log`, `meal_plan_entry`) would survive a re-import — though none exist yet for houmous.
+
+#### `import_log` audit trail confirmed
+
+Two rows for `classic-houmous` (ids 4 and 21): the original 2B.3 import and the 2C.2 re-import. `meal.import_id` points to the newest row (21); prior rows survive undeleted.
+
+#### `meal_ingredient` count confirmed at 8
+
+`SELECT COUNT(*) FROM meal_ingredient WHERE meal_id = 5` returned 8. Confirms the six unconditional DELETEs in the update branch ran correctly and the re-populate produced a clean set of child rows, not an accumulated pile from multiple imports.
+
+#### New strip annotation in item 5
+
+`capers, rinsed` → `capers (stripped: ", rinsed")` — "rinsed" is in `prep_verbs`. Third strip annotation observed across slice smoke tests (after `lemon, juiced` and `garlic clove, peeled` from 2C.1). No false-match concern: `capers` is the correct canonical.
+
+#### Item 5 strip misses — expected
+
+`cauliflower, broken into florets` and `lemon, sliced into rounds` did not strip. "broken", "into", "florets", "rounds" are not in `prep_verbs` or `modifying_adverbs`. Both required manual choices. Consistent with spec.
+
+#### No UI surprises
+
+Advisory banner, replace/cancel flow, commit gate, and the "✓ Replace confirmed" toggle all behaved as specified. Race-condition path (`duplicate_external_ref` 23505) not exercised by smoke — expected, since the upsert path intercepts before the DB constraint fires.
