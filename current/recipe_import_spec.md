@@ -71,7 +71,7 @@ Each `component_layers` entry:
 |---|---|---|
 | `base_servings` | integer \| null | Number of servings the ingredient quantities make. Shopping-list scaling multiplies against this. Leave `null` if the source doesn't state a yield — don't estimate. |
 | `prep_time_minutes` | integer \| null | Hands-on time. Populate only when stated in the source — see conventions for what counts as stated. |
-| `cook_time_minutes` | integer \| null | In-session unattended time: oven, hob, fryer, short chills (≤2 hours). Populate only when stated in the source — see conventions. Long out-of-session time goes in `notes`, not here. |
+| `cook_time_minutes` | integer \| null | In-session unattended time: oven, hob, fryer, short chills in the refrigerator or at room temperature (≤2 hours). Populate only when stated in the source — see conventions. Long out-of-session time goes in `notes`, not here. |
 
 ## Ingredients
 
@@ -115,13 +115,15 @@ Conventions for converting human-written recipes into template form. None of the
 
 **Combined seasonings.** Recipe writers commonly write `salt and black pepper` (or `salt and pepper`) as a single ingredient line. Split these into two rows at conversion time — one for salt, one for black pepper — each with its own quantity (`"to taste"` is fine: `"amount": null` with `"notes": "to taste"`). A single combined row matches only one of the two ingredients in the importer and leaves the other unrepresented in the shopping list.
 
+**Duplicate ingredient names across groups.** When the same ingredient appears in two distinct contexts within a recipe (olive oil for cooking and for greasing a tin; soy sauce in the broth and as a table condiment; ground cumin in two different spice groups), use separate rows with distinct IDs and groups. One row per use, not one row aggregated — this keeps step references unambiguous and shopping-list quantities accurate. Identical context but split for legibility doesn't qualify; this is for genuinely distinct uses.
+
 **Leading prep modifiers.** Where an ingredient name leads with a prep verb followed by the ingredient (`grated nutmeg`, `chopped parsley`, `minced garlic`), convert to the trailing-clause form: `nutmeg, grated`, `parsley, chopped`, `garlic, minced`. The trailing form lets the importer's prep-adjective stripping fire — the leading form is treated as a canonical name and does not strip. Prep verbs in scope: chopped, minced, sliced, diced, drained, rinsed, grated, crushed, juiced, peeled, halved, quartered, torn, shredded, mashed, beaten, softened, washed. Do not apply this to canonical-identity modifiers: `dried oregano`, `fresh basil`, `tinned tomatoes`, `ground cumin`, and `whole milk` all stay as written — these aren't prep verbs, they're part of the ingredient's name. Multiple prep verbs on one ingredient are joined with "and" in trailing form (`lemons, zested and juiced`, `garlic cloves, peeled and crushed`) rather than split across rows — one row per ingredient, even when two prep operations are applied.
 
 **Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
 
 **Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`). The top-level `notes` field is also where context the spec has no dedicated field for goes — e.g. "serves 4 as a main, 6 as a side", or other serving-context information.
 
-**Servings not stated.** Where the source gives no yield ("Serves N", "Makes N", "Cuts into N" or similar is absent), leave `base_servings` as `null` — don't estimate. The operator can fill it in after import if shopping-list scaling matters for that recipe.
+**Servings not stated.** Where the source gives no yield ("Serves N", "Makes N", "Cuts into N" or similar is absent), leave `base_servings` as `null` — don't estimate. The operator can fill it in after import if shopping-list scaling matters for that recipe. Inferred yields from scaling notes, variation paragraphs, tin sizes, or photos don't count — the source has to state a canonical yield directly. If you're tempted to override this rule based on circumstantial evidence in the recipe, don't.
 
 **Non-standard and functional quantities.** Pinches, dashes, splashes, drizzles, length descriptors ("1-inch piece"), and functional amounts ("to taste", "to serve", "for frying", "for greasing") all use `amount: null` / `unit: null`, with the original descriptor in `notes`. Don't substitute estimated weights or volumes — the recipe didn't state them.
 
@@ -145,10 +147,10 @@ For amounts not in the table, interpolate to the nearest 5g / 25g step as the ta
 **Times stated in the source.** `prep_time_minutes` and `cook_time_minutes` come only from values the source actually states. Three permitted sources:
 
 1. **Labelled fields.** "Prep:", "Cook:", "Hands-on:", "Active time:", "Bake:" — used at face value for the field they name.
-2. **Stated step durations for in-session cooking.** Explicit times in method steps ("Bake for 30 minutes", "Simmer 20 mins", "Roast 35–40 mins" — lower bound per the range rule) sum into `cook_time_minutes`. Brief active hob steps with stated durations count (e.g. "fry 2 minutes each side" → 4).
+2. **Stated step durations for in-session cooking.** Explicit times in method steps ("Bake for 30 minutes", "Simmer 20 mins", "Roast 35–40 mins" — lower bound per the range rule) sum into `cook_time_minutes`. Brief active hob steps with stated durations count (e.g. "fry 2 minutes each side" → 4). When stated step durations clearly run in parallel (one step in the oven while another is on the hob; potatoes boiling while veg is air-fried), sum only the longer of the parallel pair. The result is the critical path — the elapsed time an attentive cook would experience. If the critical path can't be determined confidently from the source, leave `cook_time_minutes` `null` and put the individual durations in `notes`. Don't middle-ground between sum and critical-path — null is the correct answer when the structure is unclear.
 3. **Single combined time, zero cook activity.** Where the recipe has no cook activity at all (no-cook salads, all-blender dips like houmous), a combined time populates `prep_time_minutes`.
 
-Don't estimate, don't derive one field by subtracting from a stated total, don't split a combined total across both fields where both prep and cook activities exist. If only a total is stated and the recipe involves both prep and cook, both fields stay `null` and the total goes in `notes` if useful. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, never in `cook_time_minutes`.
+Don't estimate, don't derive one field by subtracting from a stated total, don't split a combined total across both fields where both prep and cook activities exist. If only a total is stated and the recipe involves both prep and cook, both fields stay `null` and the total goes in `notes` if useful. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, never in `cook_time_minutes`. Post-cook rest (resting meat, in-tin cooling after bake, batter standing time) is in-session but not cook time — exclude from `cook_time_minutes`.
 
 ## Seeded vocabulary — frameworks, layers, families
 
