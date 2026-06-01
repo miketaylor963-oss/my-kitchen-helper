@@ -153,11 +153,9 @@ export function validate(data: unknown, lookups: LookupSets): ValidationResult {
   if (typeof doc.name !== "string" || (doc.name as string).trim() === "")
     errs.push({ path: "name", message: "Required non-empty string" });
 
-  // base_servings is required (not "when set") — spec type is integer with no | null
-  if (doc.base_servings === undefined || doc.base_servings === null)
-    errs.push({ path: "base_servings", message: "Required — must be a positive integer" });
-  else if (!isPositiveInt(doc.base_servings))
-    errs.push({ path: "base_servings", message: "Must be a positive integer" });
+  // base_servings is optional — spec type is integer | null
+  if (doc.base_servings !== undefined && doc.base_servings !== null && !isPositiveInt(doc.base_servings))
+    errs.push({ path: "base_servings", message: "Must be a positive integer when set" });
 
   // Nullable numeric fields (positive integer when set)
   for (const f of ["prep_time_minutes", "cook_time_minutes", "gi_index"] as const) {
@@ -278,10 +276,8 @@ export function validate(data: unknown, lookups: LookupSets): ValidationResult {
       if (typeof d.name !== "string" || (d.name as string).trim() === "")
         errs.push({ path: `${p}.name`, message: "Required non-empty string" });
 
-      if (d.base_servings === undefined || d.base_servings === null)
-        errs.push({ path: `${p}.base_servings`, message: "Required — must be a positive integer" });
-      else if (!isPositiveInt(d.base_servings))
-        errs.push({ path: `${p}.base_servings`, message: "Must be a positive integer" });
+      if (d.base_servings !== undefined && d.base_servings !== null && !isPositiveInt(d.base_servings))
+        errs.push({ path: `${p}.base_servings`, message: "Must be a positive integer when set" });
 
       for (const f of ["prep_time_minutes", "cook_time_minutes", "gi_index"] as const) {
         const v = d[f];

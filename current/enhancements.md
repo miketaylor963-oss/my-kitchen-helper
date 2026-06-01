@@ -123,3 +123,33 @@ Two RPC functions (`match_ingredient`, `commit_import`) are not in the generated
 Becomes worth building when: a third custom RPC is added (F2C re-import or F3 component import are likely candidates), or a typed RPC return surface would catch a real bug. Until then the cast pattern is the convention.
 
 Originally raised: F2 close-out, 2026-05-30.
+
+---
+
+## Recipe modelling
+
+### Twin-recipe pattern for whole-recipe alternative versions
+When a recipe describes a complete alternative version via inline
+substitutions (vegan version of a vegetarian dish, dairy-free version
+of a dairy dish), the current convention captures only the canonical
+(as-written) version. The alternative goes in `notes`, but downstream
+filtering (dietary category, shopping list aggregation) treats only
+the canonical version as first-class. A user cooking the alternative
+will see misleading shopping list lines and dietary classification.
+
+A future twin-recipe pattern would model this as two linked recipes:
+one canonical, one alternative-version, sharing structure (steps,
+group labels, base servings) but each carrying its own ingredient
+list and classification. Schema implication: a `recipe_variant_of`
+column on `meal`, or a separate linking table — to be designed when
+the feature is built.
+
+Becomes worth building when: alternative-version recipes start
+mattering enough that canonical-only filtering reveals false
+positives in dietary filtering or false additions in shopping lists.
+Likely surfaces first via shopping-list generation against a meal
+plan including an alternative-version cook.
+
+Originally raised: F2C 2C.3 re-import sweep. Vegetarian ramen
+(eggs vs tofu) and vegetarian pancake pie (heavy inline vegan
+substitutions throughout) both surfaced the gap.

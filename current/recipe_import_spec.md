@@ -24,7 +24,7 @@ This contract is the source of truth for both manual conversion of existing reci
 | `cuisine` | string \| null | Must match a `cuisine.code` in the database (`british`, `moroccan`, `japanese`, etc.). |
 | `dietary_category` | string \| null | Must match a `dietary_category.code` (`vegan`, `vegetarian`, `pescatarian`, `meat`). Use the **least restrictive eater** rule — a vegan dish is classified `vegan`, not `vegetarian`, because vegans can also eat it. |
 | `dietary_restrictions` | string[] | Codes from `dietary_restriction` describing what the dish **contains** (`dairy`, `gluten`, `eggs`, `nuts`, `peanuts`, `soy`, `shellfish`, `sesame`). Empty array if none. |
-| `nutritional_tags` | string[] | Codes from `nutritional_tag` describing qualitative nutritional properties (`omega3_strong`). Empty array if none. The ★ marker in the source docs maps to `omega3_strong`. |
+| `nutritional_tags` | string[] | Codes from `nutritional_tag` describing qualitative nutritional properties (`omega3_strong`). Empty array if none. The ★ marker in the source docs maps to `omega3_strong`; explicit prose equivalents ("fits the omega 3/6 strategy", "good source of omega-3") also qualify. |
 
 ## Macro data — all optional
 
@@ -69,9 +69,9 @@ Each `component_layers` entry:
 
 | Field | Type | Notes |
 |---|---|---|
-| `base_servings` | integer | Number of servings the ingredient quantities make. Shopping-list scaling multiplies against this. |
-| `prep_time_minutes` | integer \| null | Hands-on time. Leave `null` when the source doesn't state it — don't estimate. |
-| `cook_time_minutes` | integer \| null | In-session unattended time: oven, hob, fryer, short chills (≤2 hours). Leave `null` when the source doesn't state it — don't estimate. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, not here. |
+| `base_servings` | integer \| null | Number of servings the ingredient quantities make. Shopping-list scaling multiplies against this. Leave `null` if the source doesn't state a yield — don't estimate. |
+| `prep_time_minutes` | integer \| null | Hands-on time. Populate only when stated in the source — see conventions for what counts as stated. |
+| `cook_time_minutes` | integer \| null | In-session unattended time: oven, hob, fryer, short chills (≤2 hours). Populate only when stated in the source — see conventions. Long out-of-session time goes in `notes`, not here. |
 
 ## Ingredients
 
@@ -103,17 +103,27 @@ Array of step rows. Order matters — used as `sort_order`. No step IDs needed.
 
 Conventions for converting human-written recipes into template form. None of these are validator rules — they're consistency conventions for converters so fixtures and imports stay comparable.
 
+**Cuisine inference.** Assign `cuisine` when the dish is characteristically of one cuisine (style, ingredients, source culture all align). Leave `null` for hybrid dishes, neutral home baking with no strong cuisine identity, or where the source itself doesn't claim one. Don't force-fit — `null` is the right answer often enough.
+
+**Source-supplied macros.** Carry source nutrition figures into `protein_g` / `carbs_g` / `gi_index` only if they describe the recipe as written, without accompaniments. If they include rice, bread, or other to-serve items, leave the fields `null` and put the source figures in `notes`.
+
 **Inline alternatives.** When a recipe lists alternatives inline ("tamari or soy sauce", "ricotta or cottage cheese", "kombu or seaweed flakes"), take the first-named option as the canonical ingredient. Put the alternatives in `notes`. Classification (dietary category, restrictions) follows the canonical choice. Alternative ingredients are not first-class in the spec.
 
 *The `name` field contains only the first-named option, not the "X or Y" phrase.* A recipe line "3 tbsp tamari or soy sauce" converts to `"name": "tamari", "notes": "or soy sauce"` — not `"name": "tamari or soy sauce"`. The `name` is what the importer matches against the master vocabulary; embedded alternatives push the row into fuzzy bucketing unnecessarily. This applies whether the alternatives are near-equivalent (`tamari or soy sauce`, `fresh parsley or coriander`) or genuinely different ingredients the recipe writer offers as substitutions (`sherry vinegar or red wine vinegar`, `Chinese lettuce or cabbage`) — pick one, note the other.
 
+**Whole-recipe branching.** Where a recipe presents a whole-recipe alternative version (e.g. a vegan version of a vegetarian dish achieved by substituting eggs with tofu and dairy with plant equivalents), convert only the canonical (as-written) version. Classification follows the canonical version. Describe the alternative in the top-level `notes`. The twin-recipe pattern — one canonical, one alternative-version, linked — is a future enhancement; until then this convention captures the canonical case only.
+
 **Combined seasonings.** Recipe writers commonly write `salt and black pepper` (or `salt and pepper`) as a single ingredient line. Split these into two rows at conversion time — one for salt, one for black pepper — each with its own quantity (`"to taste"` is fine: `"amount": null` with `"notes": "to taste"`). A single combined row matches only one of the two ingredients in the importer and leaves the other unrepresented in the shopping list.
 
-**Leading prep modifiers.** Where an ingredient name leads with a prep verb followed by the ingredient (`grated nutmeg`, `chopped parsley`, `minced garlic`), convert to the trailing-clause form: `nutmeg, grated`, `parsley, chopped`, `garlic, minced`. The trailing form lets the importer's prep-adjective stripping fire — the leading form is treated as a canonical name and does not strip. Prep verbs in scope: chopped, minced, sliced, diced, drained, rinsed, grated, crushed, juiced, peeled, halved, quartered, torn, shredded, mashed, beaten, softened, washed. Do not apply this to canonical-identity modifiers: `dried oregano`, `fresh basil`, `tinned tomatoes`, `ground cumin`, and `whole milk` all stay as written — these aren't prep verbs, they're part of the ingredient's name.
+**Leading prep modifiers.** Where an ingredient name leads with a prep verb followed by the ingredient (`grated nutmeg`, `chopped parsley`, `minced garlic`), convert to the trailing-clause form: `nutmeg, grated`, `parsley, chopped`, `garlic, minced`. The trailing form lets the importer's prep-adjective stripping fire — the leading form is treated as a canonical name and does not strip. Prep verbs in scope: chopped, minced, sliced, diced, drained, rinsed, grated, crushed, juiced, peeled, halved, quartered, torn, shredded, mashed, beaten, softened, washed. Do not apply this to canonical-identity modifiers: `dried oregano`, `fresh basil`, `tinned tomatoes`, `ground cumin`, and `whole milk` all stay as written — these aren't prep verbs, they're part of the ingredient's name. Multiple prep verbs on one ingredient are joined with "and" in trailing form (`lemons, zested and juiced`, `garlic cloves, peeled and crushed`) rather than split across rows — one row per ingredient, even when two prep operations are applied.
 
 **Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
 
 **Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`). The top-level `notes` field is also where context the spec has no dedicated field for goes — e.g. "serves 4 as a main, 6 as a side", or other serving-context information.
+
+**Servings not stated.** Where the source gives no yield ("Serves N", "Makes N", "Cuts into N" or similar is absent), leave `base_servings` as `null` — don't estimate. The operator can fill it in after import if shopping-list scaling matters for that recipe.
+
+**Non-standard and functional quantities.** Pinches, dashes, splashes, drizzles, length descriptors ("1-inch piece"), and functional amounts ("to taste", "to serve", "for frying", "for greasing") all use `amount: null` / `unit: null`, with the original descriptor in `notes`. Don't substitute estimated weights or volumes — the recipe didn't state them.
 
 **Tin weight, not drained weight.** Where a recipe specifies tinned ingredients, use the tin weight (e.g. `400` for "1 × 400g tin of chickpeas"), not the drained weight. The shopping list maps to "buy a tin", and this matches the worked example. Note the tin format in `notes` if useful ("1 × 400g tin").
 
@@ -130,11 +140,15 @@ Conventions for converting human-written recipes into template form. None of the
 | 4 fl oz | 115 ml |
 | 1 pint | 570 ml |
 
-For amounts not in the table, interpolate to the nearest 5g / 25g step as the table itself does. Keep originals in `notes` for traceability where useful.
+For amounts not in the table, interpolate to the nearest 5g / 25g step as the table itself does. Keep originals in `notes` for traceability where useful. Where a recipe uses "oz" for liquids without explicit "fl oz", treat as fluid oz unless context makes weight unambiguous (cream, milk, water → volume; flour, sugar, fat → weight).
 
-**Times not stated explicitly.** Leave `prep_time_minutes` and `cook_time_minutes` as `null` unless the recipe states each one explicitly with a label that matches its meaning — "Prep:", "Cook:", "Hands-on:", "Active time:", "Bake:", or similar. Never derive `prep_time_minutes` or `cook_time_minutes` from a stated total time, a stated "ready in" time, the difference between two stated values, or your own estimate from reading the method. If only a total is stated, both fields stay `null` and the total goes in `notes` if useful. Estimating produces dishonest data and breaks downstream "active vs total" filtering.
+**Times stated in the source.** `prep_time_minutes` and `cook_time_minutes` come only from values the source actually states. Three permitted sources:
 
-**Long unattended time.** Overnight soaks, multi-hour chills, day-ahead marinades — don't put these in `cook_time_minutes`. Describe in `notes`.
+1. **Labelled fields.** "Prep:", "Cook:", "Hands-on:", "Active time:", "Bake:" — used at face value for the field they name.
+2. **Stated step durations for in-session cooking.** Explicit times in method steps ("Bake for 30 minutes", "Simmer 20 mins", "Roast 35–40 mins" — lower bound per the range rule) sum into `cook_time_minutes`. Brief active hob steps with stated durations count (e.g. "fry 2 minutes each side" → 4).
+3. **Single combined time, zero cook activity.** Where the recipe has no cook activity at all (no-cook salads, all-blender dips like houmous), a combined time populates `prep_time_minutes`.
+
+Don't estimate, don't derive one field by subtracting from a stated total, don't split a combined total across both fields where both prep and cook activities exist. If only a total is stated and the recipe involves both prep and cook, both fields stay `null` and the total goes in `notes` if useful. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, never in `cook_time_minutes`.
 
 ## Seeded vocabulary — frameworks, layers, families
 
@@ -173,7 +187,7 @@ Each `derived_components` entry:
 | `protein_g` | number \| null | no | Per-serving macro for the component used alone. |
 | `carbs_g` | number \| null | no | Same. |
 | `gi_index` | integer \| null | no | Same. |
-| `base_servings` | integer | yes | The component's own serving count when used independently. Often the same as the parent's, sometimes not. |
+| `base_servings` | integer \| null | no | The component's own serving count when used independently. Often the same as the parent's, sometimes not. Leave `null` if the parent's is null, or if the operator hasn't supplied one. |
 | `prep_time_minutes` | integer \| null | no | Time to make this component alone — usually less than the parent's. |
 | `cook_time_minutes` | integer \| null | no | Same. |
 | `ingredient_ids` | string[] | yes | Parent ingredient `id`s to include. The importer copies these rows into the component's own ingredient list. |
@@ -222,7 +236,7 @@ Notable conversions from the original source JSON:
 - Grouped ingredients into "filling" and "mash" — the original was flat.
 - Step `group` labels match ingredient groups.
 - Added `{NNNN}` placeholders in step content for scaling. Refs derive automatically.
-- Salt and pepper changed to `amount: null` with a `"to taste"` note rather than the placeholder `1 pinch`.
+- Salt and pepper split into two rows (one each), `amount: null` with a `"to taste"` note, per the combined-seasonings convention.
 - Added a `derived_components` entry for the lentil & bean base.
 - Macros left null — would be populated during Claude-assisted recipe development.
 
@@ -270,7 +284,8 @@ Notable conversions from the original source JSON:
     { "id": "0015", "name": "lemon, juiced", "amount": 0.5, "unit": null, "group": "filling", "notes": null },
     { "id": "0016", "name": "floury potatoes, peeled and chopped", "amount": 800, "unit": "g", "group": "mash", "notes": null },
     { "id": "0017", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "mash", "notes": "for the mash" },
-    { "id": "0018", "name": "salt and black pepper", "amount": null, "unit": null, "group": "mash", "notes": "to taste" }
+    { "id": "0018", "name": "salt", "amount": null, "unit": null, "group": "mash", "notes": "to taste" },
+    { "id": "0019", "name": "black pepper", "amount": null, "unit": null, "group": "mash", "notes": "to taste" }
   ],
 
   "steps": [
@@ -306,7 +321,7 @@ Notable conversions from the original source JSON:
     },
     {
       "title": "Make the mash",
-      "content": "While the filling simmers, boil {0016} in salted water until tender, around 20 minutes. Drain thoroughly, then mash with {0017} and a splash of the cooking water if needed. Season generously with {0018}. You want it smooth and spreadable but not too loose.",
+      "content": "While the filling simmers, boil {0016} in salted water until tender, around 20 minutes. Drain thoroughly, then mash with {0017} and a splash of the cooking water if needed. Season generously with {0018} and {0019}. You want it smooth and spreadable but not too loose.",
       "timer_seconds": 1200,
       "group": "mash"
     },
