@@ -109,6 +109,8 @@ Conventions for converting human-written recipes into template form. None of the
 
 **Combined seasonings.** Recipe writers commonly write `salt and black pepper` (or `salt and pepper`) as a single ingredient line. Split these into two rows at conversion time — one for salt, one for black pepper — each with its own quantity (`"to taste"` is fine: `"amount": null` with `"notes": "to taste"`). A single combined row matches only one of the two ingredients in the importer and leaves the other unrepresented in the shopping list.
 
+**Leading prep modifiers.** Where an ingredient name leads with a prep verb followed by the ingredient (`grated nutmeg`, `chopped parsley`, `minced garlic`), convert to the trailing-clause form: `nutmeg, grated`, `parsley, chopped`, `garlic, minced`. The trailing form lets the importer's prep-adjective stripping fire — the leading form is treated as a canonical name and does not strip. Prep verbs in scope: chopped, minced, sliced, diced, drained, rinsed, grated, crushed, juiced, peeled, halved, quartered, torn, shredded, mashed, beaten, softened, washed. Do not apply this to canonical-identity modifiers: `dried oregano`, `fresh basil`, `tinned tomatoes`, `ground cumin`, and `whole milk` all stay as written — these aren't prep verbs, they're part of the ingredient's name.
+
 **Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
 
 **Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`).
