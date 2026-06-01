@@ -113,7 +113,7 @@ Conventions for converting human-written recipes into template form. None of the
 
 **Optional ingredients.** Include as full ingredient rows with `notes: "optional, ..."` describing when they're used. Don't drop them and don't invent a new field.
 
-**Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`).
+**Range quantities.** "1–2 tbsp", "2–3 tsp", "4–5 patties", "8–10 slices" — use the lower bound for `amount` and note the range in `notes`. Apply the same rule to `base_servings` for range yields ("Serves 4–6" → `base_servings: 4`, with the range in `notes`). The top-level `notes` field is also where context the spec has no dedicated field for goes — e.g. "serves 4 as a main, 6 as a side", or other serving-context information.
 
 **Tin weight, not drained weight.** Where a recipe specifies tinned ingredients, use the tin weight (e.g. `400` for "1 × 400g tin of chickpeas"), not the drained weight. The shopping list maps to "buy a tin", and this matches the worked example. Note the tin format in `notes` if useful ("1 × 400g tin").
 
@@ -132,7 +132,7 @@ Conventions for converting human-written recipes into template form. None of the
 
 For amounts not in the table, interpolate to the nearest 5g / 25g step as the table itself does. Keep originals in `notes` for traceability where useful.
 
-**Times not stated.** Leave `prep_time_minutes` and `cook_time_minutes` as `null`. Estimating produces dishonest data and breaks downstream "active vs total" filtering.
+**Times not stated explicitly.** Leave `prep_time_minutes` and `cook_time_minutes` as `null` unless the recipe states each one explicitly with a label that matches its meaning — "Prep:", "Cook:", "Hands-on:", "Active time:", "Bake:", or similar. Never derive `prep_time_minutes` or `cook_time_minutes` from a stated total time, a stated "ready in" time, the difference between two stated values, or your own estimate from reading the method. If only a total is stated, both fields stay `null` and the total goes in `notes` if useful. Estimating produces dishonest data and breaks downstream "active vs total" filtering.
 
 **Long unattended time.** Overnight soaks, multi-hour chills, day-ahead marinades — don't put these in `cook_time_minutes`. Describe in `notes`.
 
