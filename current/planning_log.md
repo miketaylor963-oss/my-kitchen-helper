@@ -1472,6 +1472,8 @@ Items F3 planning inherits from F2C:
 
 ### Slice 2C.3 close-out — Recipe re-import sweep (partial coverage)
 
+
+
 **Status:** complete with documented partial coverage. F2C close-out deferred to 2C.4.
 
 **Decisions taken during 2C.3:**
@@ -1487,3 +1489,48 @@ Items F3 planning inherits from F2C:
 - **Strip-list extension data is now compelling.** Sweep produced concrete observations across four extension patterns: multi-prep trailing forms (~9 rows), pluralisation (~5), leading descriptors (~2), mid-name modifier mismatches (~7). Decision-46's sequencing (strip first, threshold second) confirmed against post-strip residuals.
 
 **Stale slice-prompt wording observation:** the 2C.3 slice prompt carried (b2)-era language calling the 23505 `duplicate_ingredient_name` path "still untested", which 2C.1 had already resolved. No project-instructions change recommended; logged as a discipline reminder to update inherited prompt text when status changes.
+
+---
+
+## F2C close-out
+
+### F2C done
+
+**Decision 57 done-definition check:**
+
+1. **Upsert end-to-end against production:** confirmed. 2C.2 smoke: Classic Houmous re-imported with `on_conflict='update'`; `meal.id` stable (id=5); child rows replaced cleanly; `import_log` audit trail preserved (two rows for `classic-houmous`). 2C.3 sweep: five additional fixtures committed via upsert. ✅
+
+2. **`duplicate_ingredient_name` error message names the colliding ingredient:** confirmed in 2C.1. Fix: `ingredientChoices` map's `create_new.canonical_name` used as the ingredient name, bypassing the null `error.details` field. ✅
+
+3. **All twelve landed fixtures re-imported via the upsert path with source-data conventions corrected:** **partial.** Five fixtures committed in 2C.3 (lemon cheesecake, bread pudding, harissa pie, ramen, banana bread — confirmed against 2C.3 build log per-fixture data, rows 13, 7, 12, 15, 9). Five deferred to the post-2C.4 re-import slice pending canonical slug convention: aubergine parmigiana, black bean patties, north african spiced shepherd's pie, `ramen-hairy-bikers` (fresh slug: `vegetarian-ramen`), teriyaki aubergine. Per Decision 60, F2C closes with documented partial coverage; the post-2C.4 re-import slice resolves the gap. ✅ (with caveat)
+
+**Threshold re-evaluation:** confirmed in 2C.3 findings. Strip-list extension would promote several low-score fuzzy cases (0.30–0.45 band) to exact, leaving a cleaner residual bucket. Decision-46's sequencing (strip first, threshold second) confirmed. Threshold raise deferred until strip-list extension lands. ✅
+
+**Watch-list from 2C.1:** `mushrooms, sliced` → `mushrooms` and `ginger, grated` → `ginger` — neither specific form appeared in the 2C.3 fixtures. Watch-list unexercised and uncontradicted; carry to post-2C.4 re-import slice.
+
+### F2C scope as built
+
+- **Slice 2C.1:** `duplicate_ingredient_name` name-extraction fix; stale "lands in F2C" string updated to "lands in F3"; prep-adjective stripping (`generateVariants`, `StripList`, `getStripList` in `src/lib/import/strip_list.ts`; strip annotation in `ExactRow`).
+- **Slice 2C.2:** `commit_import` RPC extension with `on_conflict TEXT DEFAULT 'fail'`; validate-time `existing_meal` advisory; replace/cancel UI confirmation flow; fresh match on re-import.
+- **Slice 2C.3:** Four rounds of mid-slice spec amendments (base_servings nullable, validator fix, concurrency rule, duplicate-rows convention, base_servings discipline, in-session passive waits, method-only optional ingredients). Re-import sweep: five fixtures committed, one inserted-then-deleted (aubergine parmigiana slug mismatch), five deferred.
+- **Slice 2C.4:** Canonical slug convention (in spec Conversion conventions + conversion-time prompt); redesigned prompt with batch/interactive mode split and explicit discipline rules; standalone converter prompt file and project setup artefact bundle.
+
+### Carry-forward at F2C close
+
+**Post-2C.4 re-import slice** (highest priority): re-convert and re-import the five slug-mismatched fixtures via the new converter project, supplying the existing slug as input. Closes the F2C content coverage gap and verifies Decision 57 item 3 in full.
+
+**Importer-fix slice:** advisory banner gate fix (`matching.ts:241`, evaluate against resolved candidates regardless of outcome kind); `updated_at` ON UPDATE trigger (applied via schema install / migration); alias-via-fuzzy investigation (`courgettes` alias resolved at 0.37 fuzzy rather than being promoted to exact).
+
+**Strip-list extension slice:** multi-prep trailing forms (~9 cases from 2C.3), pluralisation (~5 cases), leading descriptor stripping with carve-outs (~2 cases), mid-name modifier handling (~7 cases, possibly alias-system territory rather than strip-list).
+
+**F3:** component modelling, component CRUD, component-shape import, derived-components-from-recipe-import. `gen:types` migration likely triggered by F3's component import RPC.
+
+### Lessons captured
+
+**Mid-slice spec amendments as a first-class pattern.** Four rounds landed during 2C.3 without destabilising the content focus. The constraint (spec edit + immediate validator fix if needed; no unrelated application code) was load-bearing. Worth carrying as an explicit pattern into slices with spec-adjacent work.
+
+**Advisory paths need deliberate exercise.** The advisory banner bug was present from 2B.2 onwards but never triggered in normal use — every real fixture had at least one fuzzy or none row. Only the deliberate ramen contrivance (dietary_category flipped to vegan) surfaced it. Future advisory paths should have an explicit trigger case in the smoke surface, not just an expected-never-fires note.
+
+**Model-switch slug drift.** Opus 4.7 added author and disambiguator suffixes consistently; Sonnet 4.6 stripped them. The canonical slug convention resolves this by making the convention the authority, and by supplying the original slug at re-conversion time. Lesson: any identifier-generation task that crosses model versions needs an explicit convention, not just a prompt suggestion.
+
+**Converter project as toolchain infrastructure.** Dedicated Claude project with standing inputs is cleaner than pasting spec excerpts into each conversion chat. Project setup is operator-side by design — it's toolchain configuration, not application code.

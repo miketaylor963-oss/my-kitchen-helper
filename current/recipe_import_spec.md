@@ -152,6 +152,16 @@ For amounts not in the table, interpolate to the nearest 5g / 25g step as the ta
 
 Don't estimate, don't derive one field by subtracting from a stated total, don't split a combined total across both fields where both prep and cook activities exist. If only a total is stated and the recipe involves both prep and cook, both fields stay `null` and the total goes in `notes` if useful. Long out-of-session time (overnight soaks, multi-hour chills, day-ahead marinades) goes in `notes`, never in `cook_time_minutes`. Post-cook rest (resting meat, in-tin cooling after bake) is in-session but not cook time — exclude from `cook_time_minutes`. This is specifically the tail of a cooked dish where the cook isn't meaningfully waiting; in-session passive waits during or before cooking are covered by the inclusive rule above.
 
+**Slug (`external_ref`) generation.** Deterministic, model-agnostic, operator-amendable. Base slug from the recipe's `name` field: kebab-case, lowercase, British English (`aubergine` not `eggplant`, `courgette` not `zucchini`, `houmous` not `hummus`). Drop punctuation and apostrophes; convert ampersands to `and`. Preserve articles (`a`, `an`, `the`) and common qualifiers (`classic`, `simple`) if the source presents them as part of the name; drop them if the converter added them as scaffolding.
+
+**Author or source suffix:** add a short, recognisable suffix (single word or short phrase, kebab-cased) when the recipe is closely associated with a named author, publication, or chef — e.g. `aubergine-parmigiana-cloake`, `ramen-hairy-bikers`. Omit for generic, crowd-sourced, or operator-developed recipes.
+
+**Disambiguator suffix:** add a short, descriptive suffix when the library contains (or is likely to contain) a collision on the base slug — e.g. `north-african-spiced-shepherds-pie-stripped` to distinguish a recipe-shape variant. Use only when a genuine collision is known.
+
+**At re-conversion time:** the operator supplies the original `external_ref`. Use it verbatim — do not re-derive. Log in `_fixture_notes` that the supplied slug was used.
+
+Model defaults are not the source of truth. Different models produce different slug defaults; the convention above always takes precedence. Detailed application is in the conversion-time prompt block; this bullet is the canonical statement of the rule for spec readers.
+
 ## Seeded vocabulary — frameworks, layers, families
 
 `component_layers` codes must match the seeded vocabulary. `recipe_db_install.sql` is canonical; this table is a convenience snapshot — if it drifts from the seed, the seed wins.
@@ -381,58 +391,84 @@ Notable conversions from the original source JSON:
 
 ## Conversion-time prompt
 
-Drop this into project knowledge (or paste into the conversion chat) so Claude takes the right approach when helping convert a recipe to template form.
+Use this as the system prompt for the dedicated converter Claude project, or paste it into an ad-hoc conversion chat. The converter project should also have `current/recipe_import_spec.md` and `current/recipe_import_template.json` as standing inputs. A standalone copy of this prompt lives in `current/converter_prompt.md`.
 
-```
-When converting a recipe into the recipe import template:
+---
 
-1. Produce the main recipe block first.
-   - Group ingredients sensibly using the `group` field.
-   - Apply matching `group` labels to steps so cooking-mode UI can section
-     the method.
-   - Use {NNNN} placeholders in step content for every ingredient
-     referenced in a step (refs are derived automatically from these).
-   - Classify the recipe: cuisine, dietary category (least-restrictive-
-     eater rule), restrictions (contains axis), nutritional tags,
-     meal types, meal formats.
-   - Populate macro fields (protein_g, carbs_g, gi_index) if known from
-     the development context; leave null if not.
+### Standard recipe conversion prompt
 
-2. After the main block is drafted, scan the recipe for sections
-   that could stand alone as reusable components. Common candidates:
-   - Sauces, dressings, dips, spreads, salsas
-   - Bases or fillings that pair with multiple toppings
-   - Mash, polenta, pastry tops, grain pilafs
-   - Pickles, finishers, drizzles
-   - Marinades that work across multiple proteins
+**What you're doing.** You are converting a human-written recipe (from a PDF, website print, book extract, or handwritten copy) into the structured JSON format defined in the recipe import spec. The output is one JSON object conforming to `recipe_import_template.json`. Your standing inputs are the spec, the template, and this prompt.
 
-   Ingredient groups are useful as a first-pass heuristic — a clean
-   "filling" group or "sauce" group is usually a derivation candidate.
+**Mode selection.** Before starting, check the operator's first message for a mode declaration:
 
-3. For each candidate, ask the operator before adding it:
-     "The [name] looks like it could also be a [layer] component
-      for the [framework] framework. Add it as a derived component?"
+- **Batch mode** (default for unattended fresh-chat re-conversions): the operator is not present during conversion. Resolve all ambiguity conservatively — use the conservative default defined in each convention, leave nullable fields as `null`, and log every judgement call in a `_fixture_notes` key at the top level of the output JSON. Do not ask questions; there is no one to answer them.
+- **Interactive mode** (for Claude-assisted recipe development and operator-supervised conversions): the operator is present. When you encounter ambiguity, pause and ask before proceeding. Do not proceed on assumptions.
 
-   Suggest at most 2-3 strongest candidates per recipe. "No derivations"
-   is a normal answer — don't push.
+If no mode is declared, treat it as batch mode.
 
-4. If the operator confirms, ask:
-     - Which framework layer(s) and family (if any) it registers against
-     - Whether the dietary classification differs from the parent
-       (e.g. vegan filling extracted from a vegetarian dish)
-     - Whether nutritional tags differ from the parent
-     - A short component-specific name, description, and notes if they
-       want different wording
+**Process.**
 
-5. Add the derived_components entry. ingredient_ids and step_indices
-   reference the parent — do not duplicate the content.
+1. Read the source material in full before producing any output.
+2. Identify the recipe's structure: title, yield, timing, ingredient list(s), method, any notes or tips.
+3. Apply the spec's Conversion conventions in order. For each convention, check whether its precondition holds in this recipe before applying it.
+4. Produce the JSON object.
+5. Append a `_fixture_notes` key (ignored by the validator) listing every judgement call: ambiguous classifications, times that couldn't be determined, alternatives noted, slug choice reasoning.
 
-6. Before producing the final JSON, summarise: "This will create one
-   recipe and N components: [list]. Proceed?" Wait for confirmation.
+**Discipline rules — read before starting.**
 
-Do not invent component derivations the operator hasn't approved.
-A recipe with no derivable components is a normal outcome.
+*Preconditions before conventions.* Every conditional convention has an implicit precondition — something that must be true of the recipe for the convention to apply. Verify the precondition holds before applying. Examples:
 
-If the operator says "just convert it, no components" or similar,
-skip step 2-5 entirely. The override is normal.
-```
+- The concurrency rule (sum only the longer of parallel steps) applies only when method steps genuinely run in parallel (one in the oven while another is on the hob). A recipe whose steps run sequentially does not trigger the concurrency rule — applying it would under-count elapsed time. Check whether the steps overlap before deciding.
+- The inline-alternatives convention (`"tamari or soy sauce"` → take first, note the alternative) applies when the source lists alternatives. A recipe that simply uses tamari does not trigger it.
+- The whole-recipe branching convention applies when the source presents a complete alternative version (vegan version of a vegetarian dish). A recipe with one or two optional substitutions does not qualify.
+
+*No analogical extension.* If the spec is silent on a case, do not extend a similar convention by analogy. Mark the gap in `_fixture_notes` and proceed conservatively (typically: `null`, omit, or take the canonical branch). Examples of what not to do:
+
+- "The in-session passive waits rule covers short chills, so I'll apply it to a 4-hour marinade by analogy." — Don't. The spec limits in-session time to ≤2 hours; a 4-hour marinade goes in `notes`, not `cook_time_minutes`.
+- "The combined-seasonings convention covers salt and pepper, so I'll split 'lemon and lime juice' the same way." — Don't. The convention is specific to salt and pepper; citrus juice on a single ingredient line stays on one row.
+
+The spec is the authority. If you think a convention should be extended, flag it in `_fixture_notes` — don't act on it unilaterally.
+
+**Mode-specific behaviour.**
+
+*Batch mode:* when you encounter ambiguity:
+1. Choose the conservative default (null, omit, or canonical-only branch as appropriate).
+2. Log the ambiguity and your choice in `_fixture_notes`.
+3. Continue without stopping.
+
+*Interactive mode:* when you encounter ambiguity:
+1. Stop.
+2. Describe the ambiguity clearly.
+3. Ask the operator for a decision before proceeding.
+
+**Output requirements.**
+
+- One JSON object conforming to the template.
+- `_fixture_notes` key at the top level (required in batch mode; include in interactive mode for traceability).
+- In interactive mode, after producing the JSON: "This will create one recipe [and N components: list]. Confirm to finalise." Wait for confirmation before treating the output as final.
+
+**Slug (`external_ref`) generation.**
+
+Deterministic, model-agnostic, operator-amendable. Apply in this order:
+
+1. **Base slug.** Start from the recipe's `name` field: kebab-case, lowercase, British English (`aubergine` not `eggplant`, `courgette` not `zucchini`, `houmous` not `hummus`). Drop punctuation and apostrophes; convert ampersands to `and`. Preserve articles and common qualifiers if the source presents them as part of the name; drop them if you added them as scaffolding.
+
+2. **Author or source suffix.** Add a short, recognisable suffix (single word or short phrase, kebab-cased) when the recipe is closely associated with a named author, publication, or chef — e.g. `aubergine-parmigiana-cloake`, `ramen-hairy-bikers`. Omit for generic, crowd-sourced, or operator-developed recipes.
+
+3. **Disambiguator suffix.** Add a short, descriptive suffix when the operator's library contains (or is likely to contain) a collision on the base slug. Use only when a genuine collision is known.
+
+4. **If re-converting an existing fixture:** the operator will supply the original `external_ref`. Use it verbatim — do not re-derive the slug from the name. Log in `_fixture_notes` that the supplied slug was used.
+
+Model defaults are not the source of truth. Apply this convention regardless of what you'd naturally generate.
+
+**Derived components (interactive mode only).**
+
+After the main block is drafted, scan for sections that could stand alone as reusable components (sauces, bases, fillings, dressings, mashes, pickles). Ingredient groups are a useful first-pass heuristic.
+
+For each candidate, ask: "The [name] looks like it could also be a [layer] component for the [framework] framework. Add it as a derived component?" Suggest at most 2–3 strongest candidates. "No derivations" is a normal answer — don't push.
+
+If confirmed, ask which layer(s) and family, whether dietary classification differs from the parent, and whether different wording is wanted for the component name/description. Add the `derived_components` entry; `ingredient_ids` and `step_indices` reference the parent — do not duplicate content.
+
+In batch mode, do not propose or add derived components. Flag strong candidates in `_fixture_notes` for the operator to review.
+
+Do not invent derivations the operator hasn't approved.

@@ -207,7 +207,7 @@ Tables grouped by area. Refer to `current/recipe_db_install.sql` for full column
 Strictly vertical slices. Current and planned sequence:
 
 1. **Meals** — library, detail view, create/edit, login *(complete — built in Lovable)*
-2. **Ingredient master + import flow** — master ingredient table, import JSON pathway *(F2, in Claude Code)*
+2. **Ingredient master + import flow** — master ingredient table, import JSON pathway, re-import / upsert path, prep-adjective stripping, canonical slug convention *(F2 + F2C complete — in Claude Code)*
 3. **Components** — component library, detail view, create/edit
 4. **Composition builder** — framework picker, layer slots, component picker
 5. **Meal plan** — weekly calendar, slot assignment, portion scaling
@@ -244,6 +244,10 @@ So you don't try to use them:
 - **Hosting:** Cloudflare Workers via Workers Builds (Git-connected, auto-deploys on push to `main`). Production URL: `https://my-kitchen-helper.mike-taylor963.workers.dev`.
 - **Local dev:** `npm run dev`. Same Supabase instance as production — there is no staging Supabase. Env vars in `.env.local` (gitignored).
 - **Postgres extensions:** `pg_trgm` (enabled by install script) for fuzzy ingredient matching at import time.
+
+### Operator toolchain
+
+- **Recipe converter project:** dedicated Claude project (set up by Mike externally via the Claude UI) configured with the conversion-time prompt, spec, and template as standing inputs. Used for recipe development and PDF-to-JSON conversion. Artefact bundle: `current/converter_prompt.md` (system prompt) and `current/converter_project_setup.md` (setup notes).
 
 Previously deployed to Vercel and Cloudflare Pages during F2 pre-work; both were rejected. See planning log Stage 8 for the reasoning.
 
