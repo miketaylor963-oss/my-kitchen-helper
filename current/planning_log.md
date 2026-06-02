@@ -1469,3 +1469,21 @@ Items F3 planning inherits from F2C:
 **`duplicate_external_ref` race-condition message updated.** The 23505 fallback now reads "Try paste again — the recipe may have been imported by someone else just now." to reflect that the normal re-import path is now the upsert flow. The fallback was not exercised by smoke (expected).
 
 **standing_brief and requirements updated.** `commit_import` description in §8 and the F2 status note in requirements §3.8 updated to reflect that upsert is now operational.
+
+### Slice 2C.3 close-out — Recipe re-import sweep (partial coverage)
+
+**Status:** complete with documented partial coverage. F2C close-out deferred to 2C.4.
+
+**Decisions taken during 2C.3:**
+
+- **Decision 58 — Mid-slice spec amendments rolling.** Four rounds of spec amendments landed during 2C.3 (R1: `base_servings` nullable + validator fix + classification/quantity convention layer; R2: concurrency rule + post-cook rest clarification + duplicate-rows convention + base_servings discipline; R3: in-session passive waits regardless of position; R4: method-only optional ingredients). Pragmatic exception to the slice's "no application code changes" rule for the round-1 validator fix — the spec edit and the validator fix were one logical change. Discipline preserved otherwise.
+- **Decision 59 — Canonical slug convention deferred to 2C.4.** Fresh re-conversion produced five slug mismatches against existing rows (parmigiana, black bean patties, north african pie, ramen, teriyaki aubergine). Root cause is converter-side, not system-side: re-conversions have no visibility into prior slug choices, and model defaults vary (Opus 4.7 added author / disambiguator suffixes; Sonnet 4.6 stripped them). Hand-patching slugs per fixture would embed model-specific defaults rather than a convention. Defer to 2C.4 prompt rework; re-import the five via a follow-up slice.
+- **Decision 60 — F2C close-out blocked on 2C.4.** Five fixtures unlanded means F2C's content milestone (Decision 57 item 3) doesn't strictly close at 2C.3. The done-definition reading: F2C closes at 2C.4 + the post-2C.4 re-import slice. Confirm at 2C.4 close-out.
+
+**Structural findings:**
+
+- **Advisory banner (rule 204) broken, not untested.** `evaluateConsistencyAdvisory` at `src/lib/import/matching.ts:241` gates on `allExact`, which means the check never runs in practice — every real import has at least one fuzzy or none row. The (b2) carry-forward framing ("matching-memory enhancement status check, still untested") was incorrect; the path was reachable but never triggered. Filed for importer-fix.
+- **`updated_at` not refreshed on upsert-replace.** Schema declares `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` with no `ON UPDATE` trigger. Confirmed systemic across all five committed rows in the sweep. Filed for importer-fix.
+- **Strip-list extension data is now compelling.** Sweep produced concrete observations across four extension patterns: multi-prep trailing forms (~9 rows), pluralisation (~5), leading descriptors (~2), mid-name modifier mismatches (~7). Decision-46's sequencing (strip first, threshold second) confirmed against post-strip residuals.
+
+**Stale slice-prompt wording observation:** the 2C.3 slice prompt carried (b2)-era language calling the 23505 `duplicate_ingredient_name` path "still untested", which 2C.1 had already resolved. No project-instructions change recommended; logged as a discipline reminder to update inherited prompt text when status changes.
