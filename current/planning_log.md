@@ -1591,3 +1591,19 @@ All twelve `meal.id` values stable across upsert-replace. Row 5 (classic houmous
 F2C content coverage is now complete.
 
 **Converter project as toolchain infrastructure.** Dedicated Claude project with standing inputs is cleaner than pasting spec excerpts into each conversion chat. Project setup is operator-side by design — it's toolchain configuration, not application code.
+
+---
+
+### Importer-fix slice close-out
+
+**Date:** 2026-06-21.
+
+**Advisory banner gate fix** (`src/lib/import/matching.ts`): `allExact` gate removed. Fuzzy rows now contribute `candidates[0]` to dietary evaluation; ambiguous/none rows skip; null `dietary_category_id` skips the row rather than aborting. New `"no_resolved_rows"` silent reason. Previously every real fixture had at least one fuzzy row, so the banner was permanently suppressed.
+
+**`updated_at` trigger gap:** four tables (`meal`, `ingredient`, `component`, `meal_plan`). `meal` is the only actively-broken one (upsert-replace). App doesn't read `updated_at` anywhere. Mike to apply ON UPDATE trigger via Supabase SQL editor; no application code change.
+
+**Alias-via-fuzzy** (`courgettes`): alias confirmed in DB (id=19). Root cause is strip-list gap — `, cut into 1.5cm dice` clause doesn't strip. Carry-forward to strip-list extension slice.
+
+**vitest added.** Four unit tests for `evaluateConsistencyAdvisory` in `src/lib/import/matching.test.ts`. All passing.
+
+**Smoke:** Marinated Teriyaki Aubergine (id=14). 4 fuzzy rows, all vegan. Advisory `silent/consistent` post-fix (was `silent/not_all_resolved` pre-fix). ✅

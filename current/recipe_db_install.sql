@@ -1301,6 +1301,39 @@ BEGIN
 END;
 $$;
 
+-- =====================================================================
+-- SECTION 11a — Triggers
+-- =====================================================================
+
+-- One trigger function, reused by all four tables
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attach to each of the four tables
+CREATE TRIGGER trg_ingredient_updated_at
+  BEFORE UPDATE ON ingredient
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_component_updated_at
+  BEFORE UPDATE ON component
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_meal_updated_at
+  BEFORE UPDATE ON meal
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_meal_plan_updated_at
+  BEFORE UPDATE ON meal_plan
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
 
 -- =====================================================================
 -- SECTION 12 — Seeds

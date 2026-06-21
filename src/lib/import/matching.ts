@@ -32,7 +32,7 @@ export type MatchingResult = {
 
 export type AdvisoryResult =
   | { kind: "fires"; declared: string; strictest_ingredient_name: string; strictest_category: string }
-  | { kind: "silent"; reason: "not_all_resolved" | "missing_dietary_category_id" | "no_declared_category" | "consistent" };
+  | { kind: "silent"; reason: "not_all_resolved" | "no_resolved_rows" | "missing_dietary_category_id" | "no_declared_category" | "consistent" };
 
 export type ParsedRecipe = {
   dietary_category?: string | null;
@@ -238,21 +238,32 @@ export function evaluateConsistencyAdvisory(
   const declaredRank = dietaryCategoryRanks.get(declared);
   if (declaredRank === undefined) return { kind: "silent", reason: "no_declared_category" };
 
-  const allExact = matching.rows.every((r) => r.outcome.kind === "exact");
-  if (!allExact) return { kind: "silent", reason: "not_all_resolved" };
-
   let strictestRank = -1;
   let strictestIngredientName = "";
   let strictestCode = "";
 
   for (const match of matching.rows) {
-    if (match.outcome.kind !== "exact") throw new Error("unreachable");
-    const dcId = match.outcome.candidate.dietary_category_id;
-    if (dcId === null) return { kind: "silent", reason: "missing_dietary_category_id" };
+    let candidate: Candidate | undefined;
+
+    if (match.outcome.kind === "exact") {
+      candidate = match.outcome.candidate;
+    } else if (match.outcome.kind === "fuzzy") {
+      candidate = match.outcome.candidates[0]; // sorted desc by score in resolveOutcome
+    } else {
+      // ambiguous: no single best candidate by construction — skip
+      // none: no candidate — skip
+      continue;
+    }
+
+    const dcId = candidate.dietary_category_id;
+    if (dcId === null) continue;
+
     const code = dietaryCategoryCodeById.get(dcId);
-    if (!code) return { kind: "silent", reason: "missing_dietary_category_id" };
+    if (!code) continue;
+
     const rank = dietaryCategoryRanks.get(code);
-    if (rank === undefined) return { kind: "silent", reason: "missing_dietary_category_id" };
+    if (rank === undefined) continue;
+
     if (rank > strictestRank) {
       strictestRank = rank;
       strictestIngredientName = match.row_name;
@@ -260,7 +271,7 @@ export function evaluateConsistencyAdvisory(
     }
   }
 
-  if (strictestRank === -1) return { kind: "silent", reason: "missing_dietary_category_id" };
+  if (strictestRank === -1) return { kind: "silent", reason: "no_resolved_rows" };
   if (declaredRank >= strictestRank) return { kind: "silent", reason: "consistent" };
 
   return {
