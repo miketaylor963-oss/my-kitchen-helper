@@ -1,0 +1,117 @@
+{
+  "import_type": "recipe",
+  "external_ref": "banana-bread",
+  "name": "Banana Bread",
+  "description": "A cross between banana bread and a drizzle cake — quick to make, freezable, and an excellent use for overripe bananas.",
+  "source": "Good Food team, BBC Good Food, bbcgoodfood.com",
+
+  "cuisine": null,
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["dairy", "eggs", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["snack", "dessert"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 8,
+  "prep_time_minutes": 15,
+  "cook_time_minutes": 50,
+
+  "ingredients": [
+    { "id": "0001", "name": "butter, softened", "amount": 140, "unit": "g", "group": null, "notes": null },
+    { "id": "0002", "name": "butter", "amount": null, "unit": null, "group": null, "notes": "for greasing the tin" },
+    { "id": "0003", "name": "caster sugar", "amount": 140, "unit": "g", "group": null, "notes": null },
+    { "id": "0004", "name": "large eggs, beaten", "amount": 2, "unit": null, "group": null, "notes": null },
+    { "id": "0005", "name": "self-raising flour", "amount": 140, "unit": "g", "group": null, "notes": null },
+    { "id": "0006", "name": "baking powder", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0007", "name": "very ripe bananas, mashed", "amount": 2, "unit": null, "group": null, "notes": null },
+    { "id": "0008", "name": "icing sugar", "amount": 50, "unit": "g", "group": null, "notes": null },
+    { "id": "0009", "name": "water", "amount": 2, "unit": "tsp", "group": null, "notes": "2–3 tsp; for the icing. Not listed in source ingredient list — added from method" },
+    { "id": "0010", "name": "dried banana chips", "amount": null, "unit": null, "group": null, "notes": "handful; for decoration" }
+  ],
+
+  "steps": [
+    {
+      "title": "Prepare the tin",
+      "content": "Heat oven to 180C/160C fan/gas 4. Grease a 2lb loaf tin with {0002} and line the base and sides with baking parchment.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Cream butter and sugar",
+      "content": "Cream {0001} and {0003} together until light and fluffy. Slowly add {0004} with a little of the {0005}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Fold in flour and bananas",
+      "content": "Fold in the remaining {0005}, {0006} and {0007}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Bake",
+      "content": "Pour the mixture into the prepared tin and bake for about 50 minutes, or until cooked through. Check from around 30–40 minutes in by testing with a skewer — it should insert and remove cleanly. Time may vary depending on the shape of your tin.",
+      "timer_seconds": 3000,
+      "group": null
+    },
+    {
+      "title": "Cool",
+      "content": "Cool in the tin for 10 minutes, then turn out onto a wire rack.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Make the icing",
+      "content": "Mix {0008} with {0009} to make a runny icing.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Ice and decorate",
+      "content": "Drizzle the icing across the top of the cake and decorate with {0010}.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "Cuts into 8–10 slices. Can be frozen un-iced.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'banana-bread' used verbatim; not re-derived.",
+
+    "base_servings": "Source states 'Cuts into 8-10 slices' — direct yield statement. Range convention: base_servings set to 8, range noted in top-level notes.",
+
+    "cook_time_minutes": "Labelled COOK TIME: 50 mins. Used at face value. Bake step says 'about 50 mins' — consistent. Post-cook rest (Step 5, cool in tin 10 mins) is post-cook rest and excluded per spec. Step 5 timer set to null.",
+
+    "prep_time_minutes": "Labelled PREP TIME: 15 mins. Used at face value.",
+
+    "butter_duplicate": "Butter appears as 140g for the batter and 'plus extra for the tin' (greasing). Two distinct uses — separate rows (0001 and 0002) per duplicate-ingredient-across-groups convention. No groups in this recipe so both have group null; distinctness is by use, not group label.",
+
+    "water_method_only": "2–3 tsp water appears in Step 6 (icing) but is absent from the source ingredient list. Per the method-only optionals convention, added as a full ingredient row (0009) with amount set to lower bound (2 tsp), range in notes, and source omission noted. Water is not optional for the icing — notes reflect that it was missing from the source list rather than conditional.",
+
+    "eggs_prep_modifier": "Source lists '2 large eggs, beaten'. 'Beaten' is a prep verb — trailing form already used in source, convention satisfied. 'Large' is a size/selection qualifier, not a prep verb — retained as part of the name.",
+
+    "bananas_prep_modifier": "Source lists '2 very ripe bananas, mashed'. 'Mashed' is a prep verb — trailing form already used. 'Very ripe' is a selection criterion (canonical-identity modifier), not a prep verb — retained.",
+
+    "cuisine": "Banana loaf/drizzle cake — neutral British home baking with no strong single-cuisine identity. Left null per cuisine inference convention.",
+
+    "dietary_category": "Contains butter and eggs. Classified 'vegetarian'.",
+
+    "dietary_restrictions": "Dairy: butter. Eggs: eggs. Gluten: self-raising flour. Baking powder may contain trace starch but self-raising flour is the primary gluten source. No nuts, soy, sesame, shellfish, or peanuts.",
+
+    "meal_types": "Source describes as a loaf cake/banana bread — assigned snack and dessert. Source does not frame it as a breakfast item despite banana bread commonly serving that purpose; conservative default applied.",
+
+    "no_source_notes": "Source has no closing notes beyond the freezing tip, which is captured in top-level notes.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. No obvious reusable component candidates in a simple loaf cake."
+  }
+}

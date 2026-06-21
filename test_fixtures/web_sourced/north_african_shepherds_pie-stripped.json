@@ -1,0 +1,128 @@
+{
+  "import_type": "recipe",
+  "external_ref": "north-african-spiced-shepherds-pie-stripped",
+  "name": "North African Spiced Shepherd's Pie",
+  "description": "A harissa-spiced lentil and mushroom filling with a golden olive oil mash — warming, hearty, and even better the next day.",
+  "source": null,
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": null,
+  "cook_time_minutes": 80,
+
+  "ingredients": [
+    { "id": "0001", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0002", "name": "leek, sliced", "amount": 1, "unit": null, "group": "filling", "notes": null },
+    { "id": "0003", "name": "celery stalks, diced", "amount": 2, "unit": null, "group": "filling", "notes": null },
+    { "id": "0004", "name": "carrots, diced", "amount": 2, "unit": null, "group": "filling", "notes": null },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "filling", "notes": null },
+    { "id": "0006", "name": "cumin seeds", "amount": 1, "unit": "tsp", "group": "filling", "notes": null },
+    { "id": "0007", "name": "ground cumin", "amount": 1, "unit": "tsp", "group": "filling", "notes": null },
+    { "id": "0008", "name": "rose harissa paste", "amount": 2, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0009", "name": "mushrooms, roughly chopped", "amount": 200, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0010", "name": "green or brown lentils, dried", "amount": 150, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0011", "name": "white beans, drained", "amount": 400, "unit": "g", "group": "filling", "notes": "tinned" },
+    { "id": "0012", "name": "tinned tomatoes", "amount": 400, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0013", "name": "vegetable stock", "amount": 300, "unit": "ml", "group": "filling", "notes": null },
+    { "id": "0014", "name": "miso paste", "amount": 1, "unit": "tbsp", "group": "filling", "notes": null },
+    { "id": "0015", "name": "lemon, juiced", "amount": 0.5, "unit": null, "group": "filling", "notes": null },
+    { "id": "0016", "name": "floury potatoes, peeled and chopped", "amount": 800, "unit": "g", "group": "mash", "notes": null },
+    { "id": "0017", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "mash", "notes": "for the mash" },
+    { "id": "0018", "name": "salt", "amount": null, "unit": null, "group": "mash", "notes": "to taste; source listed as combined 'salt and black pepper'" },
+    { "id": "0019", "name": "black pepper", "amount": null, "unit": null, "group": "mash", "notes": "to taste; source listed as combined 'salt and black pepper'" }
+  ],
+
+  "steps": [
+    {
+      "title": "Cook the lentils",
+      "content": "Rinse {0010} and simmer in plenty of water for 20–25 minutes until just tender but still holding their shape. Drain and set aside.",
+      "timer_seconds": 1200,
+      "group": "filling"
+    },
+    {
+      "title": "Build the base",
+      "content": "Heat {0001} in a large pan over medium heat. Add {0006} and let them sizzle for 30 seconds, then add {0002}, {0003} and {0004}. Cook for 8–10 minutes until softened.",
+      "timer_seconds": 510,
+      "group": "filling"
+    },
+    {
+      "title": "Add garlic and spices",
+      "content": "Add {0005}, {0007} and {0008}. Stir well and cook for 2 minutes until fragrant.",
+      "timer_seconds": 120,
+      "group": "filling"
+    },
+    {
+      "title": "Add mushrooms",
+      "content": "Add {0009} and cook for 5 minutes until they've released their moisture and started to colour.",
+      "timer_seconds": 300,
+      "group": "filling"
+    },
+    {
+      "title": "Build the sauce",
+      "content": "Add {0012}, {0013} and {0014}. Stir to combine, then add the cooked lentils and {0011}. Simmer on a low heat for 15–20 minutes until thick and rich. It should not be sloppy — let it reduce properly. Finish with {0015} and season well with {0018} and {0019}.",
+      "timer_seconds": 900,
+      "group": "filling"
+    },
+    {
+      "title": "Make the mash",
+      "content": "While the filling simmers, boil {0016} in salted water until tender, around 20 minutes. Drain thoroughly, then mash with {0017} and a splash of the cooking water if needed. Season generously with {0018} and {0019}. You want it smooth and spreadable but not too loose.",
+      "timer_seconds": 1200,
+      "group": "mash"
+    },
+    {
+      "title": "Assemble",
+      "content": "Preheat oven to 200°C. Spoon the filling into a baking dish. Spread the mash over the top evenly, then rough up the surface with a fork to create ridges — these will catch and brown nicely. Drizzle a little extra olive oil over the top.",
+      "timer_seconds": null,
+      "group": "assembly"
+    },
+    {
+      "title": "Bake",
+      "content": "Bake for 25–30 minutes until the top is golden and the filling is bubbling at the edges. Rest for 5 minutes before serving.",
+      "timer_seconds": 1500,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "The filling genuinely improves overnight as the harissa and spices develop. If reheating the next day, add a splash of water or stock before putting it back in the oven covered with foil, then uncover for the last 10 minutes to re-crisp the mash. You can add a little extra harissa on top of the mash before baking if you want more heat on the surface.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'north-african-spiced-shepherds-pie-stripped' used verbatim; not re-derived. Disambiguator suffix '-stripped' signals this is the plain-source-PDF version rather than the annotated worked-example fixture.",
+
+    "cook_time_minutes": "No labelled timing fields in source. Stated step durations summed per the spec's stated-step-durations convention. Durations: Step 1 (lentils) 20 min lower bound; Step 2 (base) 8 min lower bound + 30 sec sizzle rounded to 8.5, taken as 8 for integer sum; Step 3 (spices) 2 min; Step 4 (mushrooms) 5 min; Steps 5 and 6 run concurrently (source states 'While the filling simmers, boil potatoes') — critical path is longer of 15 min (sauce simmer lower bound) and 20 min (potatoes) = 20 min; Step 8 (bake) 25 min lower bound. Post-cook rest (5 min) excluded per spec. Total: 20 + 8 + 2 + 5 + 20 + 25 = 80 min. cook_time_minutes set to 80.",
+
+    "prep_time_minutes": "No labelled prep field and no stated prep duration separate from cooking steps. Left null.",
+
+    "salt_and_pepper": "Source lists a single ingredient line '1 pinch salt and black pepper'. Combined-seasonings convention applied: split into two rows (0018 salt, 0019 black pepper), each with amount null and notes 'to taste'. The 'pinch' descriptor is a non-standard quantity — treated as functional per the non-standard quantities convention. Source's combined framing noted in both ingredient notes rows. Group assigned 'mash' as this is the only ingredient group the line appears under; salt is also referenced in step 5 (season the filling) and step 6 (salted boiling water) via {0018} and {0019} placeholders — this is a genuine dual-use case but the spec's duplicate-ingredient convention applies only when uses are in distinct groups. Both uses are within the same recipe scope and the salt/pepper rows are already group-labelled 'mash'; the filling seasoning reference in step 5 reuses those IDs. No additional rows created — flagged for operator review if shopping-list accuracy requires separate quantities.",
+
+    "miso_paste": "Source lists 'miso paste' without specifying type. The worked example in the spec uses 'miso paste' identically. Carried across as written; soy restriction retained as miso paste universally contains soy.",
+
+    "dietary_category": "All ingredients are plant-based. Classified 'vegan'.",
+
+    "dietary_restrictions": "Soy: miso paste. No dairy, gluten, eggs, nuts, peanuts, shellfish, or sesame.",
+
+    "meal_types": "Source has no explicit meal-type framing beyond a dinner-style dish. Assigned ['dinner'] only. The worked example in the spec includes 'lunch' and meal_formats: ['microwave'] based on a separate lunch options document not present in this source PDF — not carried across, as this conversion is from the source alone.",
+
+    "meal_formats": "No meal-format framing in source. Left empty. (The worked example's 'microwave' classification derived from an external lunch options doc not present here.)",
+
+    "olive_oil_duplicate": "Olive oil appears in two distinct uses: 3 tbsp for the filling (0001) and 3 tbsp for the mash (0017). Separate rows per duplicate-ingredient-across-groups convention.",
+
+    "white_beans": "Source specifies '400g white beans (tinned, drained)'. Tin-weight convention: 400g used as amount (matching the tin weight). Drained weight not used.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The lentil and bean filling is a strong derivation candidate for component_dinner/base, as in the spec's worked example. Flagged for operator review."
+  }
+}

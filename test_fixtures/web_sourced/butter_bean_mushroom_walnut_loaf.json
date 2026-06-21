@@ -1,0 +1,142 @@
+{
+  "import_type": "recipe",
+  "external_ref": "butter-bean-mushroom-walnut-loaf",
+  "name": "Butter Bean, Mushroom & Walnut Loaf",
+  "description": "A deeply savoury vegetarian centrepiece loaf of butter beans, chestnut and porcini mushrooms, and toasted walnuts — slices cleanly at the table.",
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["eggs", "nuts", "soy"],
+  "nutritional_tags": ["omega3_strong"],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 6,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "butter beans, drained and rinsed", "amount": 800, "unit": "g", "group": null, "notes": "2 × 400g tins" },
+    { "id": "0002", "name": "chestnut mushrooms, finely chopped", "amount": 400, "unit": "g", "group": null, "notes": null },
+    { "id": "0003", "name": "dried porcini mushrooms", "amount": 25, "unit": "g", "group": null, "notes": "soaked in 150ml just-boiled water for at least 20 minutes; reserve the soaking liquid" },
+    { "id": "0004", "name": "onion, finely diced", "amount": 1, "unit": null, "group": null, "notes": "large" },
+    { "id": "0005", "name": "garlic cloves, minced", "amount": 4, "unit": null, "group": null, "notes": null },
+    { "id": "0006", "name": "walnuts, roughly chopped", "amount": 100, "unit": "g", "group": null, "notes": null },
+    { "id": "0007", "name": "eggs, beaten", "amount": 2, "unit": null, "group": null, "notes": null },
+    { "id": "0008", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": null, "notes": "for cooking" },
+    { "id": "0009", "name": "tamari", "amount": 1, "unit": "tbsp", "group": null, "notes": "or soy sauce" },
+    { "id": "0010", "name": "dried thyme", "amount": 1, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0011", "name": "dried rosemary, crushed", "amount": 0.5, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0012", "name": "salt", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "0013", "name": "black pepper", "amount": null, "unit": null, "group": null, "notes": "to taste" },
+    { "id": "0014", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": null, "notes": "for greasing the tin" },
+    { "id": "0015", "name": "oats", "amount": null, "unit": null, "group": null, "notes": "optional; add 1 tbsp if mixture is very wet before filling the tin. Not listed in source ingredient list — added from method" }
+  ],
+
+  "steps": [
+    {
+      "title": "Soak the porcini",
+      "content": "Place {0003} in a small bowl and cover with 150ml of just-boiled water. Set aside for at least 20 minutes. Drain and reserve the soaking liquid for another use. Roughly chop the soaked porcini.",
+      "timer_seconds": 1200,
+      "group": null
+    },
+    {
+      "title": "Toast the walnuts",
+      "content": "Toast {0006} in a dry frying pan over medium heat until fragrant and just starting to colour. Set aside.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Cook the onion and garlic",
+      "content": "Heat {0008} in a large frying pan over medium-low heat. Add {0004}, {0010} and {0011} and cook gently until the onion is completely soft. Add {0005} and cook for a further 2 minutes.",
+      "timer_seconds": 120,
+      "group": null
+    },
+    {
+      "title": "Cook down the mushrooms",
+      "content": "Add {0002} and turn the heat up to medium-high. Cook, stirring occasionally, until all moisture has evaporated and the mushrooms are deeply coloured and almost dry. Add the chopped {0003} and {0009}. Season well with {0012} and {0013}. Cook for 2 more minutes, then set aside to cool slightly.",
+      "timer_seconds": 120,
+      "group": null
+    },
+    {
+      "title": "Prepare the tin",
+      "content": "Preheat oven to 200°C/180°C fan. Line a 900g loaf tin with baking parchment and brush with {0014}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Make the filling",
+      "content": "Tip {0001} into a large bowl and roughly mash — mostly smooth but with some texture remaining. Add the mushroom mixture, {0006} and {0007}. Mix thoroughly. Taste and adjust seasoning with {0012} and {0013}. If the mixture feels very wet, stir in {0015}.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Fill the tin",
+      "content": "Spoon the mixture into the prepared tin, pressing it down firmly and smoothing the top.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Roast",
+      "content": "Roast for 35–40 minutes until the top is firm and well coloured.",
+      "timer_seconds": 2100,
+      "group": null
+    },
+    {
+      "title": "Rest and turn out",
+      "content": "Leave in the tin for 10 minutes before turning out. Turn onto a board, remove the parchment, and slice with a sharp serrated knife.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "The porcini soaking liquid is worth keeping — strain through a fine sieve and refrigerate for up to 3 days or freeze. It makes an excellent base for a porcini and red wine miso gravy.\n\nDon't over-mash the beans — some texture makes for a better slice and a more interesting bite alongside the walnut chunks.\n\nThe filling can be made up to a day ahead and kept in the fridge; spoon into the tin and roast when needed.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'butter-bean-mushroom-walnut-loaf' used verbatim; not re-derived.",
+
+    "nutritional_tags": "Source states 'Fits the omega 3/6 strategy throughout' — explicit prose equivalent of omega3_strong per the spec. Tagged accordingly.",
+
+    "cook_time_minutes": "No labelled cook field. Stated step durations: porcini soak 20 min (in-session passive, ≤2 hours); garlic cook 2 min; porcini/tamari finish 2 min; roast 35 min (lower bound). Concurrency: porcini soak (step 1) runs while steps 2–4 proceed — source structure implies this. Steps 2–4 combined include unstated durations (walnut toast, onion softening). Critical path of the parallel block cannot be determined confidently — onion step has no stated duration and is likely the longest element. Both timing fields left null. Individual step timers capture the 20-min soak, 2-min garlic, 2-min mushroom finish, and 35-min roast.",
+
+    "prep_time_minutes": "No labelled prep field. Left null.",
+
+    "post_cook_rest": "Step 9 (rest in tin 10 min) is post-cook rest — excluded from cook_time_minutes per spec. Timer null.",
+
+    "salt_and_pepper": "Source lists 'salt and black pepper' as a single combined line. Combined-seasonings convention applied: split into two rows (0012 salt, 0013 black pepper).",
+
+    "olive_oil_duplicate": "Olive oil appears in two distinct uses: 3 tbsp for cooking (0008) and 1 tbsp for greasing the tin (0014). Separate rows per duplicate-ingredient-across-groups convention.",
+
+    "tamari_alternative": "Source lists 'tamari or soy sauce'. Inline-alternatives convention: tamari canonical (first-named), soy sauce noted.",
+
+    "butter_beans_total": "Source lists '2 tins butter beans (400g each), drained and rinsed'. Tin weight convention: amount set to 800g (2 × 400g), format noted. Using total weight as the shopping quantity is the cleaner representation; tin count and format in notes.",
+
+    "oats_method_only": "Step 6 mentions 'stir in a tablespoon of oats' as a conditional fix if the mixture is very wet. Not in the source ingredient list. Added as row 0015 with amount null, unit null, per the method-only optionals convention.",
+
+    "porcini_referenced_twice": "Dried porcini (0003) is referenced in step 1 (soak and chop) and step 4 (add to mushrooms). One row, two step references — correct. The soaked/chopped form used in step 4 is the same ingredient prepared in step 1.",
+
+    "walnuts_referenced_twice": "Walnuts (0006) are toasted in step 2 and added to the filling in step 6. One row, two step references — correct.",
+
+    "dried_rosemary": "'Dried rosemary, crushed' — 'crushed' is a prep verb. Source already uses trailing form; convention satisfied. 'Dried' is canonical-identity modifier, stays.",
+
+    "dietary_restrictions": "Eggs: eggs. Nuts: walnuts. Soy: tamari (canonical choice contains soy). Oats (optional, row 0015) are not in the spec's restriction code list. No dairy, gluten (tamari is typically gluten-free; no wheat ingredients), sesame, shellfish, or peanuts.",
+
+    "dietary_category": "Contains eggs — classified 'vegetarian', not vegan.",
+
+    "cuisine": "British-style vegetarian centrepiece loaf with no strong single-cuisine identity. Left null.",
+
+    "no_source": "Source is an operator-written document with no external attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. No obvious reusable component candidates in a single-piece loaf."
+  }
+}

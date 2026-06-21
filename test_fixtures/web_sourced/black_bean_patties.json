@@ -1,0 +1,137 @@
+{
+  "import_type": "recipe",
+  "external_ref": "black-bean-patties-portobello-mushrooms",
+  "name": "Black Bean Patties with Air-Fried Portobello Mushrooms",
+  "description": "Smoky, spiced black bean patties air-fried until golden, served in buns with air-fried Portobello mushrooms.",
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["gluten", "soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "lunch"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "black beans, drained and rinsed", "amount": 400, "unit": "g", "group": "patties", "notes": "1 × 400g tin" },
+    { "id": "0002", "name": "red onion, finely diced", "amount": 0.5, "unit": null, "group": "patties", "notes": null },
+    { "id": "0003", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "patties", "notes": null },
+    { "id": "0004", "name": "red pepper, finely diced", "amount": 0.5, "unit": null, "group": "patties", "notes": null },
+    { "id": "0005", "name": "breadcrumbs", "amount": 4, "unit": "tbsp", "group": "patties", "notes": "add an extra tbsp if mixture is too wet" },
+    { "id": "0006", "name": "smoked paprika", "amount": 1, "unit": "tsp", "group": "patties", "notes": null },
+    { "id": "0007", "name": "ground cumin", "amount": 1, "unit": "tsp", "group": "patties", "notes": null },
+    { "id": "0008", "name": "ground coriander", "amount": 0.5, "unit": "tsp", "group": "patties", "notes": null },
+    { "id": "0009", "name": "chipotle paste", "amount": 1, "unit": "tsp", "group": "patties", "notes": "or a pinch of chilli flakes" },
+    { "id": "0010", "name": "white miso paste", "amount": 1, "unit": "tsp", "group": "patties", "notes": null },
+    { "id": "0011", "name": "soy sauce", "amount": 1, "unit": "tbsp", "group": "patties", "notes": null },
+    { "id": "0012", "name": "fresh coriander, roughly chopped", "amount": 3, "unit": "tbsp", "group": "patties", "notes": null },
+    { "id": "0013", "name": "lime, juiced", "amount": 0.5, "unit": null, "group": "patties", "notes": null },
+    { "id": "0014", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": "patties", "notes": "for softening the veg" },
+    { "id": "0015", "name": "olive oil", "amount": null, "unit": null, "group": "patties", "notes": "for brushing patties before air frying" },
+    { "id": "0016", "name": "Portobello mushrooms", "amount": 4, "unit": null, "group": "mushrooms", "notes": "large" },
+    { "id": "0017", "name": "garlic cloves, minced", "amount": 2, "unit": null, "group": "mushrooms", "notes": null },
+    { "id": "0018", "name": "soy sauce", "amount": 1, "unit": "tbsp", "group": "mushrooms", "notes": null },
+    { "id": "0019", "name": "olive oil", "amount": 1, "unit": "tbsp", "group": "mushrooms", "notes": null },
+    { "id": "0020", "name": "burger buns", "amount": 2, "unit": null, "group": "assembly", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Soften the veg",
+      "content": "Heat {0014} in a frying pan over medium heat. Sauté {0002} and {0004} for 5–6 minutes until softened. Add {0003} and cook for another minute. Set aside to cool slightly.",
+      "timer_seconds": 420,
+      "group": "patties"
+    },
+    {
+      "title": "Mash the beans",
+      "content": "Tip {0001} into a large bowl. Mash roughly two-thirds with a fork or potato masher, leaving the rest whole for texture.",
+      "timer_seconds": null,
+      "group": "patties"
+    },
+    {
+      "title": "Mix the patty mixture",
+      "content": "Add the softened veg to the beans along with {0005}, {0006}, {0007}, {0008}, {0009}, {0010}, {0011}, {0012}, and {0013}. Mix well until combined. The mixture should hold its shape when pressed — if too wet, add another tablespoon of breadcrumbs.",
+      "timer_seconds": null,
+      "group": "patties"
+    },
+    {
+      "title": "Shape and chill",
+      "content": "Divide the mixture into 4–5 patties, pressing firmly to compact them. Place on a plate, cover, and refrigerate for at least 20–30 minutes to help them hold together during cooking.",
+      "timer_seconds": 1200,
+      "group": "patties"
+    },
+    {
+      "title": "Prep the mushrooms",
+      "content": "Mix {0017}, {0018}, and {0019} together. Brush over both sides of {0016}. Set aside until ready to cook.",
+      "timer_seconds": null,
+      "group": "mushrooms"
+    },
+    {
+      "title": "Air fry the patties",
+      "content": "Preheat your air fryer to 190°C. Brush both sides of the patties lightly with {0015}. Cook for 12–15 minutes, flipping carefully halfway through, until golden and firm on the outside.",
+      "timer_seconds": 840,
+      "group": "patties"
+    },
+    {
+      "title": "Air fry the mushrooms",
+      "content": "While the patties rest, cook {0016} at 190°C for 8–10 minutes, gill-side up for the first half, until tender and slightly caramelised.",
+      "timer_seconds": 540,
+      "group": "mushrooms"
+    },
+    {
+      "title": "Assemble and serve",
+      "content": "Toast {0020} lightly. Layer with a patty, a Portobello mushroom, and any toppings you like — smashed avocado, sliced tomato, or shredded lettuce all work well.",
+      "timer_seconds": null,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "Makes 4–5 patties; base_servings set to 2 (the stated yield), with patty count range noted here.\n\nLeftover patties keep in the fridge for 3 days; reheat in the air fryer at 180°C for 5–6 minutes. To freeze: shape before cooking, freeze on a tray until solid, then bag — keeps for up to 3 months.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'black-bean-patties-portobello-mushrooms' used verbatim; not re-derived.",
+
+    "dietary_category": "Source labels the dish 'Vegetarian · Dairy-free · Egg-free'. All ingredients are plant-based; classified 'vegan' per the least-restrictive-eater rule. The source's own labelling omits 'vegan' but no animal-derived ingredients are present.",
+
+    "dietary_restrictions": "Gluten: breadcrumbs and burger buns. Soy: soy sauce (both groups) and white miso paste. No dairy, eggs, nuts, peanuts, shellfish, or sesame detected.",
+
+    "cuisine": "No strong single-cuisine identity — spicing draws on Mexican and broader fusion influences. Left null.",
+
+    "meal_types": "No explicit meal-type framing in source beyond a burger/patty format. Assigned dinner and lunch as the most natural fits. No breakfast framing.",
+
+    "base_servings": "Source states 'SERVES 2 (makes 4–5 patties)'. Serves 2 is the canonical yield. Patty count is a range — lower bound 4 noted; range recorded in notes per range-quantity convention.",
+
+    "cook_time_minutes": "Stated step durations: soften veg 5–6 min (lower bound 5), garlic 1 min, chill 20–30 min (in-session passive, lower bound 20), air fry patties 12–15 min (lower bound 12), air fry mushrooms 8–10 min (lower bound 8). Steps 6 and 7 run sequentially — mushrooms cook while patties rest, not simultaneously with active cooking. However, the 20–30 min chill (step 4) is an in-session passive wait under 2 hours, so it counts toward cook time per the spec. Total if sequential: 5+1+20+12+8 = 46 min. But step 5 (prep mushrooms) runs during or after the chill with no stated duration overlap, and the transition between chill and frying is ambiguous. The spec requires critical-path confidence; given the sequential structure is reasonably clear here, a sum of stated durations is defensible — but prep_time_minutes has no labelled field either. Both fields left null to stay conservative; individual durations are captured in timer_seconds.",
+
+    "prep_time_minutes": "No labelled prep field. Left null per stated-times-only convention.",
+
+    "olive_oil_duplicates": "Olive oil appears in three distinct uses: for softening veg (0014, 1 tbsp, patties group), for brushing patties (0015, functional amount, patties group), and for the mushroom marinade (0019, 1 tbsp, mushrooms group). Three separate rows per the duplicate-ingredient-across-groups convention.",
+
+    "soy_sauce_duplicate": "Soy sauce appears in both the patty mixture (0011) and mushroom marinade (0018). Separate rows per duplicate-ingredient-across-groups convention.",
+
+    "garlic_duplicate": "Garlic appears in both the patty soften step (0003, 3 cloves) and mushroom marinade (0017, 2 cloves). Separate rows.",
+
+    "chipotle_paste_alternative": "Source lists 'chipotle paste (or pinch of chilli flakes)'. Inline-alternatives convention applied: chipotle paste taken as canonical (0009), alternative noted in ingredient notes.",
+
+    "fresh_coriander": "Source lists '3 tbsp fresh coriander, roughly chopped'. Leading-prep-modifier convention: 'roughly chopped' is a prep verb, so converted to trailing form: 'fresh coriander, roughly chopped'. 'Fresh' is a canonical-identity modifier and stays.",
+
+    "tin_weight": "Source specifies '1 tin black beans, drained and rinsed'. Tin-weight convention applied: 400g used as amount. Tin format noted in ingredient notes.",
+
+    "burger_buns": "Buns contain gluten; already captured in dietary_restrictions. No further action needed.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The mushroom marinade/cook is a potential bento or component_dinner veg candidate; flagged for operator review."
+  }
+}

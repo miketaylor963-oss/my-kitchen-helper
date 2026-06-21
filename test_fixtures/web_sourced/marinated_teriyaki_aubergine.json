@@ -1,0 +1,103 @@
+{
+  "import_type": "recipe",
+  "external_ref": "marinated-teriyaki-eggplant",
+  "name": "Marinated Teriyaki Aubergine",
+  "description": "Sweet, sticky and salty teriyaki-marinated aubergine, griddled until charred and served over rice.",
+  "source": "Cupful of Kale, cupfulofkale.com",
+
+  "cuisine": "japanese",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy", "sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 2,
+  "prep_time_minutes": 20,
+  "cook_time_minutes": 10,
+
+  "ingredients": [
+    { "id": "0001", "name": "aubergines", "amount": 2, "unit": null, "group": "marinade", "notes": "source uses 'eggplant/aubergine'" },
+    { "id": "0002", "name": "soy sauce", "amount": 0.5, "unit": "cup", "group": "marinade", "notes": null },
+    { "id": "0003", "name": "mirin", "amount": 0.25, "unit": "cup", "group": "marinade", "notes": null },
+    { "id": "0004", "name": "rice wine vinegar", "amount": 1, "unit": "tbsp", "group": "marinade", "notes": null },
+    { "id": "0005", "name": "brown sugar", "amount": 1, "unit": "tbsp", "group": "marinade", "notes": "1–2 tbsp; add more to taste" },
+    { "id": "0006", "name": "fresh root ginger, grated", "amount": null, "unit": null, "group": "marinade", "notes": "1-inch piece" },
+    { "id": "0007", "name": "garlic cloves, minced", "amount": 3, "unit": null, "group": "marinade", "notes": null },
+    { "id": "0008", "name": "sushi rice", "amount": null, "unit": null, "group": "to serve", "notes": "or short grain rice; quantity to taste" },
+    { "id": "0009", "name": "sesame seeds", "amount": null, "unit": null, "group": "to serve", "notes": null },
+    { "id": "0010", "name": "spring onion, finely sliced", "amount": null, "unit": null, "group": "to serve", "notes": null }
+  ],
+
+  "steps": [
+    {
+      "title": "Make the marinade",
+      "content": "Whisk {0002}, {0003}, {0004}, {0005}, {0006} and {0007} together in a bowl until the sugar is dissolved.",
+      "timer_seconds": null,
+      "group": "marinade"
+    },
+    {
+      "title": "Coat the aubergine",
+      "content": "Cut {0001} into small chunks and place in a large bowl. Pour the marinade over the top, stir well to coat, and set aside.",
+      "timer_seconds": null,
+      "group": "marinade"
+    },
+    {
+      "title": "Marinate",
+      "content": "Leave to marinate for at least 20 minutes, stirring a few times.",
+      "timer_seconds": 1200,
+      "group": "marinade"
+    },
+    {
+      "title": "Griddle the aubergine",
+      "content": "Place a griddle pan on the hob over medium-high heat. Once hot, add the marinated {0001}. Pour over any excess marinade while cooking. You may need to cook in two batches, keeping the first batch warm on a low heat in the oven. Cook for a few minutes on each side until brown and starting to char from the griddle lines.",
+      "timer_seconds": null,
+      "group": "marinade"
+    },
+    {
+      "title": "Serve",
+      "content": "Serve immediately with {0008} or as a side. Top with {0009} and {0010}.",
+      "timer_seconds": null,
+      "group": "to serve"
+    }
+  ],
+
+  "notes": "Mix it up by adding different vegetables or tofu for extra protein.\n\nSource nutrition figures (per serving, yield 2): 342 kcal, 10g protein, 56g carbohydrates, 7g fat. These likely include the rice accompaniment and are not carried into the macro fields.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'marinated-teriyaki-eggplant' used verbatim; not re-derived. Note: slug uses American English 'eggplant' rather than British English 'aubergine' — preserved verbatim as instructed.",
+
+    "name": "Source title is 'Marinated Teriyaki Eggplant'. Display name preserved as written; 'eggplant' not converted to 'aubergine' in the name field, as the spec's British English rule applies to slug generation, not the display name. Flagged for operator to amend if preferred.",
+
+    "base_servings": "Source header states YIELD: 2-3; nutrition block states YIELD: 2. Header is the canonical yield statement. Range convention applied: base_servings set to 2, range noted. Nutrition block yield (2) happens to match lower bound.",
+
+    "prep_time_minutes": "Labelled PREP TIME field: 20 minutes. Used at face value. The 20-minute marinade rest (step 3) accounts for the majority of this; the spec's in-session passive waits rule is superseded by the labelled field, which is used as stated.",
+
+    "cook_time_minutes": "Labelled COOK TIME field: 10 minutes. Used at face value. Stated step duration in the griddle step is 'a few minutes on each side' — non-standard, not a numeric duration. Labelled field governs.",
+
+    "macros": "Source provides per-serving nutrition figures. Carbohydrates (56g per serving) strongly suggests rice is included in the calculation — rice is a to-serve accompaniment. Per spec, figures that include accompaniments are excluded from macro fields and placed in notes.",
+
+    "cup_units": "Source uses cup measurements (1/2 cup soy sauce, 1/4 cup mirin). Cups are a valid unit per the spec template. No conversion applied; cup units preserved as stated.",
+
+    "ginger_length": "Source specifies '1 inch ginger'. Length descriptor treated as non-standard quantity: amount null, unit null, notes '1-inch piece'. Leading-prep form in source ('grated' follows the ingredient) is already trailing-clause form; convention satisfied.",
+
+    "brown_sugar_range": "Source specifies '1-2 tbsp brown sugar'. Range convention: lower bound 1 tbsp, range noted in ingredient notes.",
+
+    "sushi_rice_alternative": "Source lists 'Sushi/short grained rice'. Inline-alternatives convention: sushi rice taken as canonical (first-named), short grain rice noted. No quantity stated — functional to-serve amount.",
+
+    "dietary_restrictions": "Soy: soy sauce. Sesame: sesame seeds. No gluten-containing ingredients identified in the main recipe (soy sauce could contain gluten depending on brand — e.g. standard soy sauce vs tamari). Conservative default: gluten not flagged as the spec says restrictions describe what the dish contains, and no wheat-based ingredient is explicitly listed. Flagged for operator review — if standard soy sauce is assumed, gluten should be added.",
+
+    "meal_types": "Source categorised as 'Mains' and notes it can be served as a side. Assigned dinner and side.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The teriyaki marinade is a plausible derivation candidate as a reusable sauce. Flagged for operator review."
+  }
+}

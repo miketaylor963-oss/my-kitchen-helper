@@ -1,0 +1,96 @@
+{
+  "import_type": "recipe",
+  "external_ref": "classic-houmous",
+  "name": "Classic Houmous",
+  "description": "Smooth, lemony, garlicky houmous — made properly by whipping the tahini and lemon juice first for a fluffy, silky texture.",
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["side", "snack"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 10,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "chickpeas, drained", "amount": 400, "unit": "g", "group": null, "notes": "1 × 400g tin; reserve a few tbsp of the liquid (aquafaba) — can substitute for the ice-cold water to loosen, for extra body" },
+    { "id": "0002", "name": "tahini", "amount": 3, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0003", "name": "lemon, juiced", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0004", "name": "garlic clove, peeled", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0005", "name": "extra virgin olive oil", "amount": 2, "unit": "tbsp", "group": null, "notes": null },
+    { "id": "0006", "name": "ground cumin", "amount": 0.5, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0007", "name": "fine salt", "amount": 0.5, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0008", "name": "ice-cold water", "amount": 3, "unit": "tbsp", "group": null, "notes": "to loosen, as needed; add a tablespoon at a time" },
+    { "id": "0009", "name": "extra virgin olive oil", "amount": null, "unit": null, "group": null, "notes": "a swirl, to serve on top; not listed in source ingredient list — added from method" }
+  ],
+
+  "steps": [
+    {
+      "title": "Drain the chickpeas",
+      "content": "Drain {0001}, reserving a few tablespoons of the liquid (aquafaba) if you want to use it instead of water to loosen later. For a noticeably smoother result, slip the chickpeas out of their skins by pinching them between your fingers.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Whip the tahini base",
+      "content": "In a food processor, blitz {0002} with {0003} for about a minute until thick, pale, and creamy — it will seize up and look almost like buttercream. This step gives the houmous its fluffy texture.",
+      "timer_seconds": 60,
+      "group": null
+    },
+    {
+      "title": "Add aromatics",
+      "content": "Add {0004}, {0006} and {0007}. Blitz for 30 seconds to break the garlic down completely.",
+      "timer_seconds": 30,
+      "group": null
+    },
+    {
+      "title": "Add the chickpeas",
+      "content": "Tip in {0001} and {0005}. Blitz for 2–3 minutes, scraping down the sides once or twice. It will look thick and gritty at first — keep going.",
+      "timer_seconds": 120,
+      "group": null
+    },
+    {
+      "title": "Loosen and adjust",
+      "content": "With the motor running, drizzle in {0008} a tablespoon at a time until the houmous turns smooth and silky and falls slowly from a spoon. Taste — it almost always wants more lemon, salt, or both. Serve in a shallow bowl with {0009} swirled over the top.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "A pinch of bicarbonate of soda simmered with the chickpeas for 10 minutes before draining breaks down the skins and gives restaurant-smooth results without peeling. For a lighter, fluffier texture, blanch the garlic in the lemon juice for a minute first to take the raw edge off. Topping ideas: toasted pine nuts, sumac, Aleppo pepper, za'atar, or a spoon of harissa swirled through.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'classic-houmous' used verbatim; not re-derived. Note: spec slug convention specifies British English 'houmous' not 'hummus' — supplied slug already conforms.",
+
+    "prep_time_minutes": "No labelled prep/cook fields. Source states 'ABOUT 10 MINUTES' as a single combined time. Recipe has no cook activity (food processor only, no hob or oven). The spec's third timing source applies explicitly — 'all-blender dips like houmous' is the canonical example given. prep_time_minutes set to 10, cook_time_minutes null.",
+
+    "cuisine": "Houmous is characteristically Levantine/Middle Eastern. No 'levantine' or 'middle_eastern' cuisine code is confirmed in the spec's seeded vocabulary (only 'british', 'moroccan', 'japanese' are cited as examples). Conservative default: null. Flagged for operator to assign if a matching code exists in the database.",
+
+    "olive_oil_duplicate": "Extra virgin olive oil appears in two distinct uses: 2 tbsp blended into the houmous (0005, listed in ingredients) and a swirl to serve on top (0009, method-only). Separate rows per duplicate-ingredient-across-groups convention. Row 0009 flagged as method-only addition.",
+
+    "aquafaba": "Step 1 mentions aquafaba as an optional alternative to ice-cold water for loosening. Water is the canonical ingredient (listed); aquafaba is an inline alternative noted on row 0001. No separate ingredient row created — aquafaba is the chickpea tin liquid already purchased, not a separate shopping-list item.",
+
+    "chickpea_row_referenced_twice": "Row 0001 is referenced in both step 1 (drain) and step 4 (add to blitz). This is correct — one ingredient, two method references. No duplication needed as it is the same use of the same ingredient.",
+
+    "tin_weight": "Source specifies '1 tin of chickpeas (400g)'. Tin weight convention: amount 400g. Source explicitly states tin weight parenthetically.",
+
+    "dietary_restrictions": "Sesame: tahini is ground sesame paste. No gluten, dairy, eggs, nuts (pine nuts appear only in the notes as an optional topping, not in the recipe as written), soy, shellfish, or peanuts in the canonical recipe.",
+
+    "no_source": "Source has no publication or author attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The houmous itself is a strong mezze/dip component candidate (mezze framework, dip layer). Flagged for operator review."
+  }
+}

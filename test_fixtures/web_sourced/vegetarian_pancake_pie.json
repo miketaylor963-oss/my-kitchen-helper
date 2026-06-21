@@ -1,0 +1,126 @@
+{
+  "import_type": "recipe",
+  "external_ref": "vegetarian-pancake-pie",
+  "name": "Vegetarian Pancake Pie",
+  "description": "Thin savoury herb pancakes layered with a creamy ricotta, cheddar and mushroom-spinach filling, baked until bubbling and sliced like a pie.",
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["dairy", "eggs", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": null,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "plain flour", "amount": 200, "unit": "g", "group": "pancakes", "notes": null },
+    { "id": "0002", "name": "free-range eggs", "amount": 2, "unit": null, "group": "pancakes", "notes": "vegan/egg-free alternative: 1 mashed banana, or 2 tbsp ground flaxseed mixed with 6 tbsp water" },
+    { "id": "0003", "name": "milk", "amount": 400, "unit": "ml", "group": "pancakes", "notes": "or plant-based milk" },
+    { "id": "0004", "name": "fresh chives, finely chopped", "amount": 2, "unit": "tbsp", "group": "pancakes", "notes": "or fresh parsley, finely chopped" },
+    { "id": "0005", "name": "salt", "amount": null, "unit": null, "group": "pancakes", "notes": "pinch" },
+    { "id": "0006", "name": "black pepper", "amount": null, "unit": null, "group": "pancakes", "notes": "pinch" },
+    { "id": "0007", "name": "vegetable oil", "amount": null, "unit": null, "group": "pancakes", "notes": "for frying" },
+    { "id": "0008", "name": "butter", "amount": 2, "unit": "tbsp", "group": "filling", "notes": "or olive oil" },
+    { "id": "0009", "name": "onion, finely chopped", "amount": 1, "unit": null, "group": "filling", "notes": "medium" },
+    { "id": "0010", "name": "garlic cloves, minced", "amount": 2, "unit": null, "group": "filling", "notes": null },
+    { "id": "0011", "name": "mushrooms, sliced", "amount": 250, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0012", "name": "fresh spinach, washed", "amount": 150, "unit": "g", "group": "filling", "notes": null },
+    { "id": "0013", "name": "ricotta", "amount": 200, "unit": "g", "group": "filling", "notes": "or cottage cheese, or vegan cream cheese" },
+    { "id": "0014", "name": "cheddar, grated", "amount": 100, "unit": "g", "group": "filling", "notes": "or mozzarella, or plant-based alternative; half mixed into filling, half reserved for topping" },
+    { "id": "0015", "name": "grated nutmeg", "amount": null, "unit": null, "group": "filling", "notes": "pinch" }
+  ],
+
+  "steps": [
+    {
+      "title": "Make the batter",
+      "content": "In a large mixing bowl, whisk together {0001}, {0002} and {0003} until smooth. Stir in {0004}, {0005} and {0006}.",
+      "timer_seconds": null,
+      "group": "pancakes"
+    },
+    {
+      "title": "Fry the pancakes",
+      "content": "Lightly coat a non-stick frying pan with {0007} and place over medium heat. Pour in a small ladleful of batter, tilting the pan to coat the bottom. Cook for 1–2 minutes until golden, flip, and cook for another minute. Repeat until you have 8–10 pancakes.",
+      "timer_seconds": null,
+      "group": "pancakes"
+    },
+    {
+      "title": "Cook the vegetables",
+      "content": "Heat {0008} in a pan over medium heat. Sauté {0009} and {0010} until softened, about 5 minutes. Add {0011} and cook until browned. Toss in {0012} and cook until wilted. Remove from heat and drain off any excess moisture.",
+      "timer_seconds": 300,
+      "group": "filling"
+    },
+    {
+      "title": "Mix the filling",
+      "content": "In a separate bowl, mix {0013} with half of {0014}, {0015} and seasoning. Stir in the mushroom and spinach mixture.",
+      "timer_seconds": null,
+      "group": "filling"
+    },
+    {
+      "title": "Assemble and bake",
+      "content": "Preheat oven to 180°C/160°C fan/Gas Mark 4. Grease a standard round cake tin or pie dish. Place one pancake at the bottom and spread a thin layer of filling over it. Repeat — pancake, then filling — until all ingredients are used, finishing with a pancake on top. Sprinkle the remaining {0014} over the top.",
+      "timer_seconds": null,
+      "group": "assembly"
+    },
+    {
+      "title": "Bake",
+      "content": "Bake for 20 minutes until the cheese is bubbling and golden-brown.",
+      "timer_seconds": 1200,
+      "group": "assembly"
+    },
+    {
+      "title": "Rest and serve",
+      "content": "Leave to rest for 5 minutes, then slice like a pie.",
+      "timer_seconds": null,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "No serving yield stated — base_servings left null. The recipe makes 8–10 pancakes.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'vegetarian-pancake-pie' used verbatim; not re-derived.",
+
+    "whole_recipe_branching": "Source presents vegan/egg-free alternatives scattered throughout the ingredient list. These are ingredient-level substitutions, not a single complete alternative version of the dish. Whole-recipe branching convention does not apply — each handled as an inline alternative per the inline-alternatives convention.",
+
+    "dietary_category": "Canonical ingredients (eggs, milk, butter, ricotta, cheddar) are all vegetarian. Classified 'vegetarian'. Vegan alternatives exist but classification follows canonical choices.",
+
+    "dietary_restrictions": "Dairy: butter, milk, ricotta, cheddar. Eggs: eggs. Gluten: plain flour. No soy, sesame, nuts, peanuts, or shellfish in the canonical recipe.",
+
+    "inline_alternatives": "Five inline-alternative cases resolved: (1) eggs → canonical, banana/flaxseed noted; (2) milk → canonical, plant-based noted; (3) butter → canonical, olive oil noted; (4) ricotta → canonical, cottage cheese and vegan cream cheese noted; (5) cheddar → canonical, mozzarella and plant-based alternative noted. All per inline-alternatives convention: first-named is canonical, alternatives in ingredient notes.",
+
+    "salt_and_pepper": "Source lists 'Pinch of salt and black pepper' as a single line under pancake ingredients. Combined-seasonings convention applied: split into two rows (0005 salt, 0006 black pepper), each with amount null and notes 'pinch'.",
+
+    "grated_nutmeg": "'Grated nutmeg' — same judgement as bread-pudding conversion. 'Grated' is a prep verb in the spec's scope, but 'grated nutmeg' functions as a canonical spice form in cooking, analogous to 'ground cumin'. Treated as canonical-identity modifier; left as written. Flagged for operator review.",
+
+    "fresh_chives": "Source lists '2 tbsp fresh herbs (chives or parsley), finely chopped'. Inline-alternatives convention: chives canonical (first-named). Leading-prep check: 'finely chopped' is trailing in source — convention already satisfied. 'Fresh' is canonical-identity modifier, retained.",
+
+    "cheddar_single_row": "Cheddar is used in two method stages (half in filling, half on top) but is one continuous use of the same ingredient with no distinct group separation. One row (0014) with method note explaining the split. Duplicate-ingredient convention requires genuinely distinct uses in distinct contexts — a within-recipe split of a single quantity does not qualify.",
+
+    "cook_time_minutes": "No labelled cook field. Stated step durations: sauté 5 min (step 3), bake 20 min (step 6). Pancake frying is stated per pancake (1–2 min each side) but total depends on yield range (8–10 pancakes) — cannot be summed to a single confident figure. Post-cook rest (5 min, step 7) excluded. Sequential structure otherwise clear: veg cook and pancake frying are separate phases, bake follows assembly. However, pancake frying time is not determinable without yield count, and the spec requires confidence. Both timing fields left null; step timers capture the 5-min sauté and 20-min bake.",
+
+    "prep_time_minutes": "No labelled prep field. Left null.",
+
+    "base_servings": "No serving yield stated in source. '8–10 pancakes' is a component count, not a serving count. Left null per servings-not-stated convention.",
+
+    "cuisine": "Described as similar to Greek moussaka but presented as a generic/operator creation with no single-cuisine identity. Null per cuisine inference convention.",
+
+    "metric_units": "Source provides metric and cup/oz values. Metric values used throughout; cup/oz values ignored where metric is given.",
+
+    "no_source": "Source is an operator-written document with no external attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The mushroom-spinach-ricotta filling is a plausible component_dinner or bento candidate. Flagged for operator review."
+  }
+}

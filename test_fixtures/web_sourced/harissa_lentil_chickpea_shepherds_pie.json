@@ -1,0 +1,173 @@
+{
+  "import_type": "recipe",
+  "external_ref": "harissa-lentil-chickpea-shepherds-pie",
+  "name": "Harissa Lentil & Chickpea Shepherd's Pie",
+  "description": "A smoky, harissa-led shepherd's pie with split red lentils and chickpeas in a rich tomato base, air-fried courgette and chestnut mushrooms folded through, and a 50/50 potato and sweet potato mash on top.",
+  "source": null,
+
+  "cuisine": "moroccan",
+  "dietary_category": "vegan",
+  "dietary_restrictions": ["soy"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": 25,
+  "cook_time_minutes": 68,
+
+  "ingredients": [
+    { "id": "0001", "name": "floury potatoes, peeled and chunked", "amount": 500, "unit": "g", "group": "mash", "notes": "Maris Piper or King Edward recommended" },
+    { "id": "0002", "name": "sweet potatoes, peeled and chunked", "amount": 500, "unit": "g", "group": "mash", "notes": null },
+    { "id": "0003", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "mash", "notes": "for the mash" },
+    { "id": "0004", "name": "oat milk", "amount": 50, "unit": "ml", "group": "mash", "notes": null },
+    { "id": "0005", "name": "salt", "amount": null, "unit": null, "group": "mash", "notes": "to taste" },
+    { "id": "0006", "name": "black pepper", "amount": null, "unit": null, "group": "mash", "notes": "to taste" },
+    { "id": "0007", "name": "courgettes, cut into 1.5cm dice", "amount": 2, "unit": null, "group": "air-fried veg", "notes": "medium" },
+    { "id": "0008", "name": "chestnut mushrooms, quartered", "amount": 250, "unit": "g", "group": "air-fried veg", "notes": null },
+    { "id": "0009", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "air-fried veg", "notes": "for tossing the veg before air frying" },
+    { "id": "0010", "name": "soy sauce", "amount": 1, "unit": "tbsp", "group": "air-fried veg", "notes": "or tamari" },
+    { "id": "0011", "name": "ground cumin", "amount": 0.5, "unit": "tsp", "group": "air-fried veg", "notes": null },
+    { "id": "0012", "name": "smoked paprika", "amount": 0.5, "unit": "tsp", "group": "air-fried veg", "notes": null },
+    { "id": "0013", "name": "olive oil", "amount": 3, "unit": "tbsp", "group": "base", "notes": "for sweating the onion" },
+    { "id": "0014", "name": "onion, finely chopped", "amount": 1, "unit": null, "group": "base", "notes": "large" },
+    { "id": "0015", "name": "garlic cloves, finely chopped", "amount": 4, "unit": null, "group": "base", "notes": null },
+    { "id": "0016", "name": "ground cumin", "amount": 2, "unit": "tsp", "group": "base", "notes": null },
+    { "id": "0017", "name": "ground coriander", "amount": 2, "unit": "tsp", "group": "base", "notes": null },
+    { "id": "0018", "name": "smoked paprika", "amount": 2, "unit": "tsp", "group": "base", "notes": null },
+    { "id": "0019", "name": "rose harissa", "amount": 3, "unit": "tbsp", "group": "base", "notes": "Belazu recommended. Start with 2 tbsp if your harissa is fiercer — taste before adding more; lower bound 2 tbsp per range convention" },
+    { "id": "0020", "name": "tinned chopped tomatoes", "amount": 400, "unit": "g", "group": "base", "notes": "1 × 400g tin" },
+    { "id": "0021", "name": "red split lentils, rinsed", "amount": 200, "unit": "g", "group": "base", "notes": "or yellow split lentils" },
+    { "id": "0022", "name": "vegetable stock", "amount": 500, "unit": "ml", "group": "base", "notes": null },
+    { "id": "0023", "name": "miso paste", "amount": 1, "unit": "tbsp", "group": "base", "notes": "white miso; or brown miso" },
+    { "id": "0024", "name": "chickpeas, drained and rinsed", "amount": 400, "unit": "g", "group": "base", "notes": "1 × 400g tin" },
+    { "id": "0025", "name": "sherry vinegar", "amount": 1, "unit": "tbsp", "group": "base", "notes": "or red wine vinegar" },
+    { "id": "0026", "name": "fresh parsley, chopped", "amount": null, "unit": null, "group": "base", "notes": "small handful; or fresh coriander, chopped" }
+  ],
+
+  "steps": [
+    {
+      "title": "Start the potatoes",
+      "content": "Preheat the oven to 200°C fan. Put {0001} and {0002} into a large pan, cover with cold salted water, bring to the boil, then simmer until tender — around 18–20 minutes.",
+      "timer_seconds": 1080,
+      "group": "mash"
+    },
+    {
+      "title": "Toss the veg",
+      "content": "In a bowl, toss {0007} and {0008} with {0009}, {0010}, {0011} and {0012} until everything is well coated.",
+      "timer_seconds": null,
+      "group": "air-fried veg"
+    },
+    {
+      "title": "Air fry the veg",
+      "content": "Spread the courgettes and mushrooms into the air fryer basket — don't overcrowd; cook in two batches if needed. Cook at 200°C for 14 minutes, shaking halfway. You want golden edges on the courgette and mushrooms that are shrunk and glossy. Set aside.",
+      "timer_seconds": 840,
+      "group": "air-fried veg"
+    },
+    {
+      "title": "Sweat the onion",
+      "content": "While the veg are in the air fryer, heat {0013} in a wide, deep pan over medium-low heat. Add {0014} with a pinch of {0005} and cook gently until soft and translucent — around 8 minutes.",
+      "timer_seconds": 480,
+      "group": "base"
+    },
+    {
+      "title": "Bloom the spices",
+      "content": "Add {0015}, {0016}, {0017}, {0018} and {0019}. Stir constantly for about 90 seconds until everything smells fragrant and the harissa has darkened the oil.",
+      "timer_seconds": 90,
+      "group": "base"
+    },
+    {
+      "title": "Reduce the tomatoes",
+      "content": "Add {0020} and turn the heat up. Let them bubble and reduce hard for about 5 minutes until the tomatoes thicken and turn a deeper, brick-red colour.",
+      "timer_seconds": 300,
+      "group": "base"
+    },
+    {
+      "title": "Simmer the lentils",
+      "content": "Stir in {0021}, {0022} and {0023}. Bring to a gentle simmer, cover loosely, and cook for around 18 minutes until the lentils have broken down and the base is thick. Stir occasionally to stop it catching.",
+      "timer_seconds": 1080,
+      "group": "base"
+    },
+    {
+      "title": "Make the mash",
+      "content": "Drain {0001} and {0002}, return to the pan, and mash with {0003} and {0004}. Season generously with {0005} and {0006}. You want it firm enough to hold its shape on top of the filling.",
+      "timer_seconds": null,
+      "group": "mash"
+    },
+    {
+      "title": "Finish the base",
+      "content": "Stir {0024} into the lentil base. Add {0025} and check seasoning — it should taste savoury and smoky with a quiet sharpness from the vinegar. Adjust {0005} and {0019} to taste.",
+      "timer_seconds": null,
+      "group": "base"
+    },
+    {
+      "title": "Fold in the air-fried veg",
+      "content": "Tip the air-fried courgettes and mushrooms into the base along with {0026}. Fold gently — you want them intact, not crushed. The filling should be thick and scoopable. If it looks too wet, simmer uncovered for a few more minutes.",
+      "timer_seconds": null,
+      "group": "base"
+    },
+    {
+      "title": "Assemble",
+      "content": "Transfer the filling into a baking dish (roughly 25 × 20cm). Spoon the mash on top in dollops, then spread to cover. Rough the surface up with a fork — those peaks will crisp up in the oven.",
+      "timer_seconds": null,
+      "group": "assembly"
+    },
+    {
+      "title": "Bake",
+      "content": "Bake at 200°C fan for 25 minutes, or until the top is golden and crisp and the filling is bubbling at the edges.",
+      "timer_seconds": 1500,
+      "group": "assembly"
+    },
+    {
+      "title": "Rest and serve",
+      "content": "Rest for 5 minutes before serving — it will firm up and the flavours settle. Serve with broccoli or cabbage on the side.",
+      "timer_seconds": null,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "Improves overnight. Reheat individual portions at 180°C for 20 minutes covered, then uncovered for 5 minutes to re-crisp the top. Alternatively, assemble two smaller dishes and only bake one — the unbaked dish keeps better in the fridge.\n\nIf the filling looks too wet before the mash goes on, simmer uncovered for a few more minutes. If too thick, add a splash more stock.\n\nRose harissa varies by brand. 3 tbsp gives a warm, fragrant heat with Belazu; start with 2 tbsp if yours is fiercer.\n\nSide suggestions: broccoli charred in the air fryer at 200°C for 8–10 minutes with olive oil, salt, and chilli; or cabbage shredded and fried hard with caraway or cumin seeds.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'harissa-lentil-chickpea-shepherds-pie' used verbatim; not re-derived.",
+
+    "dietary_category": "Source labels dish 'Pescatarian-friendly and dairy-free'. All ingredients are plant-based — no fish, dairy, or eggs present. Least-restrictive-eater rule: classified 'vegan', not 'pescatarian'. 'Pescatarian-friendly' describes who can eat it, not what it contains.",
+
+    "dietary_restrictions": "Soy: soy sauce (or tamari) and miso paste. Oat milk can contain gluten if not certified gluten-free, but oats are not in the spec's restriction code list. Soy sauce can contain gluten, but tamari (the noted alternative) typically does not — canonical choice is soy sauce. Conservative default: soy only. Flagged for operator review if gluten should be added.",
+
+    "cuisine": "Harissa, rose harissa, North African spicing — characteristically Moroccan/North African in flavour profile. 'moroccan' assigned consistent with the spec's worked example for a similarly spiced dish. Flagged for operator confirmation.",
+
+    "cook_time_minutes": "Source states 'Active time: ~25 mins Total: ~1 hr 15 mins'. Active time used as prep_time_minutes (labelled field). Total is a combined total — spec prohibits deriving cook time by subtraction. Cook time derived instead from stated step durations. Parallel block: step 1 (potatoes, 18 min), step 3 (air fry, 14 min), step 4 (sweat onion, 8 min) run concurrently — source explicitly signals this ('While the veg are in the air fryer'). Critical path of parallel block = 18 min. Sequential base steps: step 5 (90 sec) + step 6 (5 min) + step 7 (18 min) = 24.5 min. Bake: 25 min. Total critical path: 18 + 24.5 + 25 = 67.5 → rounded to 68 min. Post-cook rest (step 13, 5 min) excluded. Steps 8–11 are active hands-on with no stated durations; not added. cook_time_minutes: 68.",
+
+    "prep_time_minutes": "Labelled 'Active time: ~25 mins'. Used at face value. prep_time_minutes: 25.",
+
+    "olive_oil_triplicate": "Olive oil appears in three distinct uses: 3 tbsp for the mash (0003), 2 tbsp for air-fried veg (0009), 3 tbsp for the base (0013). Three separate rows per duplicate-ingredient-across-groups convention.",
+
+    "ground_cumin_duplicate": "Ground cumin appears in two distinct groups: 0.5 tsp for air-fried veg (0011) and 2 tsp for the base (0016). Separate rows.",
+
+    "smoked_paprika_duplicate": "Smoked paprika appears in two distinct groups: 0.5 tsp for air-fried veg (0012) and 2 tsp for the base (0018). Separate rows.",
+
+    "harissa_range": "Source lists '3 tbsp rose harissa' with instruction to start with 2 tbsp if the harissa is fiercer. This is cooking guidance rather than a strict range quantity — the canonical amount is 3 tbsp. Amount set to 3, note records the lower-heat guidance. Flagged: could be interpreted as a range (2–3 tbsp) under the range convention, in which case amount would be 2. Conservative default: use stated amount of 3 with note. Operator to review.",
+
+    "inline_alternatives": "Five inline-alternative cases: (1) soy sauce/tamari → soy sauce canonical; (2) red/yellow split lentils → red canonical; (3) white/brown miso → white canonical; (4) sherry vinegar/red wine vinegar → sherry vinegar canonical; (5) parsley/coriander → parsley canonical. All per inline-alternatives convention.",
+
+    "maris_piper": "'Maris Piper or King Edward' are variety qualifiers on floury potatoes, not ingredient alternatives — they are shopping guidance. Not treated as inline alternatives; folded into ingredient notes.",
+
+    "salt_and_pepper": "Source lists 'Salt and black pepper' as a combined line under mash ingredients. Combined-seasonings convention: split into two rows (0005 salt, 0006 black pepper). Both referenced in mash steps and step 4 (pinch of salt for sweating onion).",
+
+    "fresh_parsley": "Source lists 'Small handful of fresh parsley or coriander, chopped'. Inline-alternatives convention: parsley canonical. 'Chopped' is a prep verb — trailing form: 'fresh parsley, chopped'. 'Fresh' is canonical-identity modifier, stays. Amount null (small handful is a non-standard quantity); notes record 'small handful'.",
+
+    "no_source": "Source is an operator-written document with no external attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The lentil and chickpea base is a strong component_dinner/base derivation candidate, closely analogous to the north-african-spiced-lentil-bean-base in the spec's worked example. The air-fried veg could also be a component_dinner/veg candidate. Both flagged for operator review."
+  }
+}

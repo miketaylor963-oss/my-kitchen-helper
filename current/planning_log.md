@@ -1533,4 +1533,61 @@ Items F3 planning inherits from F2C:
 
 **Model-switch slug drift.** Opus 4.7 added author and disambiguator suffixes consistently; Sonnet 4.6 stripped them. The canonical slug convention resolves this by making the convention the authority, and by supplying the original slug at re-conversion time. Lesson: any identifier-generation task that crosses model versions needs an explicit convention, not just a prompt suggestion.
 
+---
+
+### Post-2C.4 re-import sweep close-out
+
+**Date:** 2026-06-21.
+
+**All twelve web_sourced recipe-shape fixtures imported via upsert-replace against production.** Decision 57 item 3 is now closed.
+
+#### Match distribution (181 ingredient rows, 12 fixtures)
+
+| Outcome | Count | % |
+|---|---|---|
+| Exact | 124 | 69% |
+| Fuzzy | 51 | 28% |
+| None (chose existing) | 5 | 3% |
+| New ingredient created | 1 | <1% |
+
+2C.3 baseline (76 rows, 5 fixtures): 61% / 30% / 9% / 0. Improvement on all axes; the none bucket halved from 9% → 3%.
+
+#### Slug convention — all twelve resolved cleanly
+
+The five 2C.3 slug-mismatched fixtures (aubergine parmigiana, black bean patties, north african pie, ramen, teriyaki aubergine) now have correct `external_ref` values from the post-2C.4 converter project. No SQL pre-work was required. The slice brief's prediction of a mismatch on aubergine parmigiana was incorrect — the (b2) row always had `aubergine-parmigiana-cloake`.
+
+#### meal.id stability
+
+All twelve `meal.id` values stable across upsert-replace. Row 5 (classic houmous) confirmed stable across three separate upserts (b2 insert → 2C.2 smoke → this sweep).
+
+#### Carry-forwards to follow-on slices
+
+*Converter prompt / fixture-prep (highest-yield):*
+- `tinned X` convention: four confirming instances (black beans, butter beans, chickpeas, white beans). Using canonical `tinned X` form directly converts ~5 rows to exact.
+- `grated nutmeg` regression: converter reverted trailing form on two fixtures. Reinforce in converter prompt.
+- `garlic clove` singular: five fixtures; pluralisation gap at 0.80. Add alias or enforce singular at conversion.
+- Specify full canonicals: `white miso paste`, `rice vinegar`, `soft brown sugar`, `red lentils`, `fresh coriander`, `rose harissa paste`.
+- Strip quality/sourcing qualifiers (`free-range`) at conversion.
+- X-or-Y alternative forms: pick one canonical, note alternative in ingredient `notes`.
+
+*Importer/system (already filed — no change):*
+- Advisory banner gate fix (`allExact` check, `matching.ts:241`).
+- `updated_at` ON UPDATE trigger.
+- Alias-via-fuzzy promotion investigation.
+
+*Master vocabulary:*
+- `garlic cloves` alias → `garlic clove`.
+- `suet` (beef) canonical — bread pudding declares `meat` but master only has `vegetarian suet`.
+- `fresh chives` created as new ingredient (Fresh herbs, Vegan) — only new ingredient from this sweep.
+
+*Threshold:* hold at 0.30; apply convention fixes first, then re-evaluate.
+
+#### Decision 57 — fully closed
+
+- Item 1 (upsert end-to-end): ✅ closed at 2C.2.
+- Item 2 (prep-adjective stripping): ✅ closed at 2C.3.
+- Item 3 (all twelve fixtures re-imported): ✅ closed at post-2C.4 sweep (2026-06-21).
+
+F2C content coverage is now complete.
+
 **Converter project as toolchain infrastructure.** Dedicated Claude project with standing inputs is cleaner than pasting spec excerpts into each conversion chat. Project setup is operator-side by design — it's toolchain configuration, not application code.

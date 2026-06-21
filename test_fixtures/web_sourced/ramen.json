@@ -1,0 +1,125 @@
+{
+  "import_type": "recipe",
+  "external_ref": "ramen-hairy-bikers",
+  "name": "Ramen",
+  "description": "A hearty vegetarian ramen with a deeply flavoured kombu and shiitake broth, charred cabbage and carrot, and the option of soft tamago eggs or crisp fried tofu.",
+  "source": "Hairy Bikers, hairybikers.com",
+
+  "cuisine": "japanese",
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["eggs", "gluten", "soy", "sesame"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "kombu", "amount": 10, "unit": "g", "group": "broth", "notes": "1 × 10g piece; soak in cold water for 30 minutes before use. Or 2 tsp seaweed flakes" },
+    { "id": "0002", "name": "dried shiitake mushrooms", "amount": 15, "unit": "g", "group": "broth", "notes": null },
+    { "id": "0003", "name": "garlic cloves, thinly sliced", "amount": 4, "unit": null, "group": "broth", "notes": null },
+    { "id": "0004", "name": "fresh root ginger, thinly sliced", "amount": 25, "unit": "g", "group": "broth", "notes": null },
+    { "id": "0005", "name": "caster sugar", "amount": 1, "unit": "tbsp", "group": "broth", "notes": "plus more to taste at seasoning stage" },
+    { "id": "0006", "name": "soy sauce", "amount": 50, "unit": "ml", "group": "broth", "notes": "plus more to taste at seasoning stage" },
+    { "id": "0007", "name": "mirin", "amount": 3, "unit": "tbsp", "group": "broth", "notes": "or sake; plus more to taste at seasoning stage" },
+    { "id": "0008", "name": "miso paste", "amount": 1, "unit": "tbsp", "group": "broth", "notes": null },
+    { "id": "0009", "name": "vegetable oil", "amount": 1, "unit": "tbsp", "group": "soup", "notes": null },
+    { "id": "0010", "name": "Chinese lettuce", "amount": 1, "unit": null, "group": "soup", "notes": "or cabbage; cut into slim wedges" },
+    { "id": "0011", "name": "onion, coarsely sliced", "amount": 1, "unit": null, "group": "soup", "notes": "sliced from top to bottom" },
+    { "id": "0012", "name": "carrot, cut into diagonal slices", "amount": 1, "unit": null, "group": "soup", "notes": "large; slices approximately 0.5cm thick" },
+    { "id": "0013", "name": "miso paste", "amount": 1, "unit": "tsp", "group": "soup", "notes": null },
+    { "id": "0014", "name": "spring onions, whites sliced on the diagonal", "amount": 6, "unit": null, "group": "soup", "notes": "whites only at this stage; keep greens for garnish" },
+    { "id": "0015", "name": "spring onion greens, very finely sliced", "amount": 6, "unit": null, "group": "garnish", "notes": "greens from the same spring onions as 0014; used to garnish" },
+    { "id": "0016", "name": "noodles", "amount": 4, "unit": null, "group": "to serve", "notes": "blocks; cook according to packet instructions" },
+    { "id": "0017", "name": "sesame oil", "amount": null, "unit": null, "group": "to serve", "notes": "a few drops; for tossing the noodles" },
+    { "id": "0018", "name": "nori sushi seaweed, roughly torn", "amount": 4, "unit": null, "group": "to serve", "notes": "sheets" },
+    { "id": "0019", "name": "tamago eggs, halved", "amount": 4, "unit": null, "group": "to serve", "notes": "optional; must be made in advance. See notes for vegan tofu alternative" },
+    { "id": "0020", "name": "sesame seeds", "amount": null, "unit": null, "group": "to serve", "notes": null },
+    { "id": "0021", "name": "coriander", "amount": null, "unit": null, "group": "garnish", "notes": "a few sprigs" },
+    { "id": "0022", "name": "beansprouts", "amount": null, "unit": null, "group": "garnish", "notes": "4 handfuls; optional" },
+    { "id": "0023", "name": "chilli oil", "amount": null, "unit": null, "group": "garnish", "notes": "to serve" },
+    { "id": "0024", "name": "soy sauce", "amount": null, "unit": null, "group": "garnish", "notes": "extra, to serve" }
+  ],
+
+  "steps": [
+    {
+      "title": "Make the broth",
+      "content": "Put {0001}, {0002}, {0003}, {0004}, {0005}, {0006}, {0007} and {0008} into a saucepan and add 1.5 litres of water. Bring to the boil, then turn the heat down and simmer for 30 minutes until everything is very soft and the stock has reduced by about a third. Remove from the heat and leave to stand.",
+      "timer_seconds": 1800,
+      "group": "broth"
+    },
+    {
+      "title": "Fry the vegetables",
+      "content": "In a separate pan, heat {0009}. Add {0010} and fry over a high heat until lightly browned on the cut sides, then remove from the pan and set aside. Add {0011} and {0012} and cook until the onions are lightly browned. Stir in {0013} to coat the vegetables and cook for a further couple of minutes. Return the cabbage to the pan.",
+      "timer_seconds": null,
+      "group": "soup"
+    },
+    {
+      "title": "Combine and simmer",
+      "content": "Strain the broth and pour it over the vegetables. Taste for seasoning and add more soy sauce, mirin or sugar to taste. Add {0014} and simmer until the cabbage is tender.",
+      "timer_seconds": null,
+      "group": "soup"
+    },
+    {
+      "title": "Cook the noodles",
+      "content": "Cook {0016} according to the packet instructions, then run under cold water and drain thoroughly. Toss in {0017}.",
+      "timer_seconds": null,
+      "group": "to serve"
+    },
+    {
+      "title": "Assemble and serve",
+      "content": "Divide {0016} and {0018} between 4 large bowls, then ladle over the broth and vegetables. Sprinkle {0020} over {0019}, if using, and add to the bowls. Garnish with {0015}, {0021} and {0022}, if using. Serve with {0023} and {0024}.",
+      "timer_seconds": null,
+      "group": "to serve"
+    }
+  ],
+
+  "notes": "If using tamago eggs, these must be prepared in advance.\n\n**Vegan option:** instead of eggs, cut a block of extra-firm tofu into chunks, pat dry, and toss in 1 tbsp cornflour. Fry in 1 tbsp vegetable oil until crisp and browned on all sides. Drizzle with a few drops of sesame oil and sprinkle with sesame seeds. Add to the soup in place of the eggs. Using this substitution makes the dish vegan (subject to the noodles being egg-free).",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'ramen-hairy-bikers' used verbatim; not re-derived.",
+
+    "whole_recipe_branching": "Source presents two complete versions: canonical egg version (tamago, vegetarian) and a vegan tofu alternative ('Biker Vegan Tip'). This is a whole-recipe alternative — not a minor substitution — so the whole-recipe branching convention applies. Canonical (egg) version converted. Vegan alternative described in top-level notes.",
+
+    "dietary_category": "Canonical version contains eggs (tamago, listed as optional). Optional ingredients are included as full rows per the optional-ingredients convention and are not excluded from classification. Classified 'vegetarian'. The vegan alternative would classify as 'vegan' but is not the canonical version.",
+
+    "dietary_restrictions": "Soy: soy sauce (broth and garnish, two separate rows), miso paste (broth and soup, two separate rows). Eggs: tamago eggs (optional but canonical). Sesame: sesame oil and sesame seeds. Gluten: noodles (standard ramen noodles assumed wheat-based; packet not specified). No dairy, nuts, peanuts, shellfish identified.",
+
+    "cook_time_minutes": "Stated durations: kombu soak 30 min (in-session passive, ≤2 hours); broth simmer 30 min. Soup veg fry and simmer durations not stated precisely ('couple of minutes' is non-standard; noodle cook time deferred to packet). The kombu soak precedes broth assembly — likely sequential, making the critical path 30 + 30 = 60 min plus unstated veg steps. However, the soak-then-simmer sequencing is inferred, not explicit. Critical path cannot be confirmed confidently. Both timing fields left null per spec. Individual step timers capture the 30-minute broth simmer only.",
+
+    "prep_time_minutes": "No labelled prep field. Left null.",
+
+    "kombu_alternative": "Source lists '1 x 10g piece kombu, soaked for half an hour in cold water OR 2 tsp seaweed flakes'. Inline-alternatives convention: kombu taken as canonical (first-named), seaweed flakes noted in ingredient notes. Soaking instruction folded into notes as it is a prep instruction, not a separate ingredient row.",
+
+    "mirin_alternative": "Source lists '3 tbsp mirin or sake'. Inline-alternatives convention: mirin taken as canonical, sake noted. The 'more to taste' instruction applies to both; noted in broth ingredient notes.",
+
+    "miso_paste_duplicate": "Miso paste appears in two distinct groups: 1 tbsp in the broth (0008) and 1 tsp in the soup veg (0013). Separate rows per duplicate-ingredient-across-groups convention.",
+
+    "soy_sauce_duplicate": "Soy sauce appears as a measured broth ingredient (0006, 50ml) and as an to-taste table condiment to serve (0024, functional amount). Distinct uses in distinct groups — separate rows.",
+
+    "spring_onion_split": "Source explicitly splits spring onions into whites (used in step 3, soup group) and greens (used in step 4 as garnish). Two distinct uses in distinct steps and groups — separate rows (0014 and 0015). Both rows reference the same 6 spring onions; shopping list will need operator awareness that these are one purchase.",
+
+    "chinese_lettuce": "Source lists 'Chinese lettuce/cabbage'. Inline-alternatives convention: Chinese lettuce taken as canonical, cabbage noted. Name rendered as 'Chinese lettuce' per canonical choice.",
+
+    "tamago_eggs": "Listed as optional in the source. Full ingredient row with notes 'optional; must be made in advance.' Classification follows canonical version (egg) as the whole-recipe branching convention assigns canonical status to the egg version.",
+
+    "noodles": "Listed as '4 blocks of noodles' with no further specification. Amount 4 (countable), unit null, name 'noodles'. Gluten restriction assigned on assumption of wheat noodles; flagged for operator to confirm or override if rice/buckwheat noodles used.",
+
+    "sesame_oil_and_seeds": "Sesame oil (0017, functional amount for noodles) and sesame seeds (0020, functional amount for serving). Both contribute to 'sesame' dietary restriction.",
+
+    "functional_amounts": "Several to-serve and garnish ingredients have no stated quantities: sesame oil ('a few drops'), sesame seeds, coriander ('a few sprigs'), beansprouts ('4 handfuls'), chilli oil, extra soy sauce. All rendered as amount null, unit null, descriptor in notes per non-standard/functional quantities convention.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The broth is a plausible derivation candidate (reusable Japanese broth/dashi base), but it is deeply integrated with the seasoning-to-taste step. Flagged for operator review."
+  }
+}

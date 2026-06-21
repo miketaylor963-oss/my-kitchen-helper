@@ -1,0 +1,108 @@
+{
+  "import_type": "recipe",
+  "external_ref": "bread-pudding",
+  "name": "Bread Pudding",
+  "description": "A traditional British baked bread pudding with suet, dried fruit, golden syrup and spice — eaten hot or cold.",
+  "source": null,
+
+  "cuisine": "british",
+  "dietary_category": "meat",
+  "dietary_restrictions": ["dairy", "eggs", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dessert"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": null,
+  "prep_time_minutes": null,
+  "cook_time_minutes": 75,
+
+  "ingredients": [
+    { "id": "0001", "name": "bread", "amount": 450, "unit": "g", "group": null, "notes": "original: 1 lb" },
+    { "id": "0002", "name": "suet", "amount": 85, "unit": "g", "group": null, "notes": "original: 3 oz" },
+    { "id": "0003", "name": "soft brown sugar", "amount": 85, "unit": "g", "group": null, "notes": "original: 3 oz; source spelling 'sofe brown Sugar' corrected" },
+    { "id": "0004", "name": "golden syrup", "amount": 85, "unit": "g", "group": null, "notes": "original: 3 oz" },
+    { "id": "0005", "name": "salt", "amount": null, "unit": null, "group": null, "notes": "pinch" },
+    { "id": "0006", "name": "grated nutmeg", "amount": null, "unit": null, "group": null, "notes": "to taste; no quantity stated in source" },
+    { "id": "0007", "name": "mixed spice", "amount": 2, "unit": "tsp", "group": null, "notes": null },
+    { "id": "0008", "name": "dried fruit", "amount": 225, "unit": "g", "group": null, "notes": "original: 8 oz" },
+    { "id": "0009", "name": "egg", "amount": 1, "unit": null, "group": null, "notes": null },
+    { "id": "0010", "name": "milk", "amount": null, "unit": null, "group": null, "notes": "a little" },
+    { "id": "0011", "name": "caster sugar", "amount": null, "unit": null, "group": null, "notes": "for sprinkling after baking; not listed in source ingredient list — added from method" }
+  ],
+
+  "steps": [
+    {
+      "title": "Soak the bread",
+      "content": "Soak {0001} in cold water in a basin overnight.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Drain the bread",
+      "content": "Squeeze the water out of the bread through a colander, then transfer to a large mixing bowl.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Mix the pudding",
+      "content": "Add {0002}, {0003}, {0005}, {0006} and {0007} to the bread and mix. Add {0009}, {0010} and {0004}. Mix thoroughly.",
+      "timer_seconds": null,
+      "group": null
+    },
+    {
+      "title": "Bake",
+      "content": "Transfer the mixture to a large, shallow, greased ovenproof dish. Bake at 180°C/Gas Mark 4 for about 1¼–1½ hours. Turn the heat down after 1¼ hours if needed.",
+      "timer_seconds": 4500,
+      "group": null
+    },
+    {
+      "title": "Finish and serve",
+      "content": "Once cooked and cooled, sprinkle with {0011}. Serve hot or cold.",
+      "timer_seconds": null,
+      "group": null
+    }
+  ],
+
+  "notes": "No yield stated — base_servings left null.\n\nRequires overnight soaking of the bread before cooking.\n\nOriginal recipe in imperial; all weights converted to metric using the standard British cookbook conversion table. Originals retained in ingredient notes.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'bread-pudding' used verbatim; not re-derived.",
+
+    "imperial_conversion": "All weights converted per the standard table: 1 lb → 450g; 3 oz → 85g (×3 ingredients); 8 oz → 225g. Original values retained in ingredient notes for traceability.",
+
+    "cook_time_minutes": "No labelled cook field. Stated bake duration: 'about 1¼–1½ hrs' — range, lower bound 75 minutes. cook_time_minutes set to 75. The overnight soak is out-of-session (explicitly overnight); goes in notes, not cook_time_minutes. No other stated step durations.",
+
+    "prep_time_minutes": "No labelled prep field and no stated numeric prep duration apart from the overnight soak (out-of-session). Left null.",
+
+    "overnight_soak_timer": "Step 1 soak timer set to null — overnight duration is not an in-session countable seconds value and the spec's timer_seconds field is for in-session waits. Duration captured in step content and top-level notes.",
+
+    "base_servings": "No yield stated in source. Left null per the servings-not-stated convention.",
+
+    "caster_sugar_method_only": "Caster sugar appears only in the method close ('sprinkle with caster sugar') and is absent from the ingredient list. Added as a full ingredient row (0011) with amount null and notes recording the source omission, per the method-only optionals convention.",
+
+    "grated_nutmeg": "'Grated nutmeg' — 'grated' is a prep verb in the spec's scope. However, 'grated nutmeg' functions as a canonical spice form in British baking, analogous to 'ground cumin' which the spec explicitly excludes from the leading-prep-modifier conversion. Treated as a canonical-identity modifier; left as 'grated nutmeg'. Flagged for operator review.",
+
+    "nutmeg_quantity": "No quantity stated for grated nutmeg in source. Amount null, notes 'to taste'.",
+
+    "soft_brown_sugar_typo": "Source spells 'sofe brown Sugar' — corrected to 'soft brown sugar' in the name field. Logged here.",
+
+    "dietary_category": "Suet is rendered beef or mutton fat — not vegetarian. Classified 'meat'.",
+
+    "dietary_restrictions": "Gluten: bread. Dairy: milk. Eggs: egg. Suet is animal fat but has no corresponding restriction code in the spec's listed codes (dairy, gluten, eggs, nuts, peanuts, soy, shellfish, sesame). Not flagged as a restriction; dietary_category 'meat' conveys the animal-product content.",
+
+    "cuisine": "Traditional British bread pudding — characteristically British in style, ingredients, and origin. 'british' assigned.",
+
+    "no_source": "Source is a handwritten or plaintext document with no attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. No reusable component candidates in a simple baked pudding."
+  }
+}

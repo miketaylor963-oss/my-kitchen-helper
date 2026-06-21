@@ -1,0 +1,101 @@
+{
+  "import_type": "recipe",
+  "external_ref": "lemon-cheesecake",
+  "name": "Lemon Cheesecake",
+  "description": "A simple no-bake lemon cheesecake with a buttery digestive base and a creamy, sharp lemon filling set in the fridge.",
+  "source": null,
+
+  "cuisine": null,
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["dairy", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dessert"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": null,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "butter", "amount": 25, "unit": "g", "group": "base", "notes": "original: 1 oz. Or margarine" },
+    { "id": "0002", "name": "digestive biscuits, crushed", "amount": 50, "unit": "g", "group": "base", "notes": "original: 2 oz" },
+    { "id": "0003", "name": "soft cheese", "amount": 225, "unit": "g", "group": "topping", "notes": "original: 8 oz. Full or half-fat; Philadelphia recommended" },
+    { "id": "0004", "name": "condensed milk", "amount": 225, "unit": "ml", "group": "topping", "notes": "original: 8 fl oz (treated as volume per spec convention)" },
+    { "id": "0005", "name": "double cream", "amount": 115, "unit": "ml", "group": "topping", "notes": "original: 4 fl oz (treated as volume). Or substitute e.g. Elmlea" },
+    { "id": "0006", "name": "lemons, rind grated and juiced", "amount": 2, "unit": null, "group": "topping", "notes": "rind and juice used separately in method" }
+  ],
+
+  "steps": [
+    {
+      "title": "Make the base",
+      "content": "Melt {0001}. Stir in {0002} and press into the base of a tin or flan dish. Leave to cool.",
+      "timer_seconds": null,
+      "group": "base"
+    },
+    {
+      "title": "Cream the cheese",
+      "content": "Beat {0003} until smooth and at a dropping consistency.",
+      "timer_seconds": null,
+      "group": "topping"
+    },
+    {
+      "title": "Combine the dairy",
+      "content": "Mix {0004} and {0005} together in a bowl or jug, then add gradually to the cheese. The mixture will be quite runny.",
+      "timer_seconds": null,
+      "group": "topping"
+    },
+    {
+      "title": "Add lemon",
+      "content": "Stir in the grated rind from {0006}, then add the juice. Mix well.",
+      "timer_seconds": null,
+      "group": "topping"
+    },
+    {
+      "title": "Set in the fridge",
+      "content": "Pour the mixture onto the cooled base. Smooth the top and refrigerate until set.",
+      "timer_seconds": null,
+      "group": "topping"
+    }
+  ],
+
+  "notes": "No yield stated — base_servings left null. Can be frozen.\n\nScaling note from source: for 6–8 people, use approximately 10 digestive biscuits, 55–85g butter (2–3 oz), and 3–4 large lemons, adjusting other quantities accordingly. Best made the day before it is needed.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'lemon-cheesecake' used verbatim; not re-derived.",
+
+    "imperial_conversion": "All weights and volumes converted per spec. Butter (fat) and soft cheese treated as weight: 1 oz → 25g, 8 oz → 225g. Digestive biscuits treated as weight: 2 oz → 50g. Condensed milk and double cream treated as volume (spec rule: cream, milk, water → volume when oz used without explicit 'fl oz'): 8 oz → 225ml, 4 oz → 115ml. Original values retained in ingredient notes.",
+
+    "base_servings": "No yield stated for the canonical recipe. The scaling note mentions 'serve 6-8 people' for a larger version with different quantities — this does not constitute a stated yield for the base recipe. Left null per servings-not-stated convention.",
+
+    "prep_time_minutes": "No labelled prep field and no stated step durations. Butter melting is minimal hob activity but no duration given. Left null.",
+
+    "cook_time_minutes": "No labelled cook field. Refrigeration is mentioned but no chilling duration stated. No stated step durations. Left null.",
+
+    "butter_or_margarine": "Source lists 'butter or margarine'. Inline-alternatives convention: butter canonical (first-named), margarine noted.",
+
+    "soft_cheese": "'Full or half-fat' is a selection qualifier, not an alternative ingredient. Retained in notes alongside the Philadelphia brand reference. Name field is 'soft cheese' only.",
+
+    "double_cream_alternative": "Source lists 'double cream (or substitute e.g. Elmlea)'. Inline-alternatives convention: double cream canonical, Elmlea noted as an example substitute.",
+
+    "lemons": "Source lists '2 lemons - grated rind + juice' as a single ingredient line covering two prep operations. Spec: 'Multiple prep verbs on one ingredient are joined with and in trailing form... one row per ingredient, even when two prep operations are applied.' One row (0006), trailing form 'lemons, rind grated and juiced'. The method separates the operations (rind added before juice, step 4) — both references point to the same row ID.",
+
+    "digestive_biscuits": "Listed as 'crushed digestive biscuits' — 'crushed' is a prep verb. Source already uses trailing-adjacent form. Rendered as 'digestive biscuits, crushed' per leading-prep-modifier convention.",
+
+    "dietary_restrictions": "Dairy: butter, soft cheese, condensed milk, double cream. Gluten: digestive biscuits (wheat flour). No eggs in the canonical recipe (condensed milk contains dairy, not eggs). No nuts, soy, sesame, shellfish, or peanuts.",
+
+    "scaling_note": "Final paragraph is a personal scaling guidance note — not a separate recipe version and not a whole-recipe alternative. Captured in top-level notes.",
+
+    "no_source": "Source is a handwritten or personal document with no external attribution. source field left null.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. No obvious reusable component candidates in a simple two-layer no-bake cheesecake."
+  }
+}

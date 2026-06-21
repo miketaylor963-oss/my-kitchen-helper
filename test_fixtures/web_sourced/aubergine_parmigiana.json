@@ -1,0 +1,121 @@
+{
+  "import_type": "recipe",
+  "external_ref": "aubergine-parmigiana-cloake",
+  "name": "Aubergine Parmigiana",
+  "description": "Felicity Cloake's definitive version: salted aubergines fried until golden, layered with a wine-enriched tomato sauce, mozzarella and Parmesan, finished with oiled breadcrumbs.",
+  "source": "Felicity Cloake, The Guardian, 20 Feb 2013",
+
+  "cuisine": "italian",
+  "dietary_category": "vegetarian",
+  "dietary_restrictions": ["dairy", "gluten"],
+  "nutritional_tags": [],
+
+  "protein_g": null,
+  "carbs_g": null,
+  "gi_index": null,
+
+  "meal_types": ["dinner", "side"],
+  "meal_formats": [],
+
+  "component_layers": [],
+
+  "base_servings": 4,
+  "prep_time_minutes": null,
+  "cook_time_minutes": null,
+
+  "ingredients": [
+    { "id": "0001", "name": "aubergines", "amount": 1500, "unit": "g", "group": "aubergines", "notes": null },
+    { "id": "0002", "name": "fine salt", "amount": null, "unit": null, "group": "aubergines", "notes": "for salting; to taste" },
+    { "id": "0003", "name": "oil", "amount": null, "unit": null, "group": "aubergines", "notes": "for frying; enough to coat the pan well" },
+    { "id": "0004", "name": "olive oil", "amount": 2, "unit": "tbsp", "group": "sauce", "notes": null },
+    { "id": "0005", "name": "garlic cloves, crushed", "amount": 3, "unit": null, "group": "sauce", "notes": null },
+    { "id": "0006", "name": "tinned tomatoes", "amount": 800, "unit": "g", "group": "sauce", "notes": "good quality" },
+    { "id": "0007", "name": "red wine", "amount": 150, "unit": "ml", "group": "sauce", "notes": null },
+    { "id": "0008", "name": "sugar", "amount": null, "unit": null, "group": "sauce", "notes": "pinch" },
+    { "id": "0009", "name": "dried oregano", "amount": 0.5, "unit": "tsp", "group": "sauce", "notes": null },
+    { "id": "0010", "name": "salt", "amount": null, "unit": null, "group": "sauce", "notes": "to taste" },
+    { "id": "0011", "name": "black pepper", "amount": null, "unit": null, "group": "sauce", "notes": "to taste" },
+    { "id": "0012", "name": "mozzarella, thinly sliced", "amount": 200, "unit": "g", "group": "assembly", "notes": "firm pizza-style mozzarella, not buffalo" },
+    { "id": "0013", "name": "Parmesan, grated", "amount": 125, "unit": "g", "group": "assembly", "notes": null },
+    { "id": "0014", "name": "breadcrumbs", "amount": 50, "unit": "g", "group": "assembly", "notes": null },
+    { "id": "0015", "name": "olive oil", "amount": null, "unit": null, "group": "assembly", "notes": "a little, for tossing the breadcrumbs; also for greasing the dish" },
+    { "id": "0016", "name": "basil leaves", "amount": null, "unit": null, "group": "assembly", "notes": "handful; torn, to finish" }
+  ],
+
+  "steps": [
+    {
+      "title": "Salt the aubergines",
+      "content": "Cut {0001} lengthways into 5mm slices. Sprinkle with {0002} and leave in a colander to drain for 30 minutes.",
+      "timer_seconds": 1800,
+      "group": "aubergines"
+    },
+    {
+      "title": "Make the tomato sauce",
+      "content": "Heat {0004} in a medium pan over a medium-high heat. Add {0005} and fry for 1 minute. Tip in {0006} and {0007}, bring to the boil, mashing the tomatoes. Turn down the heat slightly, add {0008}, {0009}, and a little seasoning with {0010} and {0011}. Simmer gently for 45 minutes, stirring occasionally. Purée until smooth.",
+      "timer_seconds": 2760,
+      "group": "sauce"
+    },
+    {
+      "title": "Fry (and blanch) the aubergines",
+      "content": "Preheat the oven to 180°C. If blanching half the slices, put a large pan of water on to boil. Rinse {0001} well and dry thoroughly with kitchen paper. Pour {0003} into a frying pan to coat the bottom well and set over a high heat. Fry half (or all) of the aubergine slices until golden brown on both sides, working in batches. Drain on kitchen paper. If blanching the remaining half, do so in the boiling water for 2 minutes, then drain well.",
+      "timer_seconds": null,
+      "group": "aubergines"
+    },
+    {
+      "title": "Layer the dish",
+      "content": "Lightly grease a baking dish with a little {0015}. Spread a thin layer of tomato sauce on the base, then add a tight layer of aubergine slices, followed by {0012}, {0013}, and seasoning with {0010} and {0011}. Add another layer of aubergines, then sauce, cheeses, and seasoning. Repeat until the aubergines are used up, finishing with a layer of sauce. Reserve a little {0013} for the top.",
+      "timer_seconds": null,
+      "group": "assembly"
+    },
+    {
+      "title": "Top and bake",
+      "content": "Toss {0014} with a little {0015} and the reserved {0013}. Sprinkle over the top. Bake for about 30 minutes until bubbling and browned.",
+      "timer_seconds": 1800,
+      "group": "assembly"
+    },
+    {
+      "title": "Rest and finish",
+      "content": "Allow to cool slightly — it is better warm than piping hot. Scatter over {0016} just before serving.",
+      "timer_seconds": null,
+      "group": "assembly"
+    }
+  ],
+
+  "notes": "Serves 4–6 as a main course or side dish. The source gives a range yield; `base_servings` set to 4 per the range rule, range noted here.\n\nCloake's preferred method is to fry half the aubergine slices and blanch the other half — this gives tenderness without excessive grease. Frying all produces a richer result. Use firm pizza-style mozzarella rather than buffalo, which is too wet.",
+
+  "derived_components": [],
+
+  "_fixture_notes": {
+    "external_ref": "Supplied slug 'aubergine-parmigiana-cloake' used verbatim; not re-derived.",
+
+    "base_servings": "Source states 'Serves 4–6 (main course/side dish)'. Range quantity convention applied: base_servings set to 4, range noted in top-level notes.",
+
+    "meal_types": "Source presents as main course and side dish. Mapped to ['dinner', 'side']. No breakfast or lunch framing in source.",
+
+    "dietary_category": "Contains dairy (mozzarella, Parmesan) and no meat or fish. Classified 'vegetarian'.",
+
+    "dietary_restrictions": "Dairy: mozzarella and Parmesan. Gluten: breadcrumbs. No nuts, eggs, soy, shellfish, or sesame.",
+
+    "cuisine": "Source is an Italian dish (melanzane alla parmigiana). 'italian' assigned — cuisine, ingredients, and source culture all align. Spec requires cuisine code to match database; 'italian' assumed valid by analogy with 'moroccan' in the worked example. Flagged for operator to confirm code exists.",
+
+    "prep_time_minutes": "No labelled prep field in source. The 30-minute salt-drain is an in-session passive wait per the spec's inclusive rule (≤2 hours, in-session), so it would count toward cook_time_minutes if step durations were summed — but no stated prep duration separate from this exists. The sauce simmer (45 min) and bake (30 min) are stated step durations. However, aubergine frying time is not stated (works in batches, no duration given), and the salting step runs concurrently with sauce-making — the critical path cannot be determined confidently. Both fields left null; individual durations noted below.",
+
+    "cook_time_minutes": "Stated durations: garlic fry 1 min, sauce simmer 45 min, blanch 2 min, bake ~30 min. Salting 30 min is in-session passive. Frying duration not stated. Concurrency: salting runs before cooking; sauce simmers while aubergines could be frying (concurrent), but fry time is unstated so critical path cannot be confirmed. Per spec: 'if the critical path can't be determined confidently from the source, leave cook_time_minutes null.' Both timing fields left null.",
+
+    "oil_for_frying": "Source lists 'Oil, to fry' as a separate ingredient line. Treated as a functional amount: amount null, unit null, notes describe use. Rendered as ingredient 0003.",
+
+    "olive_oil_duplicate": "Olive oil appears twice — 2 tbsp for the sauce (0004) and a small amount for the breadcrumbs and greasing (0015). Separate rows per the duplicate-ingredient-across-groups convention; uses are genuinely distinct.",
+
+    "salt_and_pepper_split": "Source lists seasoning across two contexts: salting the aubergines (0002, fine salt) and seasoning the sauce and layers (0010 salt, 0011 black pepper). Combined-seasonings convention applied to sauce/assembly context — split into separate rows. Salting aubergines is a distinct use, kept as its own row.",
+
+    "sugar_pinch": "Source specifies 'Pinch of sugar'. Non-standard quantity — amount null, unit null, notes 'pinch' per the non-standard quantities convention.",
+
+    "basil": "Source specifies 'Handful of basil leaves'. Functional amount — amount null, unit null, notes 'handful; torn, to finish'.",
+
+    "breadcrumb_olive_oil": "Source says 'Toss the breadcrumbs with a little olive oil and Parmesan.' The olive oil here doubles as greasing oil. Captured in 0015 as a functional amount.",
+
+    "mozzarella_note": "Source explicitly recommends firm pizza-style mozzarella over buffalo. Captured in ingredient notes.",
+
+    "no_derived_components": "Batch mode — no derived components proposed. The tomato sauce is a potential derivation candidate (reusable Italian tomato sauce), but it is not a named section in the source and is simple enough that it may not warrant independent component status. Flagged for operator review."
+  }
+}
