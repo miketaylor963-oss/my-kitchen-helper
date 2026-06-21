@@ -112,27 +112,58 @@ function resolveOutcome(rawRows: RawMatchRow[]): RowOutcome {
   return { kind: "fuzzy", candidates: fuzzyRows.map(toCandidate) };
 }
 
-function generateVariants(name: string, stripList: StripList): string[] {
-  const variants: string[] = [name];
-  const allStrippable = new Set([...stripList.prep_verbs, ...stripList.modifying_adverbs]);
+// Produces a de-pluralised variant by stripping trailing 's'/'oes' from the last word.
+// Returns null when the last word has no recognisable plural suffix.
+function toSingular(name: string): string | null {
+  const words = name.split(" ");
+  const last = words[words.length - 1].toLowerCase();
+  let singularLast: string | null = null;
+  if (last.endsWith("oes") && last.length > 3) {
+    singularLast = last.slice(0, -2); // potatoes → potato, tomatoes → tomato
+  } else if (last.endsWith("s") && !last.endsWith("ss") && !last.endsWith("us") && last.length > 2) {
+    singularLast = last.slice(0, -1); // cloves → clove, stalks → stalk, eggs → egg
+    // excludes "-us"/"-ous" endings (houmous, couscous, asparagus) which are not English plurals
+  }
+  if (singularLast === null) return null;
+  return [...words.slice(0, -1), singularLast].join(" ");
+}
 
-  // Strip trailing comma-clause: "garlic cloves, minced" → "garlic cloves"
+export function generateVariants(name: string, stripList: StripList): string[] {
+  const variants: string[] = [name];
+  // allPrep: tokens that anchor a strip — at least one must be present in a trailing clause
+  const allPrep = new Set([...stripList.prep_verbs, ...stripList.modifying_adverbs]);
+  // allAllowed: all tokens that don't block a strip
+  const allAllowed = new Set([
+    ...allPrep,
+    ...stripList.connectives,
+    ...stripList.prepositions,
+    ...stripList.cut_descriptors,
+  ]);
+  // Dimension tokens such as "1.5cm", "500g" are allowed but not added to allAllowed as literals
+  const isDimension = (t: string) => /^\d+(\.\d+)?(cm|mm|g|kg|ml|l|inch|inches)$/i.test(t);
+
+  // Strip trailing comma-clause when every token is in allAllowed or is a dimension,
+  // and at least one token is an allPrep anchor
   const commaIdx = name.indexOf(", ");
   let strippedTrailing: string | null = null;
   if (commaIdx !== -1) {
     const clause = name.slice(commaIdx + 2).trim();
     const tokens = clause.toLowerCase().split(/\s+/).filter(Boolean);
-    if (tokens.length > 0 && tokens.every((t) => allStrippable.has(t))) {
+    if (
+      tokens.length > 0 &&
+      tokens.some((t) => allPrep.has(t)) &&
+      tokens.every((t) => allAllowed.has(t) || isDimension(t))
+    ) {
       strippedTrailing = name.slice(0, commaIdx);
     }
   }
 
-  // Strip leading size adjective: "large onion" → "onion"
+  // Strip leading size adjective or quality qualifier: "large onion" → "onion", "free-range eggs" → "eggs"
   const firstSpace = name.indexOf(" ");
   let strippedLeading: string | null = null;
   if (firstSpace !== -1) {
     const firstWord = name.slice(0, firstSpace).toLowerCase();
-    if (stripList.size_adjectives.includes(firstWord)) {
+    if (stripList.size_adjectives.includes(firstWord) || stripList.quality_qualifiers.includes(firstWord)) {
       strippedLeading = name.slice(firstSpace + 1);
     }
   }
@@ -145,10 +176,16 @@ function generateVariants(name: string, stripList: StripList): string[] {
     const trailingFirstSpace = strippedTrailing.indexOf(" ");
     if (trailingFirstSpace !== -1) {
       const trailingFirstWord = strippedTrailing.slice(0, trailingFirstSpace).toLowerCase();
-      if (stripList.size_adjectives.includes(trailingFirstWord)) {
+      if (stripList.size_adjectives.includes(trailingFirstWord) || stripList.quality_qualifiers.includes(trailingFirstWord)) {
         variants.push(strippedTrailing.slice(trailingFirstSpace + 1));
       }
     }
+  }
+
+  // Generate singular form for each variant (pluralisation gap: "garlic cloves" → "garlic clove")
+  for (const v of [...variants]) {
+    const singular = toSingular(v);
+    if (singular !== null) variants.push(singular);
   }
 
   // Deduplicate, preserving insertion order (original always first)

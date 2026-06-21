@@ -1607,3 +1607,23 @@ F2C content coverage is now complete.
 **vitest added.** Four unit tests for `evaluateConsistencyAdvisory` in `src/lib/import/matching.test.ts`. All passing.
 
 **Smoke:** Marinated Teriyaki Aubergine (id=14). 4 fuzzy rows, all vegan. Advisory `silent/consistent` post-fix (was `silent/not_all_resolved` pre-fix). ✅
+
+---
+
+### Strip-list extension slice close-out
+
+**Date:** 2026-06-21.
+
+Three mechanisms added to `strip_list.ts` and `generateVariants`:
+
+**Step 1 — trailing clause extension.** Two-condition check: every token in `allAllowed ∪ dimension-pattern`, plus at least one `allPrep` anchor. New `StripList` fields: `connectives` (`and`, `then`), `prepositions` (`into`, `on`, `the`), `cut_descriptors` (`dice`, `slices`, `diagonal`). New prep_verbs: `cut`, `chunked`. New modifying_adverb: `very`. Correctly accepts `drained and rinsed`, `peeled and chunked`, `cut into 1.5cm dice`, `cut into diagonal slices`. Correctly rejects `rind grated and juiced`, `whites sliced on the diagonal` (food-part nouns block strip).
+
+**Step 2 — pluralisation.** `toSingular` helper; excludes `-us`/`-ous` endings (`houmous`, `couscous`). Resolves: garlic cloves, celery stalks, carrots, eggs, sweet potatoes → exact canonical. Also resolves `courgettes` carry-forward from importer-fix (Step 1 strips clause → Step 2 singularises → exact canonical match).
+
+**Step 3 — quality/sourcing qualifiers.** `quality_qualifiers` field added; `free-range eggs` → `eggs` → `egg` → exact.
+
+**Carry-forward routing documented in build log** — converter-prompt items (tinned X, mid-name modifiers, nutmeg regression, X-or-Y forms), master vocab items (garlic cloves alias, suet), threshold held at 0.30.
+
+**18 tests passing** (14 new generateVariants + 4 advisory).
+
+**Smoke:** black bean patties re-import (auth, Mike). Verify improved exact-rate vs post-2C.4 sweep numbers for that fixture (had `garlic cloves, minced` × 2 and `black beans, drained and rinsed` in the fuzzy bucket).

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { evaluateConsistencyAdvisory } from "./matching";
+import { evaluateConsistencyAdvisory, generateVariants } from "./matching";
 import type { MatchingResult, ParsedRecipe } from "./matching";
+import { getStripList } from "./strip_list";
 
 const ranks = new Map([
   ["vegan", 1],
@@ -92,6 +93,80 @@ function noneRow(name: string): MatchingResult["rows"][0] {
 function parsed(category: string): ParsedRecipe {
   return { dietary_category: category };
 }
+
+const stripList = getStripList();
+
+describe("generateVariants", () => {
+  // Step 1 — trailing clause extension (connectives, prepositions, cut_descriptors, dimensions)
+
+  it("strips 'drained and rinsed' via connective 'and'", () => {
+    expect(generateVariants("black beans, drained and rinsed", stripList)).toContain("black beans");
+  });
+
+  it("strips 'peeled and chunked' via connective 'and' and new prep verb 'chunked'", () => {
+    expect(generateVariants("sweet potatoes, peeled and chunked", stripList)).toContain("sweet potatoes");
+  });
+
+  it("strips 'cut into 1.5cm dice' via prep verb, preposition, dimension, and cut descriptor", () => {
+    expect(generateVariants("courgettes, cut into 1.5cm dice", stripList)).toContain("courgettes");
+  });
+
+  it("strips 'cut into diagonal slices' via prep verb, preposition, and cut descriptors", () => {
+    expect(generateVariants("carrot, cut into diagonal slices", stripList)).toContain("carrot");
+  });
+
+  it("does NOT strip 'rind grated and juiced' — 'rind' is a food-part noun, not a prep token", () => {
+    expect(generateVariants("lemons, rind grated and juiced", stripList)).not.toContain("lemons");
+  });
+
+  it("does NOT strip 'whites sliced on the diagonal' — 'whites' is a food-part noun", () => {
+    expect(generateVariants("spring onions, whites sliced on the diagonal", stripList)).not.toContain("spring onions");
+  });
+
+  // Step 2 — pluralisation (toSingular applied to each variant)
+
+  it("generates singular 'garlic clove' from stripped 'garlic cloves'", () => {
+    expect(generateVariants("garlic cloves", stripList)).toContain("garlic clove");
+  });
+
+  it("generates singular 'egg' from 'eggs, beaten' via strip then de-pluralise", () => {
+    const variants = generateVariants("eggs, beaten", stripList);
+    expect(variants).toContain("eggs");
+    expect(variants).toContain("egg");
+  });
+
+  it("generates 'sweet potato' from 'sweet potatoes, peeled and chunked' via Step 1 strip then oes→o rule", () => {
+    expect(generateVariants("sweet potatoes, peeled and chunked", stripList)).toContain("sweet potato");
+  });
+
+  it("does NOT generate 'classic houmou' — houmous ends in -us, excluded from s-strip", () => {
+    expect(generateVariants("classic houmous", stripList)).not.toContain("classic houmou");
+  });
+
+  // Step 3 — quality qualifier leading strip
+
+  it("strips 'free-range' leading qualifier to produce 'eggs' and then 'egg'", () => {
+    const variants = generateVariants("free-range eggs", stripList);
+    expect(variants).toContain("eggs");
+    expect(variants).toContain("egg");
+  });
+
+  // Regression — existing behaviour must be preserved
+
+  it("still strips trailing prep clause: 'garlic clove, peeled' → 'garlic clove'", () => {
+    const variants = generateVariants("garlic clove, peeled", stripList);
+    expect(variants).toContain("garlic clove");
+    expect(variants).not.toContain("garlic clov"); // no false singular on a non-plural word
+  });
+
+  it("still strips trailing prep clause: 'lemon, juiced' → 'lemon'", () => {
+    expect(generateVariants("lemon, juiced", stripList)).toContain("lemon");
+  });
+
+  it("still strips leading size adjective: 'large onion' → 'onion'", () => {
+    expect(generateVariants("large onion", stripList)).toContain("onion");
+  });
+});
 
 describe("evaluateConsistencyAdvisory", () => {
   it("fires on all-exact rows when a conflict exists (regression)", () => {
