@@ -1626,4 +1626,4 @@ Three mechanisms added to `strip_list.ts` and `generateVariants`:
 
 **18 tests passing** (14 new generateVariants + 4 advisory).
 
-**Smoke:** black bean patties re-import (auth, Mike). Verify improved exact-rate vs post-2C.4 sweep numbers for that fixture (had `garlic cloves, minced` × 2 and `black beans, drained and rinsed` in the fuzzy bucket).
+**Smoke:** black bean patties (id=10) re-imported against production. 19/20 exact (was 17/20 in post-2C.4 sweep). Both `garlic cloves, minced` instances now exact via `garlic clove` (stripped: "s, minced" — pluralisation + trailing strip chain). `black beans, drained and rinsed` now fuzzy at 0.61 to `tinned black beans` (was 0.38) — Step 1 stripped to `black beans`; remains fuzzy due to tinned-X convention gap. ✅
